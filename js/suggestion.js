@@ -20,7 +20,7 @@
    */
   function bindFormEvents() {
     const form = document.getElementById('suggestionForm');
-    const contentField = document.getElementById('content');
+    const contentField = document.getElementById('input-message');
     const charCount = document.getElementById('charCurrent');
     const submitBtn = document.getElementById('submitBtn');
     const successMessage = document.getElementById('successMessage');
@@ -32,15 +32,15 @@
     });
 
     // 表单提交
-    form.addEventListener('submit', async function(e) {
+    form.addEventListener('submit', function(e) {
       e.preventDefault();
 
       // 获取表单数据
-      const nickname = document.getElementById('nickname').value.trim();
-      const category = document.getElementById('category').value;
-      const content = contentField.value.trim();
+      const name = document.getElementById('input-name').value.trim();
+      const category = document.getElementById('input-category').value;
+      const message = contentField.value.trim();
 
-      if (!category || !content) {
+      if (!category || !message) {
         return;
       }
 
@@ -52,41 +52,33 @@
       successMessage.classList.remove('show');
       errorMessage.classList.remove('show');
 
-      try {
-        // 发送邮件
-        await emailjs.send('service_iouin', 'template_iouin', {
-          from_name: document.getElementById('nickname').value || '匿名',
-          reply_to: '',
-          category: document.getElementById('category').value,
-          message: document.getElementById('content').value
-        }, 'KPlvsCzR0h4RaoGaq');
-
-        // 显示成功消息
+      // 发送邮件
+      emailjs.send('service_iouin', 'template_iouin', {
+        from_name: document.getElementById('input-name').value.trim() || '匿名访客',
+        category: document.getElementById('input-category').value,
+        message: document.getElementById('input-message').value.trim(),
+        reply_to: 'nilo_emoj@163.com'
+      }, 'KPlvsCzR0h4RaoGaq')
+      .then(function() {
+        // 成功处理
         successMessage.classList.add('show');
-
-        // 重置表单
         form.reset();
         charCount.textContent = '0';
-
-        // 3秒后隐藏成功消息
         setTimeout(() => {
           successMessage.classList.remove('show');
         }, 5000);
-
-      } catch (error) {
-        console.error('发送失败:', error);
-        // 显示错误消息
+      }, function(error) {
+        console.log('发送失败', error);
         errorMessage.classList.add('show');
-
-        // 5秒后隐藏错误消息
         setTimeout(() => {
           errorMessage.classList.remove('show');
         }, 5000);
-      } finally {
+      })
+      .finally(function() {
         // 恢复提交按钮
         submitBtn.disabled = false;
         submitBtn.querySelector('.btn-text').textContent = '发送建议';
-      }
+      });
     });
   }
 
