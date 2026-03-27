@@ -1,0 +1,140 @@
+/* ========================================
+   CP同人档案馆 - 双生站主题样式
+   所有主题变量在此文件统一定义
+   ======================================== */
+
+/* ----------------------------------------
+   CSS 变量 - LionMio 冰蓝主题（默认）
+   ---------------------------------------- */
+:root,
+[data-theme="lionmio"] {
+  /* 背景色 - 冰蓝渐变 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #EAF4FF;
+  --bg-gradient: linear-gradient(180deg, #FFFFFF 0%, #EAF4FF 100%);
+
+  /* 标题色 */
+  --text-title: #2A2A2A;
+
+  /* 强调色 */
+  --accent: #7BA7C4;
+  --accent-hover: #5A8FB4;
+  --accent-glow: rgba(123, 167, 196, 0.3);
+
+  /* 正文色 */
+  --text-primary: #2F2F2F;
+  --text-secondary: #5A6A7A;
+  --text-muted: #8A9AAA;
+
+  /* 边框 */
+  --border-color: rgba(123, 167, 196, 0.25);
+  --border-strong: rgba(123, 167, 196, 0.5);
+
+  /* 毛玻璃效果 - 冰蓝系 */
+  --glass-bg: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(123, 167, 196, 0.2);
+
+  /* 导航栏 */
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-text: #2A2A2A;
+  --nav-text-hover: #7BA7C4;
+  --nav-underline: #7BA7C4;
+
+  /* 按钮 */
+  --btn-bg: #7BA7C4;
+  --btn-text: #FFFFFF;
+  --btn-hover: #5A8FB4;
+
+  /* 卡片 */
+  --card-bg: rgba(255, 255, 255, 0.9);
+  --card-shadow: 0 8px 32px rgba(123, 167, 196, 0.15);
+
+  /* Hero 背景纹理 */
+  --hero-pattern: radial-gradient(ellipse at 50% 50%, rgba(123, 167, 196, 0.08) 0%, transparent 70%);
+
+  /* 粒子颜色 */
+  --particle-color: rgba(200, 222, 255, 0.5);
+
+  /* 过渡时间 */
+  --transition-duration: 800ms;
+  --transition-easing: ease;
+}
+
+/* ----------------------------------------
+   CSS 变量 - LucasMia 深夜玫瑰主题
+   整体感觉：像深夜里翻开的粉色日记本
+   ---------------------------------------- */
+[data-theme="lucasmia"] {
+  /* 背景色 - 深紫棕渐变，带粉调 */
+  --bg-primary: #1E1418;
+  --bg-secondary: #2A1A22;
+  --bg-gradient: linear-gradient(180deg, #1E1418 0%, #2A1A22 100%);
+
+  /* 标题色 - 暖粉白 */
+  --text-title: #F5E6EC;
+
+  /* 强调色 - 玫瑰粉 */
+  --accent: #D4789A;
+  --accent-hover: #E088AA;
+  --accent-glow: rgba(212, 120, 154, 0.3);
+
+  /* 正文色 - 灰粉白 */
+  --text-primary: #E8D5DC;
+  --text-secondary: #B8A0A8;
+  --text-muted: #7A6068;
+
+  /* 边框 */
+  --border-color: rgba(212, 120, 154, 0.2);
+  --border-strong: rgba(212, 120, 154, 0.4);
+
+  /* 毛玻璃效果 - 深色带粉调 */
+  --glass-bg: rgba(30, 20, 24, 0.88);
+  --glass-border: rgba(212, 120, 154, 0.15);
+
+  /* 导航栏 */
+  --nav-bg: rgba(30, 20, 24, 0.9);
+  --nav-text: #F5E6EC;
+  --nav-text-hover: #D4789A;
+  --nav-underline: #D4789A;
+
+  /* 按钮 */
+  --btn-bg: #D4789A;
+  --btn-text: #1E1418;
+  --btn-hover: #E088AA;
+
+  /* 卡片 - 比背景略亮，有层次 */
+  --card-bg: rgba(39, 24, 32, 0.95);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* Hero 背景纹理 */
+  --hero-pattern: radial-gradient(ellipse at 50% 50%, rgba(212, 120, 154, 0.1) 0%, transparent 70%);
+
+  /* 粒子颜色 - 玫瑰花瓣 */
+  --particle-color: rgba(212, 120, 154, 0.35);
+}
+
+/* ----------------------------------------
+   全局过渡效果
+   ---------------------------------------- */
+:root {
+  --transition-duration: 800ms;
+  --transition-easing: ease;
+}
+
+* {
+  transition:
+    background-color var(--transition-duration) var(--transition-easing),
+    background var(--transition-duration) var(--transition-easing),
+    border-color var(--transition-duration) var(--transition-easing),
+    color var(--transition-duration) var(--transition-easing),
+    box-shadow var(--transition-duration) var(--transition-easing),
+    fill var(--transition-duration) var(--transition-easing),
+    stroke var(--transition-duration) var(--transition-easing),
+    opacity var(--transition-duration) var(--transition-easing);
+}
+
+/* 排除不需要过渡的元素 */
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}

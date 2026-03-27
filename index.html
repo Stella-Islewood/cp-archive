@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 双生站 LionMio & LucasMia 同人作品存档">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>CP同人档案馆 | 双生站</title>
+
+  <!-- Google Fonts - Noto Serif SC 思源宋体 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 主题样式 -->
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- ========================================
+       Header - 毛玻璃固定顶部
+       ======================================== -->
+  <header class="site-header glass" role="banner">
+    <div class="header-container">
+      
+      <!-- 左侧：Logo 徽章 + 站名 -->
+      <div class="header-logo">
+        <div class="logo-badge site-name-toggle" title="点击切换站点主题" role="button" tabindex="0" aria-label="切换站点主题">
+          <span class="logo-initials">LM</span>
+        </div>
+        <span class="logo-text site-name-toggle" title="点击切换站点主题">
+          <span class="site-name">LionMio</span>
+        </span>
+      </div>
+
+      <!-- 右侧：导航栏 -->
+      <nav class="main-nav" role="navigation" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link active">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+
+    </div>
+  </header>
+
+  <!-- ========================================
+       Hero 区域 - 全屏
+       ======================================== -->
+  <section class="hero">
+    <div class="hero-content">
+      <!-- 顶部小字 -->
+      <p class="hero-eyebrow">· FAN ARCHIVE · SINCE 2024 ·</p>
+      
+      <!-- 主标题 -->
+      <h1 class="hero-title">
+        <span class="title-lion">Lion</span>
+        <span class="title-separator">×</span>
+        <span class="title-mio">Mio</span>
+      </h1>
+      
+      <!-- 副标题 -->
+      <p class="hero-subtitle">OUR INFINITE RESONANCE</p>
+      
+      <!-- 创始人手记 -->
+      <p class="founder-note" id="founderNote">我建这个站，只是想给他们一个永远不会消失的地方。</p>
+      
+      <!-- 按钮 -->
+      <div class="hero-buttons">
+        <a href="archive.html" class="btn">进入档案馆</a>
+        <a href="timeline.html" class="btn btn-secondary">查看时间线</a>
+      </div>
+    </div>
+
+    <!-- 向下滚动提示 -->
+    <div class="scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- ========================================
+       今日一言
+       ======================================== -->
+  <section class="daily-section">
+    <div class="container">
+      <p class="daily-quote" id="dailyQuote"></p>
+    </div>
+  </section>
+
+  <!-- ========================================
+       主内容区域
+       ======================================== -->
+  <main class="main-content" role="main">
+    <div class="container">
+      
+      <!-- 角色档案预览 -->
+      <section class="archive-preview" id="archive">
+        <h2 class="section-title">角色档案</h2>
+        <div class="character-cards" id="character-cards">
+          <!-- 卡片内容由 JavaScript 动态切换 -->
+        </div>
+      </section>
+
+      <!-- 访客计数 -->
+      <section class="visitor-counter" id="visitorCounter">
+        <p class="visitor-counter-text">
+          <span class="visitor-counter-icon">✦</span>
+          已有 <span id="visitorCount">108</span> 人来过这里
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ========================================
+       Footer
+       ======================================== -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-content">
+        <p class="footer-left">每一段故事都值得被记住</p>
+        <p class="footer-right">© 2024 <span class="footer-site-name">LionMio</span> Archive</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 彩蛋 Modal -->
+  <div class="easter-egg-modal" id="easterEggModal">
+    <div class="easter-egg-backdrop" id="easterEggBackdrop"></div>
+    <div class="easter-egg-content">
+      <button class="easter-egg-close" id="easterEggClose" aria-label="关闭">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="easter-egg-characters">
+        <div class="character-avatar lion-avatar" id="lionAvatar">
+          <span>L</span>
+        </div>
+        <div class="character-avatar mio-avatar" id="mioAvatar">
+          <span>M</span>
+        </div>
+      </div>
+      <div class="easter-egg-dialogue">
+        <div class="dialogue-line" id="dialogueLine"></div>
+      </div>
+      <div class="easter-egg-petals" id="easterEggPetals"></div>
+    </div>
+  </div>
+
+  <!-- 脚本 -->
+  <script src="js/cp-data.js"></script>
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+  <script src="js/music-player.js"></script>
+  <script src="js/character-cards.js"></script>
+  <script src="js/easter-egg.js"></script>
+  <script src="js/daily-quote.js"></script>
+  <script src="js/visitor-counter.js"></script>
+</body>
+</html>

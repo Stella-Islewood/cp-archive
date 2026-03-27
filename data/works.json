@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-03-27",
+    "description": "CP同人档案馆作品数据"
+  },
+  "sites": {
+    "lionmio": {
+      "name": "LionMio",
+      "tagline": "灰青",
+      "colorScheme": "light"
+    },
+    "lucasmia": {
+      "name": "LucasMia",
+      "tagline": "西米露",
+      "colorScheme": "dark"
+    }
+  },
+  "characters": [
+    {
+      "id": "lion",
+      "name": "Lion",
+      "alias": ["Lion"],
+      "birthday": "01-15",
+      "traits": ["？？？", "？？？", "？？？"],
+      "element": "冰",
+      "avatar": "images/characters/lionmio.jpg",
+      "description": "？？？"
+    },
+    {
+      "id": "mio",
+      "name": "Mio",
+      "alias": ["Mio"],
+      "birthday": "08-22",
+      "traits": ["？？？", "？？？", "？？？"],
+      "element": "光",
+      "avatar": "images/characters/lucasmia.jpg",
+      "description": "？？？"
+    },
+    {
+      "id": "lucas",
+      "name": "Lucas",
+      "alias": ["Lucas"],
+      "birthday": "06-10",
+      "traits": ["？？？", "？？？", "？？？"],
+      "element": "火",
+      "avatar": "images/characters/lucas.jpg",
+      "description": "？？？"
+    },
+    {
+      "id": "mia",
+      "name": "Mia",
+      "alias": ["Mia"],
+      "birthday": "12-25",
+      "traits": ["？？？", "？？？", "？？？"],
+      "element": "暗",
+      "avatar": "images/characters/mia.jpg",
+      "description": "？？？"
+    }
+  ],
+  "works": [
+    {
+      "id": "work-001",
+      "title": "冰雪与烈焰",
+      "type": "illustration",
+      "characters": ["lionmio", "lucasmia"],
+      "author": "档案馆画师",
+      "createdAt": "2026-01-15",
+      "tags": ["并肩", "双生", "对影"],
+      "thumbnail": "images/works/work-001-thumb.jpg",
+      "fullImage": "images/works/work-001-full.jpg",
+      "description": "冰雪与烈焰的相遇，共绘双生之约。"
+    },
+    {
+      "id": "work-002",
+      "title": "永恒的羁绊",
+      "type": "comic",
+      "characters": ["lionmio", "lucasmia"],
+      "author": "档案馆画师",
+      "createdAt": "2026-02-14",
+      "tags": ["情人节", "羁绊", "永恒"],
+      "thumbnail": "images/works/work-002-thumb.jpg",
+      "pages": 12,
+      "description": "记录双生羁绊的短篇漫画。"
+    },
+    {
+      "id": "work-003",
+      "title": "晨曦与黄昏",
+      "type": "illustration",
+      "characters": ["lionmio", "lucasmia"],
+      "author": "档案馆画师",
+      "createdAt": "2026-03-20",
+      "tags": ["黎明", "黄昏", "相遇"],
+      "thumbnail": "images/works/work-003-thumb.jpg",
+      "fullImage": "images/works/work-003-full.jpg",
+      "description": "当晨曦的冰晶遇见黄昏的火焰。"
+    }
+  ],
+  "timeline": [
+    {
+      "year": 2024,
+      "month": 6,
+      "event": "CP同人档案馆创立",
+      "type": "milestone"
+    },
+    {
+      "year": 2024,
+      "month": 8,
+      "event": "双生站主题系统上线",
+      "type": "feature"
+    },
+    {
+      "year": 2025,
+      "month": 1,
+      "event": "LionMio 角色设定公开",
+      "type": "character"
+    },
+    {
+      "year": 2025,
+      "month": 8,
+      "event": "LucasMia 角色设定公开",
+      "type": "character"
+    },
+    {
+      "year": 2026,
+      "month": 3,
+      "event": "档案馆全新改版上线",
+      "type": "milestone"
+    }
+  ],
+  "navigation": [
+    {
+      "id": "home",
+      "label": "首页",
+      "path": "/",
+      "icon": "home"
+    },
+    {
+      "id": "archive",
+      "label": "档案",
+      "path": "/archive",
+      "icon": "archive"
+    },
+    {
+      "id": "timeline",
+      "label": "时间线",
+      "path": "/timeline",
+      "icon": "clock"
+    },
+    {
+      "id": "commission",
+      "label": "约稿",
+      "path": "/commission",
+      "icon": "palette"
+    },
+    {
+      "id": "creation",
+      "label": "创作",
+      "path": "/creation",
+      "icon": "pen"
+    },
+    {
+      "id": "guestbook",
+      "label": "留言板",
+      "path": "/guestbook",
+      "icon": "message"
+    },
+    {
+      "id": "suggestion",
+      "label": "建议箱",
+      "path": "/suggestion",
+      "icon": "inbox"
+    }
+  ]
+}

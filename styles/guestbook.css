@@ -1,0 +1,378 @@
+/* ========================================
+   CP同人档案馆 - 留言板页面样式
+   干净温柔的便签墙风格
+   ======================================== */
+
+/* 页面头部 */
+.page-header {
+  text-align: center;
+  padding: 6rem 2rem 2rem;
+}
+
+.page-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 0.8rem;
+  color: var(--text-title);
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+}
+
+/* ========================================
+   留言输入区
+   ======================================== */
+.message-input {
+  max-width: 500px;
+  margin: 0 auto 3rem;
+  padding: 2rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(100, 150, 255, 0.08);
+}
+
+.input-title {
+  font-size: 1.1rem;
+  color: var(--text-title);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.input-row {
+  margin-bottom: 1.2rem;
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+  position: relative;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease,
+              background-color var(--transition-duration) var(--transition-easing),
+              color var(--transition-duration) var(--transition-easing);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.char-count {
+  position: absolute;
+  right: 0.8rem;
+  bottom: 0.8rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 0.9rem 2rem;
+  margin-top: 0.5rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-submit:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   便签墙 - 干净温柔风格
+   ======================================== */
+.notes-wall {
+  padding: 2rem 0 4rem;
+}
+
+/* 瀑布流布局 */
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+/* ========================================
+   便签样式
+   ======================================== */
+.note {
+  width: 100%;
+  min-height: 140px;
+  padding: 1.8rem 1.4rem 1.2rem;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(200, 220, 255, 0.6);
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 4px 20px rgba(100, 150, 255, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: noteAppear 0.5s ease forwards;
+}
+
+/* 图钉 SVG */
+.note-pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  z-index: 5;
+}
+
+/* 随机轻微旋转 */
+.note:nth-child(7n+1) { transform: rotate(-2deg); }
+.note:nth-child(7n+2) { transform: rotate(3deg); }
+.note:nth-child(7n+3) { transform: rotate(-1deg); }
+.note:nth-child(7n+4) { transform: rotate(2deg); }
+.note:nth-child(7n+5) { transform: rotate(-3deg); }
+.note:nth-child(7n+6) { transform: rotate(1deg); }
+.note:nth-child(7n+7) { transform: rotate(-2deg); }
+
+.note:hover {
+  transform: translateY(-6px) rotate(0deg) !important;
+  box-shadow: 0 12px 40px rgba(100, 150, 255, 0.15);
+  z-index: 10;
+}
+
+@keyframes noteAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* LucasMia 主题便签 - 深色系 */
+[data-theme="lucasmia"] .note {
+  background: rgba(61, 37, 53, 0.85);
+  border: 1px solid rgba(232, 144, 176, 0.3);
+  box-shadow: 0 4px 20px rgba(100, 50, 80, 0.15);
+}
+
+[data-theme="lucasmia"] .note:hover {
+  box-shadow: 0 12px 40px rgba(232, 144, 176, 0.2);
+}
+
+/* Official 便签金色边框 */
+.note.official {
+  border: 2px solid rgba(212, 175, 55, 0.8);
+  box-shadow: 0 4px 20px rgba(212, 175, 55, 0.15);
+}
+
+.note.official::before {
+  content: '✦ Official';
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  color: rgba(212, 175, 55, 0.9);
+  font-size: 0.7rem;
+  font-family: inherit;
+  background: none;
+  width: auto;
+  height: auto;
+  transform: none;
+  box-shadow: none;
+  border-radius: 0;
+  z-index: 7;
+}
+
+/* 便签内容 */
+.note-nickname {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.2);
+  transition: color var(--transition-duration) var(--transition-easing);
+}
+
+[data-theme="lucasmia"] .note-nickname {
+  color: #E890B0;
+  border-bottom-color: rgba(232, 144, 176, 0.2);
+}
+
+.note-content {
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.7;
+  word-break: break-word;
+  transition: color var(--transition-duration) var(--transition-easing);
+}
+
+[data-theme="lucasmia"] .note-content {
+  color: #EDD5E0;
+}
+
+.note-time {
+  position: absolute;
+  bottom: 0.5rem;
+  right: 1rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+[data-theme="lucasmia"] .note-time {
+  color: #A898A0;
+}
+
+/* 删除按钮 */
+.note-delete {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.note:hover .note-delete {
+  opacity: 1;
+}
+
+.note-delete:hover {
+  background: rgba(200, 80, 80, 0.2);
+  color: #D45050;
+  transform: scale(1.1) rotate(90deg);
+}
+
+.note.removing {
+  animation: noteDisappear 0.4s ease forwards;
+}
+
+@keyframes noteDisappear {
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* ========================================
+   回到顶部按钮
+   ======================================== */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 100;
+}
+
+.back-to-top-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-text);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 768px) {
+  .message-input {
+    margin: 0 0 2rem;
+    padding: 1.5rem;
+  }
+
+  .notes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .note {
+    min-height: 120px;
+    padding: 1.5rem 1.2rem 1rem;
+  }
+
+  .page-header {
+    padding: 5rem 1rem 1.5rem;
+  }
+
+  .back-to-top {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .notes-grid {
+    grid-template-columns: 1fr;
+  }
+}

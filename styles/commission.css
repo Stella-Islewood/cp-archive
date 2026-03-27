@@ -1,0 +1,345 @@
+/* ========================================
+   CP同人档案馆 - 约稿展示页面样式
+   ======================================== */
+
+/* 页面头部 */
+.page-header {
+  text-align: center;
+  padding: 6rem 2rem 2rem;
+}
+
+.page-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 0.8rem;
+  color: var(--text-title);
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+}
+
+/* ========================================
+   Masonry 瀑布流网格
+   ======================================== */
+.commission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-auto-rows: 10px;
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+  padding: 0 1rem;
+}
+
+/* 瀑布流卡片 */
+.commission-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease,
+              background-color var(--transition-duration) var(--transition-easing);
+}
+
+.commission-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px var(--accent-glow);
+}
+
+/* 图片区域 */
+.card-image {
+  width: 100%;
+  overflow: hidden;
+}
+
+.image-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  color: var(--text-muted);
+}
+
+.image-placeholder.tall {
+  aspect-ratio: 3/4;
+}
+
+/* 卡片信息 */
+.card-info {
+  padding: 1rem 1.2rem 1.2rem;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  color: var(--text-title);
+  margin-bottom: 0.3rem;
+  transition: color var(--transition-duration) var(--transition-easing);
+}
+
+.card-artist {
+  font-size: 0.85rem;
+  color: var(--accent);
+  margin-bottom: 0.2rem;
+}
+
+.card-date {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ========================================
+   Lightbox 大图查看
+   ======================================== */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.lightbox.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.lightbox-content {
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.lightbox-image-container {
+  max-width: 100%;
+  max-height: 70vh;
+  overflow: hidden;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.lightbox-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  min-width: 300px;
+  min-height: 200px;
+  max-width: 800px;
+  max-height: 70vh;
+  color: var(--text-muted);
+}
+
+.lightbox-image svg {
+  width: 120px;
+  height: 120px;
+}
+
+/* ========================================
+   创始人笔记折叠栏
+   ======================================== */
+.lightbox-notes {
+  width: 100%;
+  max-width: 600px;
+  background: #FFFEF0;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 
+    2px 4px 12px rgba(0, 0, 0, 0.1),
+    -1px -1px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+[data-theme="lucasmia"] .lightbox-notes {
+  background: #271820;
+}
+
+/* 撕边效果 */
+.lightbox-notes::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(135deg, transparent 95%, #DDD 96%, #CCC 100%),
+    linear-gradient(-135deg, transparent 95%, #DDD 96%, #CCC 100%),
+    linear-gradient(45deg, transparent 97%, #DDD 98%, #CCC 100%),
+    linear-gradient(-45deg, transparent 97%, #DDD 98%, #CCC 100%);
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.notes-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1.2rem;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-family: "Noto Serif SC", serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.notes-toggle:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="lucasmia"] .notes-toggle {
+  color: #F0E8EC;
+}
+
+[data-theme="lucasmia"] .notes-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.notes-icon {
+  font-size: 1rem;
+}
+
+.notes-text {
+  flex: 1;
+  text-align: left;
+}
+
+.toggle-arrow {
+  transition: transform 0.3s ease;
+}
+
+.notes-toggle.expanded .toggle-arrow {
+  transform: rotate(180deg);
+}
+
+.notes-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+}
+
+.notes-content.expanded {
+  max-height: 300px;
+  padding: 0 1.2rem 1rem;
+}
+
+.notes-content p {
+  font-size: 0.95rem;
+  color: #4A4A4A;
+  line-height: 1.9;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.02em;
+}
+
+.notes-content p:last-child {
+  margin-bottom: 0;
+}
+
+[data-theme="lucasmia"] .notes-content p {
+  color: #D8C8D0;
+}
+
+/* ========================================
+   回到顶部按钮
+   ======================================== */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 90;
+}
+
+.back-to-top-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-text);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 768px) {
+  .commission-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .lightbox-notes {
+    max-width: 95vw;
+  }
+
+  .page-header {
+    padding: 5rem 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .commission-grid {
+    grid-template-columns: 1fr;
+  }
+}

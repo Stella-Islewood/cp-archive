@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 404">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>迷路了？ | CP同人档案馆</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 主题样式 -->
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    /* 404 页面专用样式 */
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .error-content {
+      max-width: 500px;
+    }
+
+    .error-code {
+      font-size: 8rem;
+      font-weight: 700;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .error-title {
+      font-size: 1.5rem;
+      color: var(--text-title);
+      margin-bottom: 1.5rem;
+    }
+
+    .error-message {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .error-quote {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-style: italic;
+      margin-bottom: 2.5rem;
+      padding: 1rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .error-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .error-buttons .btn {
+      min-width: 140px;
+    }
+
+    /* 装饰元素 */
+    .error-decoration {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .error-heart {
+      font-size: 4rem;
+      color: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* LucasMia 主题装饰 */
+    [data-theme="lucasmia"] .error-heart {
+      color: #E890B0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header glass" role="banner">
+    <div class="header-container">
+      <div class="header-logo">
+        <div class="logo-badge site-name-toggle" title="点击切换站点主题" role="button" tabindex="0" aria-label="切换站点主题">
+          <span class="logo-initials">LM</span>
+        </div>
+        <span class="logo-text site-name-toggle" title="点击切换站点主题">
+          <span class="site-name">LionMio</span>
+        </span>
+      </div>
+      <nav class="main-nav" role="navigation" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="main-content error-page">
+    <div class="error-content">
+      <div class="error-decoration">
+        <span class="error-heart">♡</span>
+      </div>
+      <div class="error-code">404</div>
+      <h1 class="error-title">迷路了？</h1>
+      <p class="error-message">
+        也许他们也曾在这里找过彼此<br>
+        但别担心，总有回去的路
+      </p>
+      <p class="error-quote">
+        "他们不说的话，藏在每一个眼神里"
+      </p>
+      <div class="error-buttons">
+        <a href="index.html" class="btn">返回首页</a>
+        <a href="timeline.html" class="btn btn-secondary">看看时间线</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-content">
+        <p class="footer-left">每一段故事都值得被记住</p>
+        <p class="footer-right">© 2024 <span class="footer-site-name">LionMio</span> Archive</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本 -->
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+</body>
+</html>

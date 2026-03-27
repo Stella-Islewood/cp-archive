@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 建议箱">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>建议箱 | CP同人档案馆</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+  <!-- 主题样式 -->
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/suggestion.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header glass" role="banner">
+    <div class="header-container">
+      <div class="header-logo">
+        <div class="logo-badge site-name-toggle" title="点击切换站点主题" role="button" tabindex="0" aria-label="切换站点主题">
+          <span class="logo-initials">LM</span>
+        </div>
+        <span class="logo-text site-name-toggle" title="点击切换站点主题">
+          <span class="site-name">LionMio</span>
+        </span>
+      </div>
+      <nav class="main-nav" role="navigation" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link active">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="main-content suggestion-page">
+    <div class="container">
+      
+      <!-- 页面标题 -->
+      <section class="page-header">
+        <h1 class="page-title">建议箱</h1>
+        <p class="page-subtitle">你的每一条建议我都会认真看</p>
+      </section>
+
+      <!-- 建议表单 -->
+      <section class="suggestion-form card">
+        <h2 class="form-title">提交建议</h2>
+        <form id="suggestionForm">
+          <!-- 标题（任选） -->
+          <div class="input-group">
+            <label for="suggestion-title" class="input-label">标题（选填）</label>
+            <input type="text" id="suggestion-title" name="title" class="input-field" 
+                   placeholder="简单概括你的建议" maxlength="50">
+          </div>
+
+          <!-- 类别下拉 -->
+          <div class="input-group">
+            <label for="suggestion-category" class="input-label">类别</label>
+            <select id="suggestion-category" name="category" class="input-field select-field" required>
+              <option value="">请选择类别</option>
+              <option value="功能建议">功能建议</option>
+              <option value="内容建议">内容建议</option>
+              <option value="bug反馈">Bug反馈</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+
+          <!-- 建议内容 -->
+          <div class="input-group">
+            <label for="suggestion-content" class="input-label">建议内容 <span class="required">*</span></label>
+            <textarea id="suggestion-content" name="content" class="input-field textarea" 
+                      placeholder="详细描述你的建议..." maxlength="500" required></textarea>
+            <span class="char-count"><span id="charCurrent">0</span>/500</span>
+          </div>
+
+          <!-- 提交按钮 -->
+          <button type="submit" class="btn btn-submit" id="submitBtn">
+            <span class="btn-text">发送建议</span>
+          </button>
+        </form>
+
+        <!-- 成功提示 -->
+        <div class="success-message" id="successMessage">
+          <div class="envelope-animation">
+            <span class="envelope-icon">✉️</span>
+          </div>
+          <p class="success-text">已送达创始人信箱！</p>
+        </div>
+
+        <!-- 失败提示 -->
+        <div class="error-message" id="errorMessage">
+          <span class="error-icon">⚠️</span>
+          <p class="error-text">发送失败，请稍后再试</p>
+        </div>
+      </section>
+
+      <!-- 创始人回声墙 -->
+      <section class="response-wall">
+        <h2 class="response-title">创始人回声墙</h2>
+        <div class="response-list">
+          
+          <!-- 响应1 -->
+          <article class="response-card">
+            <span class="response-tag">功能建议</span>
+            <p class="response-content">感谢建议！深色模式已经在开发计划中了，预计下个版本会上线。</p>
+            <p class="response-meta">— 预期时间：1个月内</p>
+          </article>
+
+          <!-- 响应2 -->
+          <article class="response-card">
+            <span class="response-tag">内容建议</span>
+            <p class="response-content">很棒的提议！时间线功能确实可以让大家更好地了解故事发展脉络。</p>
+            <p class="response-meta">— 预期时间：已实现</p>
+          </article>
+
+          <!-- 响应3 -->
+          <article class="response-card">
+            <span class="response-tag">其他</span>
+            <p class="response-content">收到你的祝福！会继续努力为大家带来更多精彩内容的～</p>
+            <p class="response-meta">— 预期时间：持续进行中</p>
+          </article>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 回到顶部按钮 -->
+  <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+    <span class="back-to-top-icon">↑</span>
+  </button>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-content">
+        <p class="footer-left">每一段故事都值得被记住</p>
+        <p class="footer-right">© 2024 <span class="footer-site-name">LionMio</span> Archive</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本 -->
+  <script src="js/cp-data.js"></script>
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+  <script src="js/music-player.js"></script>
+  <script src="js/suggestion.js"></script>
+</body>
+</html>

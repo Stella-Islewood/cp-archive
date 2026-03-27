@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 留言板">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>便签墙 | CP同人档案馆</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+  <!-- 主题样式 -->
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/guestbook.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header glass" role="banner">
+    <div class="header-container">
+      <div class="header-logo">
+        <div class="logo-badge site-name-toggle" title="点击切换站点主题" role="button" tabindex="0" aria-label="切换站点主题">
+          <span class="logo-initials">LM</span>
+        </div>
+        <span class="logo-text site-name-toggle" title="点击切换站点主题">
+          <span class="site-name">LionMio</span>
+        </span>
+      </div>
+      <nav class="main-nav" role="navigation" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link active">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="main-content guestbook-page">
+    <div class="container">
+      
+      <!-- 页面标题 -->
+      <section class="page-header">
+        <h1 class="page-title">便签墙</h1>
+        <p class="page-subtitle">留下你的足迹，让思念延续</p>
+      </section>
+
+      <!-- 留言输入区 -->
+      <section class="message-input card">
+        <h2 class="input-title">写下一句话</h2>
+        <form id="messageForm">
+          <div class="input-row">
+            <div class="input-group">
+              <label for="nickname" class="input-label">昵称</label>
+              <input type="text" id="nickname" name="nickname" class="input-field" 
+                     placeholder="你的名字" maxlength="20" required>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="message" class="input-label">留言</label>
+            <textarea id="message" name="message" class="input-field textarea" 
+                      placeholder="想说的话..." maxlength="100" required></textarea>
+            <span class="char-count"><span id="charCurrent">0</span>/100</span>
+          </div>
+          <button type="submit" class="btn btn-submit">
+            <span>留下印记</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- 便签墙 -->
+      <section class="notes-wall">
+        <div class="notes-grid" id="notesGrid">
+          <!-- 便签将由 JavaScript 生成 -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 回到顶部按钮 -->
+  <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+    <span class="back-to-top-icon">↑</span>
+  </button>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-content">
+        <p class="footer-left">每一段故事都值得被记住</p>
+        <p class="footer-right">© 2024 <span class="footer-site-name">LionMio</span> Archive</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 脚本 -->
+  <script src="js/cp-data.js"></script>
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+  <script src="js/music-player.js"></script>
+  <script src="js/guestbook.js"></script>
+</body>
+</html>

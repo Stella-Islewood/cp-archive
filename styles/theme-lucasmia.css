@@ -1,0 +1,361 @@
+/* ========================================
+   CP同人档案馆 - LucasMia 浪漫玫瑰主题
+   深色系温柔配色
+   ======================================== */
+
+:root {
+  /* LucasMia 主题变量 */
+  --lm-bg-primary: #3D2535;
+  --lm-bg-secondary: #2D1F2D;
+  --lm-bg-gradient: linear-gradient(135deg, #3D2535 0%, #2D1F2D 50%, #3D2535 100%);
+  --lm-text-primary: #EDD5E0;
+  --lm-text-secondary: #D8C0D0;
+  --lm-text-muted: #A898A0;
+  --lm-text-title: #FFE8F0;
+  --lm-accent: #E890B0;
+  --lm-accent-hover: #D07898;
+  --lm-accent-glow: rgba(232, 144, 176, 0.3);
+  --lm-border-color: rgba(232, 144, 176, 0.2);
+  --lm-border-strong: rgba(232, 144, 176, 0.4);
+  --lm-card-bg: #3D2535;
+  --lm-card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  --lm-btn-bg: linear-gradient(135deg, #E890B0, #D07898);
+  --lm-btn-hover: linear-gradient(135deg, #D07898, #C46888);
+  --lm-btn-text: #FFFFFF;
+  --lm-glass-bg: rgba(45, 31, 45, 0.88);
+  --lm-glass-border: rgba(232, 144, 176, 0.15);
+  --lm-nav-text: #D8C0D0;
+  --lm-nav-text-hover: #E890B0;
+  --lm-nav-underline: #E890B0;
+  --lm-hero-pattern: 
+    radial-gradient(circle at 20% 50%, rgba(232, 144, 176, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(196, 114, 138, 0.06) 0%, transparent 50%);
+  --lm-transition-duration: 0.4s;
+  --lm-transition-easing: ease;
+}
+
+/* LucasMia 主题应用 */
+[data-theme="lucasmia"] {
+  --bg-primary: var(--lm-bg-primary);
+  --bg-secondary: var(--lm-bg-secondary);
+  --bg-gradient: var(--lm-bg-gradient);
+  --text-primary: var(--lm-text-primary);
+  --text-secondary: var(--lm-text-secondary);
+  --text-muted: var(--lm-text-muted);
+  --text-title: var(--lm-text-title);
+  --accent: var(--lm-accent);
+  --accent-hover: var(--lm-accent-hover);
+  --accent-glow: var(--lm-accent-glow);
+  --border-color: var(--lm-border-color);
+  --border-strong: var(--lm-border-strong);
+  --card-bg: var(--lm-card-bg);
+  --card-shadow: var(--lm-card-shadow);
+  --btn-bg: var(--lm-btn-bg);
+  --btn-hover: var(--lm-btn-hover);
+  --btn-text: var(--lm-btn-text);
+  --glass-bg: var(--lm-glass-bg);
+  --glass-border: var(--lm-glass-border);
+  --nav-text: var(--lm-nav-text);
+  --nav-text-hover: var(--lm-nav-text-hover);
+  --nav-underline: var(--lm-nav-underline);
+  --hero-pattern: var(--lm-hero-pattern);
+  --transition-duration: var(--lm-transition-duration);
+  --transition-easing: var(--lm-transition-easing);
+}
+
+/* LucasMia 主题特定样式 */
+
+/* Logo 徽章 */
+[data-theme="lucasmia"] .logo-badge {
+  background: linear-gradient(135deg, #E890B0, #D07898);
+  color: white;
+}
+
+/* 按钮发光效果 */
+[data-theme="lucasmia"] .btn:hover {
+  box-shadow: 0 6px 24px rgba(232, 144, 176, 0.4);
+}
+
+/* 角色头像 - LucasMia 主题 */
+[data-theme="lucasmia"] .lucasmia-avatar {
+  background: linear-gradient(135deg, #E890B0, #C46888);
+  color: #FFFFFF;
+}
+
+[data-theme="lucasmia"] .lionmio-avatar {
+  background: linear-gradient(135deg, #D8B8C8, #C4A0B0);
+  color: #3D2535;
+}
+
+/* 性格标签 */
+[data-theme="lucasmia"] .trait-tag {
+  background: rgba(232, 144, 176, 0.15);
+  color: #E890B0;
+}
+
+/* 卡片悬浮效果 */
+[data-theme="lucasmia"] .character-card:hover {
+  box-shadow: 0 16px 48px rgba(232, 144, 176, 0.25);
+}
+
+/* 链接悬浮效果 */
+[data-theme="lucasmia"] a:hover {
+  color: #E890B0;
+}
+
+/* 导航栏悬浮效果 */
+[data-theme="lucasmia"] .nav-link:hover {
+  color: #E890B0;
+}
+
+/* 滚动条样式 */
+[data-theme="lucasmia"] ::-webkit-scrollbar-thumb {
+  background: rgba(232, 144, 176, 0.4);
+}
+
+[data-theme="lucasmia"] ::-webkit-scrollbar-thumb:hover {
+  background: #E890B0;
+}
+
+/* 选中文字 */
+[data-theme="lucasmia"] ::selection {
+  background: rgba(232, 144, 176, 0.35);
+  color: #FFE8F0;
+}
+
+[data-theme="lucasmia"] ::-moz-selection {
+  background: rgba(232, 144, 176, 0.35);
+  color: #FFE8F0;
+}
+
+/* 输入框聚焦效果 */
+[data-theme="lucasmia"] .input-field:focus {
+  border-color: #E890B0;
+  box-shadow: 0 0 0 3px rgba(232, 144, 176, 0.2);
+}
+
+/* Tab 按钮激活状态 */
+[data-theme="lucasmia"] .tab-btn.active {
+  background: #E890B0;
+  border-color: #E890B0;
+}
+
+/* 点赞按钮激活 */
+[data-theme="lucasmia"] .btn-like.liked {
+  border-color: #E890B0;
+  color: #E890B0;
+}
+
+/* 标签样式 */
+[data-theme="lucasmia"] .work-tag,
+[data-theme="lucasmia"] .response-tag {
+  background: rgba(232, 144, 176, 0.15);
+  color: #E890B0;
+}
+
+/* 回到顶部按钮 */
+[data-theme="lucasmia"] .back-to-top:hover {
+  background: #E890B0;
+  border-color: #E890B0;
+}
+
+/* 随机按钮 */
+[data-theme="lucasmia"] .btn-random:hover {
+  border-color: #E890B0;
+  color: #E890B0;
+  box-shadow: 0 4px 16px rgba(232, 144, 176, 0.25);
+}
+
+/* 签纸样式 - LucasMia 深粉 */
+[data-theme="lucasmia"] .fortune-paper {
+  background: linear-gradient(135deg, #4A3040 0%, #3D2535 100%);
+  color: #EDD5E0;
+}
+
+/* 创始人笔记 - LucasMia 深色 */
+[data-theme="lucasmia"] .lightbox-notes {
+  background: #2A1820;
+}
+
+[data-theme="lucasmia"] .notes-content p {
+  color: #D8C0D0;
+}
+
+/* 彩蛋 Modal */
+[data-theme="lucasmia"] .theme-rose .character-avatar {
+  background: linear-gradient(135deg, #E890B0, #D07898);
+}
+
+[data-theme="lucasmia"] .theme-rose .mio-avatar {
+  background: linear-gradient(135deg, #D8C0D0, #C4A0B0);
+  color: #3D2535;
+}
+
+/* 便签墙 - LucasMia 深色系 */
+[data-theme="lucasmia"] .notes-wall {
+  background: 
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(135deg, #2D1F2D, #3D2535);
+}
+
+[data-theme="lucasmia"] .note {
+  background: linear-gradient(135deg, #3D2838 0%, #352030 100%);
+  box-shadow: 
+    3px 3px 10px rgba(0, 0, 0, 0.4),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+  border-left: none;
+}
+
+[data-theme="lucasmia"] .note::before {
+  color: #E890B0;
+}
+
+[data-theme="lucasmia"] .note:nth-child(4n) {
+  background: linear-gradient(135deg, #352535 0%, #2D2030 100%);
+}
+
+[data-theme="lucasmia"] .note:nth-child(4n+1) {
+  background: linear-gradient(135deg, #302535 0%, #281D2D 100%);
+}
+
+[data-theme="lucasmia"] .note:nth-child(4n+2) {
+  background: linear-gradient(135deg, #2D2535 0%, #251D2D 100%);
+}
+
+[data-theme="lucasmia"] .note-nickname {
+  color: #E890B0;
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="lucasmia"] .note-content {
+  color: #EDD5E0;
+}
+
+[data-theme="lucasmia"] .note-time {
+  color: #A898A0;
+}
+
+/* Official 便签金色边框 */
+[data-theme="lucasmia"] .note.official,
+.note.official {
+  border: 2px solid #D4AF37;
+  box-shadow: 
+    3px 3px 10px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(212, 175, 55, 0.2);
+  position: relative;
+}
+
+[data-theme="lucasmia"] .note.official::after {
+  content: '✦';
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  color: #D4AF37;
+  font-size: 0.9rem;
+}
+
+/* 音乐播放器 - LucasMia 玫瑰粉 */
+[data-theme="lucasmia"] .play-btn {
+  background: linear-gradient(135deg, #E890B0, #D07898);
+}
+
+[data-theme="lucasmia"] .progress-fill,
+[data-theme="lucasmia"] .volume-slider::-webkit-slider-thumb {
+  background: #E890B0;
+}
+
+/* 时间线主题色 */
+[data-theme="lucasmia"] .timeline-dot {
+  background: #E890B0;
+  box-shadow: 0 0 0 3px rgba(232, 144, 176, 0.3);
+}
+
+[data-theme="lucasmia"] .timeline-date {
+  color: #E890B0;
+}
+
+[data-theme="lucasmia"] .timeline-content.expanded {
+  border-color: #E890B0;
+}
+
+/* 约稿展示卡片悬浮 */
+[data-theme="lucasmia"] .commission-card:hover {
+  box-shadow: 0 12px 32px rgba(232, 144, 176, 0.25);
+}
+
+/* 运势签筒 */
+[data-theme="lucasmia"] .bamboo-tube {
+  background: linear-gradient(90deg, #8A6070 0%, #A07080 50%, #8A6070 100%);
+}
+
+[data-theme="lucasmia"] .bamboo-tube::before {
+  background: linear-gradient(90deg, #6A4858 0%, #8A6070 50%, #6A4858 100%);
+}
+
+[data-theme="lucasmia"] .bamboo-base {
+  background: linear-gradient(90deg, #6A4858 0%, #8A6070 50%, #6A4858 100%);
+}
+
+[data-theme="lucasmia"] .btn-draw {
+  border-color: #E890B0;
+  color: #E890B0;
+}
+
+[data-theme="lucasmia"] .btn-draw:hover {
+  background: #E890B0;
+  color: white;
+}
+
+/* 飘花粒子 - LucasMia 玫瑰粉 */
+[data-theme="lucasmia"] .petal {
+  background: rgba(232, 144, 176, 0.6);
+}
+
+/* 评论点赞 */
+[data-theme="lucasmia"] .btn-empathize {
+  border-color: rgba(232, 144, 176, 0.3);
+  color: #D8C0D0;
+}
+
+[data-theme="lucasmia"] .btn-empathize.liked {
+  border-color: #E890B0;
+  color: #E890B0;
+}
+
+[data-theme="lucasmia"] .btn-comment {
+  background: #E890B0;
+}
+
+[data-theme="lucasmia"] .btn-comment:hover {
+  background: #D07898;
+}
+
+/* 毛玻璃效果增强 */
+[data-theme="lucasmia"] .glass {
+  background: rgba(45, 31, 45, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom-color: rgba(232, 144, 176, 0.1);
+}
+
+/* Hero 副标题 */
+[data-theme="lucasmia"] .hero-subtitle {
+  color: #E890B0;
+}
+
+/* CP 标语 */
+[data-theme="lucasmia"] .cp-slogan {
+  color: #C4728A;
+}
+
+/* 今日一言 */
+[data-theme="lucasmia"] .daily-quote {
+  color: #A898A0;
+}
+
+/* 创始人手记 */
+[data-theme="lucasmia"] .founder-note {
+  color: #A898A0;
+  font-style: italic;
+}

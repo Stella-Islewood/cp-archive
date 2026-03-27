@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 创作">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>灵感存档 | CP同人档案馆</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 主题样式 -->
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/works.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header glass" role="banner">
+    <div class="header-container">
+      <div class="header-logo">
+        <div class="logo-badge site-name-toggle" title="点击切换站点主题" role="button" tabindex="0" aria-label="切换站点主题">
+          <span class="logo-initials">LM</span>
+        </div>
+        <span class="logo-text site-name-toggle" title="点击切换站点主题">
+          <span class="site-name">LionMio</span>
+        </span>
+      </div>
+      <nav class="main-nav" role="navigation" aria-label="主导航">
+        <ul class="nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link active">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 主内容 -->
+  <main class="main-content works-page">
+    <div class="container">
+      
+      <!-- ========== 列表视图 ========== -->
+      <div class="works-list-view" id="worksListView">
+        
+        <!-- 页面标题 -->
+        <section class="page-header">
+          <h1 class="page-title">灵感存档</h1>
+          <p class="page-subtitle">每一份创作，都是羁绊的回响</p>
+        </section>
+
+        <!-- 工具栏 -->
+        <div class="works-toolbar">
+          <!-- 分类 Tab -->
+          <nav class="works-tabs" role="tablist">
+            <button class="tab-btn active" data-category="all" role="tab" aria-selected="true">全部</button>
+            <button class="tab-btn" data-category="text" role="tab" aria-selected="false">文字</button>
+            <button class="tab-btn" data-category="image" role="tab" aria-selected="false">图片</button>
+            <button class="tab-btn" data-category="music" role="tab" aria-selected="false">音乐</button>
+            <button class="tab-btn" data-category="video" role="tab" aria-selected="false">视频</button>
+          </nav>
+
+          <!-- 布局切换 -->
+          <div class="layout-switch">
+            <button class="layout-btn active" data-layout="masonry" title="瀑布流">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="10" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="17" width="7" height="4" rx="1"/>
+              </svg>
+            </button>
+            <button class="layout-btn" data-layout="grid" title="网格">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                <rect x="3" y="3" width="7" height="7" rx="1"/>
+                <rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/>
+                <rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 作品网格 -->
+        <div class="works-grid" id="worksGrid">
+          
+          <!-- 作品卡片1 - 图片 -->
+          <article class="work-card" data-category="image" data-work-id="work-1">
+            <div class="favorite-badge" style="display: none;">❤</div>
+            <div class="work-cover">
+              <div class="cover-placeholder">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">冰雪与烈焰</h3>
+              <p class="work-author">画师：霜月</p>
+              <span class="work-tag">图片</span>
+            </div>
+            <div class="work-actions">
+              <button class="btn-action btn-favorite" data-work-id="work-1">
+                <span class="action-icon favorite-icon">♡</span>
+                <span class="action-count favorite-count">0</span>
+              </button>
+              <button class="btn-action btn-comment" data-work-id="work-1" data-scroll-to-comments="true">
+                <span class="action-icon">💬</span>
+                <span class="action-count comment-count">0</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- 作品卡片2 - 音乐 -->
+          <article class="work-card is-music" data-category="music" data-work-id="work-2">
+            <div class="favorite-badge" style="display: none;">❤</div>
+            <div class="vinyl-container">
+              <div class="vinyl">
+                <div class="vinyl-label"></div>
+                <div class="vinyl-hole"></div>
+              </div>
+            </div>
+            <div class="work-cover">
+              <div class="cover-placeholder music-cover">
+                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M9 18V5l12-2v13"/>
+                  <circle cx="6" cy="18" r="3"/>
+                  <circle cx="18" cy="16" r="3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">永恒的共振</h3>
+              <p class="work-author">作曲：夜阑</p>
+              <span class="work-tag">音乐</span>
+            </div>
+            <div class="work-actions">
+              <button class="btn-action btn-favorite" data-work-id="work-2">
+                <span class="action-icon favorite-icon">♡</span>
+                <span class="action-count favorite-count">0</span>
+              </button>
+              <button class="btn-action btn-comment" data-work-id="work-2" data-scroll-to-comments="true">
+                <span class="action-icon">💬</span>
+                <span class="action-count comment-count">0</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- 作品卡片3 - 文字 -->
+          <article class="work-card" data-category="text" data-work-id="work-3">
+            <div class="favorite-badge" style="display: none;">❤</div>
+            <div class="work-cover">
+              <div class="cover-placeholder text-cover">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                  <line x1="8" y1="7" x2="16" y2="7"/>
+                  <line x1="8" y1="11" x2="14" y2="11"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">双生的低语</h3>
+              <p class="work-author">作者：星河</p>
+              <span class="work-tag">文字</span>
+            </div>
+            <div class="work-actions">
+              <button class="btn-action btn-favorite" data-work-id="work-3">
+                <span class="action-icon favorite-icon">♡</span>
+                <span class="action-count favorite-count">0</span>
+              </button>
+              <button class="btn-action btn-comment" data-work-id="work-3" data-scroll-to-comments="true">
+                <span class="action-icon">💬</span>
+                <span class="action-count comment-count">0</span>
+              </button>
+            </div>
+          </article>
+
+          <!-- 作品卡片4 - 视频 -->
+          <article class="work-card" data-category="video" data-work-id="work-4">
+            <div class="favorite-badge" style="display: none;">❤</div>
+            <div class="work-cover">
+              <div class="cover-placeholder video-cover">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
+                  <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">羁绊的瞬间</h3>
+              <p class="work-author">剪辑：流光</p>
+              <span class="work-tag">视频</span>
+            </div>
+            <div class="work-actions">
+              <button class="btn-action btn-favorite" data-work-id="work-4">
+                <span class="action-icon favorite-icon">♡</span>
+                <span class="action-count favorite-count">0</span>
+              </button>
+              <button class="btn-action btn-comment" data-work-id="work-4" data-scroll-to-comments="true">
+                <span class="action-icon">💬</span>
+                <span class="action-count comment-count">0</span>
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- ========== 详情视图 ========== -->
+      <div class="works-detail-view hidden" id="worksDetailView">
+        <!-- 返回按钮 -->
+        <button class="btn-back" id="btnBack">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span>返回作品列表</span>
+        </button>
+
+        <!-- 作品内容区 -->
+        <article class="work-detail" id="workDetail">
+          <!-- 作品大图 -->
+          <div class="detail-cover">
+            <div class="cover-placeholder detail-cover-placeholder" id="detailCoverPlaceholder">
+              <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <path d="M21 15l-5-5L5 21"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- 作品信息 -->
+          <div class="detail-info">
+            <h1 class="detail-title" id="detailTitle">作品标题</h1>
+            <div class="detail-meta">
+              <span class="detail-author" id="detailAuthor">作者：-</span>
+              <span class="detail-tag" id="detailTag">分类</span>
+              <span class="detail-date" id="detailDate">-</span>
+            </div>
+          </div>
+
+          <!-- 收藏按钮 -->
+          <div class="detail-actions">
+            <button class="btn-detail-favorite" id="btnDetailFavorite">
+              <span class="favorite-icon-large">♡</span>
+              <span class="favorite-text">收藏</span>
+            </button>
+          </div>
+
+          <!-- 分割线 -->
+          <div class="detail-divider"></div>
+
+          <!-- 评论区 -->
+          <section class="detail-comments" id="detailComments">
+            <h2 class="comments-title">
+              留言
+              <span class="comments-count" id="commentsCount">(0)</span>
+            </h2>
+
+            <!-- 留言列表 -->
+            <div class="comments-list" id="commentsList">
+              <!-- 留言将由 JS 动态生成 -->
+            </div>
+
+            <!-- 留言表单 -->
+            <form class="comments-form" id="commentsForm">
+              <div class="comments-form-row">
+                <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
+              </div>
+              <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
+              <button type="submit" class="btn btn-submit-comment">发布留言</button>
+            </form>
+          </section>
+        </article>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 回到顶部按钮 -->
+  <button class="back-to-top" id="backToTop" aria-label="回到顶部">
+    <span class="back-to-top-icon">↑</span>
+  </button>
+
+  <!-- Footer -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+    </div>
+  </footer>
+
+  <!-- 脚本 -->
+  <script src="js/cp-data.js"></script>
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+  <script src="js/music-player.js"></script>
+  <script src="js/works.js"></script>
+</body>
+</html>

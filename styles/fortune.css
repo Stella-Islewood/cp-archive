@@ -1,0 +1,331 @@
+/* ========================================
+   CP同人档案馆 - 运势抽签页面样式
+   ======================================== */
+
+/* 页面头部 */
+.page-header {
+  text-align: center;
+  padding: 6rem 2rem 2rem;
+}
+
+.page-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: 0.8rem;
+  color: var(--text-title);
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+}
+
+/* ========================================
+   抽签区域
+   ======================================== */
+.fortune-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0 4rem;
+}
+
+/* 竹签筒容器 */
+.bamboo-container {
+  position: relative;
+  width: 200px;
+  height: 280px;
+  margin-bottom: 2rem;
+}
+
+/* 摇晃动画容器 */
+.bamboo-shaker {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  transform-origin: bottom center;
+}
+
+/* 摇晃动画 */
+.bamboo-shaker.shaking {
+  animation: shakeBamboo 1.5s ease-in-out;
+}
+
+@keyframes shakeBamboo {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-15deg); }
+  20% { transform: rotate(12deg); }
+  30% { transform: rotate(-10deg); }
+  40% { transform: rotate(8deg); }
+  50% { transform: rotate(-6deg); }
+  60% { transform: rotate(5deg); }
+  70% { transform: rotate(-3deg); }
+  80% { transform: rotate(2deg); }
+  90% { transform: rotate(-1deg); }
+}
+
+/* 竹签样式 */
+.bamboo-tube {
+  width: 12px;
+  height: 45px;
+  background: linear-gradient(90deg, #8B7355 0%, #A08060 50%, #8B7355 100%);
+  border-radius: 3px 3px 6px 6px;
+  position: relative;
+  box-shadow: 
+    inset 1px 0 2px rgba(255, 255, 255, 0.2),
+    inset -1px 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.bamboo-tube::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, #6B5344 0%, #8B7355 50%, #6B5344 100%);
+  border-radius: 3px 3px 0 0;
+}
+
+/* 不同竹签的随机角度 */
+.bamboo-tube:nth-child(odd) { transform: rotate(-2deg); }
+.bamboo-tube:nth-child(even) { transform: rotate(1deg); }
+.bamboo-tube:nth-child(3n) { transform: rotate(2deg); }
+.bamboo-tube:nth-child(4n) { height: 50px; }
+.bamboo-tube:nth-child(5n) { height: 42px; }
+.bamboo-tube:nth-child(7n) { transform: rotate(-1deg); }
+.bamboo-tube:nth-child(11n) { transform: rotate(3deg); }
+
+/* 竹签筒底座 */
+.bamboo-base {
+  width: 180px;
+  height: 30px;
+  background: linear-gradient(90deg, #5D4E37 0%, #7D6B55 50%, #5D4E37 100%);
+  border-radius: 8px 8px 12px 12px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   抽签按钮
+   ======================================== */
+.btn-draw {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 2.5rem;
+  background: var(--card-bg);
+  border: 2px solid var(--accent);
+  border-radius: 50px;
+  color: var(--accent);
+  font-family: "Noto Serif SC", serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+
+.btn-draw:hover {
+  background: var(--accent);
+  color: var(--btn-text);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+.btn-draw:active {
+  transform: translateY(0);
+}
+
+.btn-draw:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-icon {
+  font-size: 1.3rem;
+}
+
+/* ========================================
+   已抽取提示
+   ======================================== */
+.already-drawn {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+/* ========================================
+   签文展示
+   ======================================== */
+.fortune-result {
+  margin-top: 2rem;
+  animation: fortuneAppear 0.8s ease forwards;
+}
+
+@keyframes fortuneAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) rotateX(20deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg);
+  }
+}
+
+.fortune-paper {
+  position: relative;
+  width: 280px;
+  min-height: 320px;
+  padding: 2rem 1.5rem;
+  background: linear-gradient(135deg, #F8F8FF 0%, #E8F4FF 100%);
+  border-radius: 4px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 0 30px rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: rotate(-1deg);
+}
+
+/* LucasMia 主题 - 淡粉色签纸 */
+[data-theme="lucasmia"] .fortune-paper {
+  background: linear-gradient(135deg, #FFF0F5 0%, #FFE4EC 100%);
+}
+
+.fortune-rank {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.2em;
+  margin-bottom: 0.5rem;
+}
+
+.fortune-divider {
+  width: 60%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  margin: 0.8rem 0 1.2rem;
+}
+
+.fortune-text {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+  line-height: 2;
+  text-align: center;
+  letter-spacing: 0.1em;
+}
+
+.fortune-seal {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 50px;
+  height: 50px;
+  border: 2px solid var(--accent);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent);
+  opacity: 0.6;
+  transform: rotate(15deg);
+}
+
+/* ========================================
+   签筒介绍
+   ======================================== */
+.fortune-intro {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+}
+
+.fortune-intro p {
+  margin-bottom: 0.5rem;
+}
+
+/* ========================================
+   回到顶部按钮
+   ======================================== */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 48px;
+  height: 48px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+  z-index: 90;
+}
+
+.back-to-top-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--btn-text);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 768px) {
+  .bamboo-container {
+    transform: scale(0.85);
+  }
+
+  .fortune-paper {
+    width: 260px;
+    min-height: 280px;
+  }
+
+  .page-header {
+    padding: 5rem 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .bamboo-container {
+    transform: scale(0.75);
+  }
+
+  .fortune-paper {
+    width: 240px;
+    padding: 1.5rem 1.2rem;
+  }
+}
