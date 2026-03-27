@@ -7,22 +7,10 @@
 (function() {
   'use strict';
 
-  // EmailJS 配置
-  const EMAILJS_CONFIG = {
-    serviceId: 'service_iouin',
-    templateId: 'template_iouin',
-    publicKey: 'KPlvsCzR0h4RaoGaq'
-  };
-
   /**
    * 初始化建议箱功能
    */
   function init() {
-    // 初始化 EmailJS
-    if (typeof emailjs !== 'undefined') {
-      emailjs.init(EMAILJS_CONFIG.publicKey);
-    }
-
     bindFormEvents();
     bindBackToTop();
   }
@@ -32,7 +20,7 @@
    */
   function bindFormEvents() {
     const form = document.getElementById('suggestionForm');
-    const contentField = document.getElementById('suggestion-content');
+    const contentField = document.getElementById('content');
     const charCount = document.getElementById('charCurrent');
     const submitBtn = document.getElementById('submitBtn');
     const successMessage = document.getElementById('successMessage');
@@ -48,8 +36,8 @@
       e.preventDefault();
 
       // 获取表单数据
-      const title = document.getElementById('suggestion-title').value.trim();
-      const category = document.getElementById('suggestion-category').value;
+      const nickname = document.getElementById('nickname').value.trim();
+      const category = document.getElementById('category').value;
       const content = contentField.value.trim();
 
       if (!category || !content) {
@@ -64,32 +52,18 @@
       successMessage.classList.remove('show');
       errorMessage.classList.remove('show');
 
-      // 准备邮件参数
-      const templateParams = {
-        from_name: document.getElementById('suggestion-title').value.trim() || '匿名用户',
-        category: category,
-        message: content,
-        reply_to: ''
-      };
-
       try {
         // 发送邮件
-        if (typeof emailjs !== 'undefined') {
-          await emailjs.send(
-            EMAILJS_CONFIG.serviceId,
-            EMAILJS_CONFIG.templateId,
-            templateParams,
-            EMAILJS_CONFIG.publicKey
-          );
-        } else {
-          // 模拟发送成功（离线时）
-          console.log('建议已提交（模拟）:', templateParams);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        await emailjs.send('service_iouin', 'template_iouin', {
+          from_name: document.getElementById('nickname').value || '匿名',
+          reply_to: '',
+          category: document.getElementById('category').value,
+          message: document.getElementById('content').value
+        }, 'KPlvsCzR0h4RaoGaq');
 
         // 显示成功消息
         successMessage.classList.add('show');
-        
+
         // 重置表单
         form.reset();
         charCount.textContent = '0';

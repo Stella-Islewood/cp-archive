@@ -14,7 +14,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- EmailJS -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    emailjs.init('KPlvsCzR0h4RaoGaq');
+  </script>
 
   <!-- 主题样式 -->
   <link rel="stylesheet" href="styles/theme-lionmio.css">
@@ -63,17 +66,17 @@
       <section class="suggestion-form card">
         <h2 class="form-title">提交建议</h2>
         <form id="suggestionForm">
-          <!-- 标题（任选） -->
+          <!-- 昵称（任选） -->
           <div class="input-group">
-            <label for="suggestion-title" class="input-label">标题（选填）</label>
-            <input type="text" id="suggestion-title" name="title" class="input-field" 
-                   placeholder="简单概括你的建议" maxlength="50">
+            <label for="nickname" class="input-label">昵称（选填）</label>
+            <input type="text" id="nickname" name="nickname" class="input-field"
+                   placeholder="你的名字" maxlength="20">
           </div>
 
           <!-- 类别下拉 -->
           <div class="input-group">
-            <label for="suggestion-category" class="input-label">类别</label>
-            <select id="suggestion-category" name="category" class="input-field select-field" required>
+            <label for="category" class="input-label">类别</label>
+            <select id="category" name="category" class="input-field select-field" required>
               <option value="">请选择类别</option>
               <option value="功能建议">功能建议</option>
               <option value="内容建议">内容建议</option>
@@ -84,8 +87,8 @@
 
           <!-- 建议内容 -->
           <div class="input-group">
-            <label for="suggestion-content" class="input-label">建议内容 <span class="required">*</span></label>
-            <textarea id="suggestion-content" name="content" class="input-field textarea" 
+            <label for="content" class="input-label">建议内容 <span class="required">*</span></label>
+            <textarea id="content" name="content" class="input-field textarea"
                       placeholder="详细描述你的建议..." maxlength="500" required></textarea>
             <span class="char-count"><span id="charCurrent">0</span>/500</span>
           </div>
