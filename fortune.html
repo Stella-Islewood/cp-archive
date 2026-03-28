@@ -77,52 +77,48 @@
 
       <!-- 抽签区域 -->
       <section class="fortune-section">
-        
-        <!-- 竹签筒 -->
-        <div class="bamboo-container" id="bambooContainer">
-          <div class="bamboo-shaker" id="bambooShaker">
-            <div class="bamboo-tube tube-1"></div>
-            <div class="bamboo-tube tube-2"></div>
-            <div class="bamboo-tube tube-3"></div>
-            <div class="bamboo-tube tube-4"></div>
-            <div class="bamboo-tube tube-5"></div>
-            <div class="bamboo-tube tube-6"></div>
-            <div class="bamboo-tube tube-7"></div>
-            <div class="bamboo-tube tube-8"></div>
-            <div class="bamboo-tube tube-9"></div>
-            <div class="bamboo-tube tube-10"></div>
-            <div class="bamboo-tube tube-11"></div>
-            <div class="bamboo-tube tube-12"></div>
-            <div class="bamboo-tube tube-13"></div>
-            <div class="bamboo-tube tube-14"></div>
-            <div class="bamboo-tube tube-15"></div>
-            <div class="bamboo-tube tube-16"></div>
-            <div class="bamboo-tube tube-17"></div>
-            <div class="bamboo-tube tube-18"></div>
-            <div class="bamboo-tube tube-19"></div>
-            <div class="bamboo-tube tube-20"></div>
+
+        <!-- 签筒 -->
+        <div class="fortune-shaker-wrap" id="fortuneShakerWrap">
+          <div class="fortune-tube">
+            <div class="fortune-tube-top"></div>
+            <!-- 竹节凸起线 -->
+            <div class="fortune-tube-node"></div>
+            <div class="fortune-tube-node"></div>
+            <div class="fortune-tube-node"></div>
+            <!-- 签条 -->
+            <div class="fortune-sticks-wrap" id="fortuneSticks">
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+            </div>
           </div>
-          <div class="bamboo-base"></div>
         </div>
 
         <!-- 抽签按钮 -->
-        <button class="btn-draw" id="drawBtn">
-          <span class="btn-icon">🎋</span>
-          <span class="btn-text">摇一摇</span>
-        </button>
+        <button class="btn-draw" id="drawBtn">摇签</button>
 
         <!-- 已抽取提示 -->
         <p class="already-drawn" id="alreadyDrawn" style="display: none;">
-          今日已提取，明日再来～
+          今日已提取，明日再来
         </p>
 
-        <!-- 签文展示 -->
-        <div class="fortune-result" id="fortuneResult" style="display: none;">
+        <!-- 签纸展示 -->
+        <div class="fortune-result" id="fortuneResult">
           <div class="fortune-paper" id="fortunePaper">
+            <div class="fortune-paper-frame"></div>
+            <div class="fortune-paper-top-deco"></div>
             <div class="fortune-rank" id="fortuneRank"></div>
-            <div class="fortune-divider"></div>
-            <p class="fortune-text" id="fortuneText"></p>
-            <div class="fortune-seal" id="fortuneSeal">运</div>
+            <div class="fortune-rank-line"></div>
+            <div class="fortune-text" id="fortuneText"></div>
+            <div class="fortune-paper-bottom-deco"></div>
           </div>
         </div>
 
@@ -130,8 +126,7 @@
 
       <!-- 签筒介绍 -->
       <section class="fortune-intro">
-        <p>每支签都承载着命运的指引</p>
-        <p>点击「摇一摇」，让命运为你做出选择</p>
+        <p>心诚则灵，愿你得到指引</p>
       </section>
 
     </div>

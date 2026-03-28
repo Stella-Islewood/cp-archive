@@ -218,6 +218,59 @@
             <button class="reader-action-btn" id="readerCommentBtn">
               💬 留言
             </button>
+            <button class="reader-action-btn" id="readerImmersiveBtn">
+              沉浸阅读
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 沉浸阅读模式 ========== -->
+      <div class="immersive-overlay" id="immersiveOverlay" role="dialog" aria-modal="true" aria-label="沉浸阅读模式">
+        <!-- 阅读进度条 -->
+        <div class="immersive-progress" id="immersiveProgress"></div>
+
+        <!-- 顶部工具栏 -->
+        <div class="immersive-toolbar" id="immersiveToolbar">
+          <!-- 左侧：退出按钮 -->
+          <button class="immersive-btn immersive-btn-close" id="immersiveClose" aria-label="退出沉浸阅读">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+
+          <div class="immersive-toolbar-center">
+            <span class="immersive-title-preview" id="immersiveTitlePreview"></span>
+          </div>
+
+          <!-- 右侧：字号调节 + 背景切换 -->
+          <div class="immersive-toolbar-right">
+            <!-- 字号 -->
+            <div class="immersive-font-size" role="group" aria-label="字号调节">
+              <button class="immersive-size-btn" data-size="small" title="小字">A</button>
+              <button class="immersive-size-btn active" data-size="medium" title="中字">A</button>
+              <button class="immersive-size-btn" data-size="large" title="大字">A</button>
+            </div>
+            <!-- 背景色 -->
+            <div class="immersive-bg-switch" role="group" aria-label="背景色">
+              <button class="immersive-bg-btn active" data-bg="light" title="白色" aria-label="白色背景">白</button>
+              <button class="immersive-bg-btn" data-bg="cream" title="米色" aria-label="米色背景">米</button>
+              <button class="immersive-bg-btn" data-bg="dark" title="深色" aria-label="深色背景">暗</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 阅读内容区 -->
+        <div class="immersive-content-wrap" id="immersiveContentWrap">
+          <div class="immersive-content" id="immersiveContent">
+            <div class="immersive-header">
+              <span class="immersive-tag" id="immersiveTag"></span>
+              <h1 class="immersive-title" id="immersiveTitle"></h1>
+              <p class="immersive-author" id="immersiveAuthor"></p>
+              <div class="immersive-divider"></div>
+            </div>
+            <div class="immersive-text" id="immersiveText"></div>
           </div>
         </div>
       </div>

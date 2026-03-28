@@ -499,6 +499,16 @@
       }, 300);
     });
 
+    // 沉浸阅读按钮
+    const immersiveBtn = document.getElementById('readerImmersiveBtn');
+    if (immersiveBtn) {
+      const newImmBtn = immersiveBtn.cloneNode(true);
+      immersiveBtn.parentNode.replaceChild(newImmBtn, immersiveBtn);
+      newImmBtn.addEventListener('click', function() {
+        openImmersiveMode(workId);
+      });
+    }
+
     // 关闭按钮
     const closeBtn = document.getElementById('readerClose');
     const newCloseBtn = closeBtn.cloneNode(true);
@@ -554,12 +564,185 @@
 
   // 监听 ESC 关闭阅读器
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeTextReader();
+    if (e.key === 'Escape') {
+      if (document.getElementById('immersiveOverlay') && document.getElementById('immersiveOverlay').classList.contains('show')) {
+        closeImmersiveMode();
+      } else {
+        closeTextReader();
+      }
+    }
   });
 
+  // ========== 沉浸阅读模式 ==========
+
+  let immersiveScrollHandler = null;
+  let immersiveMouseHandler = null;
+  let immersiveToolbarTimer = null;
+  let currentImmersiveWorkId = null;
+
   /**
-   * 筛选作品（支持搜索 + 分类联合过滤）
+   * 打开沉浸阅读模式
    */
+  function openImmersiveMode(workId) {
+    const work = cachedWorks.find(w => w.id === workId);
+    if (!work) return;
+
+    currentImmersiveWorkId = workId;
+    const overlay = document.getElementById('immersiveOverlay');
+    const contentWrap = document.getElementById('immersiveContentWrap');
+
+    // 填充内容
+    document.getElementById('immersiveTag').textContent = work.type || '';
+    document.getElementById('immersiveTitle').textContent = work.title || '无标题';
+    document.getElementById('immersiveAuthor').textContent = work.author ? `文 / ${work.author}` : '';
+    document.getElementById('immersiveTitlePreview').textContent = work.title || '';
+    document.getElementById('immersiveText').innerHTML = formatTextContent(work.content || '');
+
+    // 重置状态
+    resetImmersiveState();
+
+    // 显示
+    overlay.classList.add('show', 'bg-light');
+    overlay.classList.remove('bg-cream', 'bg-dark');
+    document.getElementById('immersiveToolbar').className = 'immersive-toolbar light';
+    document.getElementById('immersiveText').className = 'immersive-text size-medium';
+    document.getElementById('immersiveProgress').style.width = '0%';
+
+    // 隐藏工具栏
+    document.getElementById('immersiveToolbar').classList.add('hidden');
+
+    document.body.style.overflow = 'hidden';
+
+    // 滚动到顶部
+    contentWrap.scrollTop = 0;
+
+    // 绑定事件
+    bindImmersiveEvents();
+
+    // 关闭文字阅读器
+    closeTextReader();
+  }
+
+  /**
+   * 重置沉浸模式状态
+   */
+  function resetImmersiveState() {
+    document.querySelectorAll('.immersive-size-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.immersive-size-btn[data-size="medium"]').classList.add('active');
+    document.querySelectorAll('.immersive-bg-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector('.immersive-bg-btn[data-bg="light"]').classList.add('active');
+  }
+
+  /**
+   * 关闭沉浸阅读模式
+   */
+  function closeImmersiveMode() {
+    const overlay = document.getElementById('immersiveOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+    currentImmersiveWorkId = null;
+
+    // 移除滚动监听
+    if (immersiveScrollHandler) {
+      const contentWrap = document.getElementById('immersiveContentWrap');
+      if (contentWrap) contentWrap.removeEventListener('scroll', immersiveScrollHandler);
+      immersiveScrollHandler = null;
+    }
+    // 移除鼠标移动监听
+    if (immersiveMouseHandler) {
+      overlay.removeEventListener('mousemove', immersiveMouseHandler);
+      immersiveMouseHandler = null;
+    }
+    if (immersiveToolbarTimer) {
+      clearTimeout(immersiveToolbarTimer);
+      immersiveToolbarTimer = null;
+    }
+  }
+
+  /**
+   * 绑定沉浸模式事件
+   */
+  function bindImmersiveEvents() {
+    const overlay = document.getElementById('immersiveOverlay');
+    const toolbar = document.getElementById('immersiveToolbar');
+    const contentWrap = document.getElementById('immersiveContentWrap');
+
+    // 退出按钮
+    const closeBtn = document.getElementById('immersiveClose');
+    if (closeBtn) {
+      const newBtn = closeBtn.cloneNode(true);
+      closeBtn.parentNode.replaceChild(newBtn, closeBtn);
+      newBtn.addEventListener('click', closeImmersiveMode);
+    }
+
+    // 点击遮罩退出
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeImmersiveMode();
+    });
+
+    // 滚动 → 进度条 + 自动隐藏工具栏
+    if (immersiveScrollHandler) {
+      contentWrap.removeEventListener('scroll', immersiveScrollHandler);
+    }
+    immersiveScrollHandler = function() {
+      const el = document.getElementById('immersiveContent');
+      const wrap = document.getElementById('immersiveContentWrap');
+      if (!el || !wrap) return;
+
+      const scrollTop = wrap.scrollTop;
+      const scrollHeight = el.offsetHeight - wrap.clientHeight;
+      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 100;
+      document.getElementById('immersiveProgress').style.width = Math.min(progress, 100) + '%';
+
+      // 显示工具栏
+      toolbar.classList.remove('hidden');
+      if (immersiveToolbarTimer) clearTimeout(immersiveToolbarTimer);
+      immersiveToolbarTimer = setTimeout(() => {
+        toolbar.classList.add('hidden');
+      }, 2000);
+    };
+    contentWrap.addEventListener('scroll', immersiveScrollHandler);
+
+    // 鼠标移动 → 显示工具栏
+    if (immersiveMouseHandler) {
+      overlay.removeEventListener('mousemove', immersiveMouseHandler);
+    }
+    immersiveMouseHandler = function() {
+      toolbar.classList.remove('hidden');
+      if (immersiveToolbarTimer) clearTimeout(immersiveToolbarTimer);
+      immersiveToolbarTimer = setTimeout(() => {
+        toolbar.classList.add('hidden');
+      }, 2000);
+    };
+    overlay.addEventListener('mousemove', immersiveMouseHandler, { passive: true });
+
+    // 字号切换
+    document.querySelectorAll('.immersive-size-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const size = this.dataset.size;
+        document.querySelectorAll('.immersive-size-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const text = document.getElementById('immersiveText');
+        text.classList.remove('size-small', 'size-medium', 'size-large');
+        text.classList.add('size-' + size);
+      });
+    });
+
+    // 背景色切换
+    document.querySelectorAll('.immersive-bg-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const bg = this.dataset.bg;
+        document.querySelectorAll('.immersive-bg-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        overlay.classList.remove('bg-light', 'bg-cream', 'bg-dark');
+        overlay.classList.add('bg-' + bg);
+        toolbar.classList.remove('light', 'cream', 'dark');
+        toolbar.classList.add(bg === 'dark' ? 'dark' : bg === 'cream' ? 'cream' : 'light');
+      });
+    });
+  }
+
+  // ========== 筛选功能 ==========
   function applyFilters() {
     const searchQuery = (document.getElementById('worksSearch') || { value: '' }).value.trim().toLowerCase();
     const activeTab = document.querySelector('.works-tabs .tab-btn.active');

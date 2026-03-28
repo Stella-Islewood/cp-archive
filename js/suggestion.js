@@ -58,7 +58,7 @@
         category: document.getElementById('input-category').value,
         message: document.getElementById('input-message').value.trim(),
         reply_to: 'nilo_emoj@163.com'
-      }, 'KPlvsCzR0h4RaoGaq')
+      }, { publicKey: '2-bqy-WtwB1MWirsB' })
       .then(function() {
         // 成功处理
         successMessage.classList.add('show');
@@ -68,7 +68,7 @@
           successMessage.classList.remove('show');
         }, 5000);
       }, function(error) {
-        console.log('发送失败', error);
+        console.error('建议箱发送失败', error);
         errorMessage.classList.add('show');
         setTimeout(() => {
           errorMessage.classList.remove('show');
