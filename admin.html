@@ -3,281 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CP同人档案馆 - 后台管理">
   <title>后台管理 | CP同人档案馆</title>
-  
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #333; line-height: 1.6; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; margin: 30px 0; color: #1a73e8; font-size: 24px; }
     
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
+    /* 登录 */
+    .login-box { max-width: 360px; margin: 120px auto; background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+    .login-box h2 { margin-bottom: 24px; color: #333; }
+    .login-box input { width: 100%; padding: 12px 16px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; margin-bottom: 12px; }
+    .login-box button { width: 100%; padding: 12px; background: #1a73e8; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+    .login-box button:hover { background: #1557b0; }
+    .login-error { color: #d93025; margin-top: 10px; display: none; font-size: 14px; }
     
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
+    /* 管理面板 */
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
     
-    h1 {
-      text-align: center;
-      margin: 40px 0 20px;
-      color: #7BA7C4;
-    }
+    /* Tab */
+    .tabs { display: flex; background: #fff; border-radius: 10px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .tab-btn { flex: 1; padding: 14px; background: transparent; border: none; font-size: 15px; cursor: pointer; transition: all 0.2s; }
+    .tab-btn:hover { background: #f5f5f5; }
+    .tab-btn.active { background: #1a73e8; color: #fff; }
     
-    h2 {
-      margin: 20px 0 10px;
-      color: #555;
-    }
-    
-    /* 登录区域 */
-    .login-section {
-      max-width: 400px;
-      margin: 100px auto;
-      background: white;
-      padding: 40px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    
-    .login-section h2 {
-      margin-bottom: 30px;
-    }
-    
-    .login-section input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-bottom: 15px;
-    }
-    
-    .login-section button {
-      width: 100%;
-      padding: 12px;
-      background: #7BA7C4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    
-    .login-section button:hover {
-      background: #6a96b3;
-    }
-    
-    .login-error {
-      color: #e74c3c;
-      margin-top: 10px;
-      display: none;
-    }
-    
-    /* 管理界面 */
-    .admin-section {
-      display: none;
-    }
-    
-    .admin-section.active {
-      display: block;
-    }
-    
-    /* Tab 导航 */
-    .tabs {
-      display: flex;
-      gap: 5px;
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    .tab-btn {
-      flex: 1;
-      padding: 12px 20px;
-      background: transparent;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .tab-btn:hover {
-      background: #f0f0f0;
-    }
-    
-    .tab-btn.active {
-      background: #7BA7C4;
-      color: white;
-    }
-    
-    /* Tab 内容 */
-    .tab-content {
-      display: none;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
+    /* 内容区 */
+    .tab-content { display: none; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .tab-content.active { display: block; }
+    .tab-content h2 { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; color: #333; font-size: 18px; }
     
     /* 表单 */
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .form-group { flex: 1; min-width: 200px; }
+    .form-group.full { flex: 100%; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #555; font-size: 14px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; font-family: inherit; }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .btn { padding: 10px 20px; background: #1a73e8; color: #fff; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+    .btn:hover { background: #1557b0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-danger { background: #d93025; }
+    .btn-danger:hover { background: #a93025; }
     
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #555;
-    }
+    /* 消息 */
+    .msg { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; display: none; font-size: 14px; }
+    .msg.success { background: #d4edda; color: #155724; display: block; }
+    .msg.error { background: #f8d7da; color: #721c24; display: block; }
     
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-    }
-    
-    .form-group textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-    
-    .form-row {
-      display: flex;
-      gap: 15px;
-    }
-    
-    .form-row .form-group {
-      flex: 1;
-    }
-    
-    .btn {
-      padding: 10px 24px;
-      background: #7BA7C4;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    
-    .btn:hover {
-      background: #6a96b3;
-    }
-    
-    .btn-danger {
-      background: #e74c3c;
-      padding: 6px 12px;
-      font-size: 12px;
-    }
-    
-    .btn-danger:hover {
-      background: #c0392b;
-    }
-    
-    /* 消息提示 */
-    .message {
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    
-    .message.success {
-      background: #d4edda;
-      color: #155724;
-      display: block;
-    }
-    
-    .message.error {
-      background: #f8d7da;
-      color: #721c24;
-      display: block;
-    }
-    
-    /* 数据列表 */
-    .data-list {
-      margin-top: 30px;
-    }
-    
-    .data-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 15px;
-      border: 1px solid #eee;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-    
-    .data-item:hover {
-      background: #fafafa;
-    }
-    
-    .data-info {
-      flex: 1;
-    }
-    
-    .data-info h4 {
-      margin-bottom: 5px;
-      color: #333;
-    }
-    
-    .data-info p {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 3px;
-    }
-    
-    .data-meta {
-      display: flex;
-      gap: 10px;
-      margin-top: 5px;
-    }
-    
-    .data-meta span {
-      font-size: 11px;
-      padding: 2px 8px;
-      background: #f0f0f0;
-      border-radius: 4px;
-      color: #666;
-    }
-    
-    .data-actions {
-      display: flex;
-      gap: 5px;
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #999;
+    /* 列表 */
+    .data-list { margin-top: 30px; }
+    .data-list h3 { margin-bottom: 12px; color: #555; font-size: 16px; }
+    .data-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: #fafafa; }
+    .data-item:hover { background: #f5f5f5; }
+    .data-info { flex: 1; }
+    .data-info h4 { margin-bottom: 4px; color: #333; }
+    .data-info p { font-size: 13px; color: #888; margin-bottom: 3px; }
+    .data-meta { display: flex; gap: 8px; margin-top: 6px; }
+    .data-meta span { font-size: 11px; padding: 2px 8px; background: #e8eaed; border-radius: 4px; color: #666; }
+    .data-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .empty { text-align: center; padding: 40px; color: #999; }
+    .loading { text-align: center; padding: 30px; color: #888; }
+
+    @media (max-width: 600px) {
+      .form-row { flex-direction: column; }
+      .form-group { min-width: 100%; }
+      .data-item { flex-direction: column; gap: 10px; }
+      .data-actions { width: 100%; }
     }
   </style>
 </head>
@@ -285,118 +78,126 @@
   <div class="container">
     <h1>CP同人档案馆 - 后台管理</h1>
     
-    <!-- 登录区域 -->
-    <div class="login-section" id="loginSection">
+    <!-- 登录框 -->
+    <div class="login-box" id="loginBox">
       <h2>管理员登录</h2>
       <input type="password" id="passwordInput" placeholder="请输入管理员密码" autocomplete="off">
-      <button onclick="checkPassword()">登录</button>
+      <button onclick="doLogin()">登 录</button>
       <p class="login-error" id="loginError">密码错误，请重试</p>
     </div>
     
-    <!-- 管理界面 -->
-    <div class="admin-section" id="adminSection">
+    <!-- 管理面板 -->
+    <div class="admin-panel" id="adminPanel">
       
-      <!-- Tab 导航 -->
+      <!-- Tabs -->
       <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('timeline')">时间线</button>
         <button class="tab-btn" onclick="switchTab('commission')">约稿</button>
         <button class="tab-btn" onclick="switchTab('works')">创作</button>
       </div>
       
-      <!-- 时间线 Tab -->
+      <!-- 时间线 -->
       <div class="tab-content active" id="tab-timeline">
         <h2>添加时间线节点</h2>
-        <div class="message" id="timelineMsg"></div>
-        <form id="timelineForm">
+        <div class="msg" id="msg-timeline"></div>
+        <form id="form-timeline" onsubmit="submitTimeline(event)">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
-              <select id="timelineSite">
+              <select id="tl-site">
                 <option value="lionmio">LionMio</option>
                 <option value="lucasmia">LucasMia</option>
               </select>
             </div>
             <div class="form-group">
               <label>日期 (YYYY-MM-DD)</label>
-              <input type="text" id="timelineDate" placeholder="2026-03-27" required>
+              <input type="text" id="tl-date" placeholder="2026-03-27" required>
             </div>
           </div>
-          <div class="form-group">
-            <label>标题</label>
-            <input type="text" id="timelineTitle" placeholder="事件标题" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label>标题</label>
+              <input type="text" id="tl-title" placeholder="事件标题" required>
+            </div>
+            <div class="form-group">
+              <label>心情标签</label>
+              <input type="text" id="tl-mood" placeholder="如：开心、期待">
+            </div>
           </div>
-          <div class="form-group">
-            <label>内容</label>
-            <textarea id="timelineContent" placeholder="详细描述..."></textarea>
-          </div>
-          <div class="form-group">
-            <label>心情标签</label>
-            <input type="text" id="timelineMood" placeholder="如：开心、期待、纪念">
+          <div class="form-row">
+            <div class="form-group full">
+              <label>内容</label>
+              <textarea id="tl-content" placeholder="详细描述..."></textarea>
+            </div>
           </div>
           <button type="submit" class="btn">添加节点</button>
         </form>
         
-        <div class="data-list" id="timelineList">
-          <h2>现有时间线</h2>
-          <div id="timelineItems"></div>
+        <div class="data-list">
+          <h3>已有节点</h3>
+          <div id="list-timeline"><div class="loading">加载中...</div></div>
         </div>
       </div>
       
-      <!-- 约稿 Tab -->
+      <!-- 约稿 -->
       <div class="tab-content" id="tab-commission">
         <h2>添加约稿</h2>
-        <div class="message" id="commissionMsg"></div>
-        <form id="commissionForm">
+        <div class="msg" id="msg-commission"></div>
+        <form id="form-commission" onsubmit="submitCommission(event)">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
-              <select id="commissionSite">
+              <select id="cm-site">
                 <option value="lionmio">LionMio</option>
                 <option value="lucasmia">LucasMia</option>
               </select>
             </div>
             <div class="form-group">
               <label>标题</label>
-              <input type="text" id="commissionTitle" placeholder="约稿标题" required>
+              <input type="text" id="cm-title" placeholder="约稿标题" required>
             </div>
           </div>
-          <div class="form-group">
-            <label>画师名</label>
-            <input type="text" id="commissionArtist" placeholder="画师昵称" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label>画师名</label>
+              <input type="text" id="cm-artist" placeholder="画师昵称" required>
+            </div>
+            <div class="form-group">
+              <label>图片 URL</label>
+              <input type="text" id="cm-image" placeholder="https://...">
+            </div>
           </div>
-          <div class="form-group">
-            <label>图片 URL</label>
-            <input type="text" id="commissionImage" placeholder="https://example.com/image.jpg">
-          </div>
-          <div class="form-group">
-            <label>创始人笔记</label>
-            <textarea id="commissionNotes" placeholder="关于这张约稿的故事..."></textarea>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>创始人笔记</label>
+              <textarea id="cm-notes" placeholder="关于这张约稿的故事..."></textarea>
+            </div>
           </div>
           <button type="submit" class="btn">添加约稿</button>
         </form>
         
-        <div class="data-list" id="commissionList">
-          <h2>现有约稿</h2>
-          <div id="commissionItems"></div>
+        <div class="data-list">
+          <h3>已有约稿</h3>
+          <div id="list-commission"><div class="loading">加载中...</div></div>
         </div>
       </div>
       
-      <!-- 创作 Tab -->
+      <!-- 创作 -->
       <div class="tab-content" id="tab-works">
         <h2>添加创作</h2>
-        <div class="message" id="worksMsg"></div>
-        <form id="worksForm">
+        <div class="msg" id="msg-works"></div>
+        <form id="form-works" onsubmit="submitWorks(event)">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
-              <select id="worksSite">
+              <select id="wk-site">
                 <option value="lionmio">LionMio</option>
                 <option value="lucasmia">LucasMia</option>
               </select>
             </div>
             <div class="form-group">
               <label>类型</label>
-              <select id="worksType">
+              <select id="wk-type">
                 <option value="文字">文字</option>
                 <option value="图片">图片</option>
                 <option value="音乐">音乐</option>
@@ -409,330 +210,249 @@
           <div class="form-row">
             <div class="form-group">
               <label>标题</label>
-              <input type="text" id="worksTitle" placeholder="作品标题" required>
+              <input type="text" id="wk-title" placeholder="作品标题" required>
             </div>
             <div class="form-group">
               <label>作者</label>
-              <input type="text" id="worksAuthor" placeholder="作者昵称">
+              <input type="text" id="wk-author" placeholder="作者昵称">
             </div>
           </div>
-          <div class="form-group">
-            <label>内容/图片 URL</label>
-            <textarea id="worksContent" placeholder="作品内容或图片链接..."></textarea>
+          <div class="form-row">
+            <div class="form-group full">
+              <label>内容 / 图片 URL</label>
+              <textarea id="wk-content" placeholder="作品内容或图片链接..."></textarea>
+            </div>
           </div>
           <button type="submit" class="btn">添加创作</button>
         </form>
         
-        <div class="data-list" id="worksList">
-          <h2>现有创作</h2>
-          <div id="worksItems"></div>
+        <div class="data-list">
+          <h3>已有创作</h3>
+          <div id="list-works"><div class="loading">加载中...</div></div>
         </div>
       </div>
+      
     </div>
   </div>
-  
+
   <script>
     // Supabase 配置
-    const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+    const SB_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
+    const SB_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+    const sb = supabase.createClient(SB_URL, SB_KEY);
     
-    // 初始化 Supabase
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // 管理员密码
-    const ADMIN_PASSWORD = 'lionmio2024';
+    const ADMIN_PW = 'lionmio2024';
     
     // 检查登录状态
-    function checkLoginStatus() {
-      const loggedIn = sessionStorage.getItem('adminLoggedIn');
-      if (loggedIn === 'true') {
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('adminSection').classList.add('active');
-        loadAllData();
-      }
+    if (sessionStorage.getItem('adminLoggedIn') === 'true') {
+      document.getElementById('loginBox').style.display = 'none';
+      document.getElementById('adminPanel').classList.add('active');
+      loadAll();
     }
     
-    // 检查密码
-    function checkPassword() {
-      const password = document.getElementById('passwordInput').value;
-      if (password === ADMIN_PASSWORD) {
+    // 登录
+    function doLogin() {
+      const pw = document.getElementById('passwordInput').value;
+      if (pw === ADMIN_PW) {
         sessionStorage.setItem('adminLoggedIn', 'true');
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('adminSection').classList.add('active');
-        loadAllData();
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('adminPanel').classList.add('active');
+        loadAll();
       } else {
         document.getElementById('loginError').style.display = 'block';
       }
     }
     
+    // 回车登录
+    document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+    
     // Tab 切换
-    function switchTab(tab) {
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
-      document.getElementById(`tab-${tab}`).classList.add('active');
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
+      document.getElementById('tab-' + name).classList.add('active');
     }
     
     // 显示消息
-    function showMessage(type, msg, msgId) {
-      const el = document.getElementById(msgId);
-      el.className = `message ${type}`;
-      el.textContent = msg;
-      setTimeout(() => {
-        el.className = 'message';
-      }, 3000);
+    function showMsg(id, type, text) {
+      const el = document.getElementById(id);
+      el.className = 'msg ' + type;
+      el.textContent = text;
+      setTimeout(() => { el.className = 'msg'; }, 3000);
+    }
+    
+    // HTML转义
+    function h(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
     }
     
     // 加载所有数据
-    async function loadAllData() {
-      await loadTimeline();
-      await loadCommissions();
-      await loadWorks();
+    function loadAll() {
+      loadTimeline();
+      loadCommission();
+      loadWorks();
     }
     
     // ========== 时间线 ==========
     
-    // 时间线表单提交
-    document.getElementById('timelineForm').addEventListener('submit', async (e) => {
+    async function submitTimeline(e) {
       e.preventDefault();
-      
       const data = {
-        archive_id: document.getElementById('timelineSite').value,
-        date: document.getElementById('timelineDate').value,
-        title: document.getElementById('timelineTitle').value,
-        content: document.getElementById('timelineContent').value,
-        mood_tag: document.getElementById('timelineMood').value,
+        archive_id: document.getElementById('tl-site').value,
+        date: document.getElementById('tl-date').value,
+        title: document.getElementById('tl-title').value,
+        content: document.getElementById('tl-content').value,
+        mood_tag: document.getElementById('tl-mood').value,
         created_at: new Date().toISOString()
       };
-      
-      const { error } = await supabase.from('timeline').insert([data]);
-      
+      const { error } = await sb.from('timeline').insert([data]);
       if (error) {
-        showMessage('error', '保存失败: ' + error.message, 'timelineMsg');
+        showMsg('msg-timeline', 'error', '保存失败: ' + error.message);
       } else {
-        showMessage('success', '✅ 保存成功！', 'timelineMsg');
-        document.getElementById('timelineForm').reset();
+        showMsg('msg-timeline', 'success', '✅ 保存成功！');
+        document.getElementById('form-timeline').reset();
         loadTimeline();
       }
-    });
+    }
     
-    // 加载时间线
     async function loadTimeline() {
-      const { data, error } = await supabase
-        .from('timeline')
-        .select('*')
-        .order('date', { ascending: false });
-      
-      if (error) {
-        document.getElementById('timelineItems').innerHTML = '<p class="empty-state">加载失败: ' + error.message + '</p>';
-        return;
-      }
-      
-      if (!data || data.length === 0) {
-        document.getElementById('timelineItems').innerHTML = '<p class="empty-state">暂无时间线数据</p>';
-        return;
-      }
-      
-      document.getElementById('timelineItems').innerHTML = data.map(item => `
+      const { data, error } = await sb.from('timeline').select('*').order('created_at', { ascending: false });
+      const el = document.getElementById('list-timeline');
+      if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
+      if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      el.innerHTML = data.map(item => `
         <div class="data-item">
           <div class="data-info">
-            <h4>${escapeHtml(item.title)}</h4>
-            <p>${escapeHtml(item.content || '无内容')}</p>
+            <h4>${h(item.title)}</h4>
+            <p>${h(item.content || '无内容')}</p>
             <div class="data-meta">
-              <span>${item.date}</span>
-              <span>${item.mood_tag || '无标签'}</span>
-              <span>${item.archive_id}</span>
+              <span>${h(item.date)}</span>
+              <span>${h(item.mood_tag || '无')}</span>
+              <span>${h(item.archive_id)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger" onclick="deleteTimeline('${item.id}')">删除</button>
+            <button class="btn btn-danger btn-sm" onclick="delTimeline('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    // 删除时间线
-    async function deleteTimeline(id) {
-      if (!confirm('确定要删除这条时间线吗？')) return;
-      
-      const { error } = await supabase.from('timeline').delete().eq('id', id);
-      
-      if (error) {
-        showMessage('error', '删除失败: ' + error.message, 'timelineMsg');
-      } else {
-        showMessage('success', '✅ 删除成功！', 'timelineMsg');
-        loadTimeline();
-      }
+    async function delTimeline(id) {
+      if (!confirm('确定删除？')) return;
+      const { error } = await sb.from('timeline').delete().eq('id', id);
+      if (error) showMsg('msg-timeline', 'error', '删除失败');
+      else { showMsg('msg-timeline', 'success', '✅ 删除成功'); loadTimeline(); }
     }
     
     // ========== 约稿 ==========
     
-    // 约稿表单提交
-    document.getElementById('commissionForm').addEventListener('submit', async (e) => {
+    async function submitCommission(e) {
       e.preventDefault();
-      
       const data = {
-        archive_id: document.getElementById('commissionSite').value,
-        title: document.getElementById('commissionTitle').value,
-        artist: document.getElementById('commissionArtist').value,
-        image_url: document.getElementById('commissionImage').value,
-        founder_notes: document.getElementById('commissionNotes').value,
+        archive_id: document.getElementById('cm-site').value,
+        title: document.getElementById('cm-title').value,
+        artist: document.getElementById('cm-artist').value,
+        image_url: document.getElementById('cm-image').value,
+        founder_notes: document.getElementById('cm-notes').value,
         created_at: new Date().toISOString()
       };
-      
-      const { error } = await supabase.from('commissions').insert([data]);
-      
+      const { error } = await sb.from('commissions').insert([data]);
       if (error) {
-        showMessage('error', '保存失败: ' + error.message, 'commissionMsg');
+        showMsg('msg-commission', 'error', '保存失败: ' + error.message);
       } else {
-        showMessage('success', '✅ 保存成功！', 'commissionMsg');
-        document.getElementById('commissionForm').reset();
-        loadCommissions();
+        showMsg('msg-commission', 'success', '✅ 保存成功！');
+        document.getElementById('form-commission').reset();
+        loadCommission();
       }
-    });
+    }
     
-    // 加载约稿
-    async function loadCommissions() {
-      const { data, error } = await supabase
-        .from('commissions')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        document.getElementById('commissionItems').innerHTML = '<p class="empty-state">加载失败: ' + error.message + '</p>';
-        return;
-      }
-      
-      if (!data || data.length === 0) {
-        document.getElementById('commissionItems').innerHTML = '<p class="empty-state">暂无约稿数据</p>';
-        return;
-      }
-      
-      document.getElementById('commissionItems').innerHTML = data.map(item => `
+    async function loadCommission() {
+      const { data, error } = await sb.from('commissions').select('*').order('created_at', { ascending: false });
+      const el = document.getElementById('list-commission');
+      if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
+      if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      el.innerHTML = data.map(item => `
         <div class="data-item">
           <div class="data-info">
-            <h4>${escapeHtml(item.title)}</h4>
-            <p>画师: ${escapeHtml(item.artist)}</p>
-            ${item.image_url ? `<p>图片: <a href="${escapeHtml(item.image_url)}" target="_blank">查看</a></p>` : ''}
-            ${item.founder_notes ? `<p>笔记: ${escapeHtml(item.founder_notes.substring(0, 50))}...</p>` : ''}
+            <h4>${h(item.title)}</h4>
+            <p>画师: ${h(item.artist)}</p>
+            ${item.image_url ? `<p>图片: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
+            ${item.founder_notes ? `<p>笔记: ${h(item.founder_notes.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
-              <span>${item.archive_id}</span>
+              <span>${h(item.archive_id)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger" onclick="deleteCommission('${item.id}')">删除</button>
+            <button class="btn btn-danger btn-sm" onclick="delCommission('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    // 删除约稿
-    async function deleteCommission(id) {
-      if (!confirm('确定要删除这条约稿吗？')) return;
-      
-      const { error } = await supabase.from('commissions').delete().eq('id', id);
-      
-      if (error) {
-        showMessage('error', '删除失败: ' + error.message, 'commissionMsg');
-      } else {
-        showMessage('success', '✅ 删除成功！', 'commissionMsg');
-        loadCommissions();
-      }
+    async function delCommission(id) {
+      if (!confirm('确定删除？')) return;
+      const { error } = await sb.from('commissions').delete().eq('id', id);
+      if (error) showMsg('msg-commission', 'error', '删除失败');
+      else { showMsg('msg-commission', 'success', '✅ 删除成功'); loadCommission(); }
     }
     
     // ========== 创作 ==========
     
-    // 创作表单提交
-    document.getElementById('worksForm').addEventListener('submit', async (e) => {
+    async function submitWorks(e) {
       e.preventDefault();
-      
       const data = {
-        archive_id: document.getElementById('worksSite').value,
-        type: document.getElementById('worksType').value,
-        title: document.getElementById('worksTitle').value,
-        author: document.getElementById('worksAuthor').value,
-        content: document.getElementById('worksContent').value,
+        archive_id: document.getElementById('wk-site').value,
+        type: document.getElementById('wk-type').value,
+        title: document.getElementById('wk-title').value,
+        author: document.getElementById('wk-author').value,
+        content: document.getElementById('wk-content').value,
         created_at: new Date().toISOString()
       };
-      
-      const { error } = await supabase.from('works').insert([data]);
-      
+      const { error } = await sb.from('works').insert([data]);
       if (error) {
-        showMessage('error', '保存失败: ' + error.message, 'worksMsg');
+        showMsg('msg-works', 'error', '保存失败: ' + error.message);
       } else {
-        showMessage('success', '✅ 保存成功！', 'worksMsg');
-        document.getElementById('worksForm').reset();
+        showMsg('msg-works', 'success', '✅ 保存成功！');
+        document.getElementById('form-works').reset();
         loadWorks();
       }
-    });
+    }
     
-    // 加载创作
     async function loadWorks() {
-      const { data, error } = await supabase
-        .from('works')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) {
-        document.getElementById('worksItems').innerHTML = '<p class="empty-state">加载失败: ' + error.message + '</p>';
-        return;
-      }
-      
-      if (!data || data.length === 0) {
-        document.getElementById('worksItems').innerHTML = '<p class="empty-state">暂无创作数据</p>';
-        return;
-      }
-      
-      document.getElementById('worksItems').innerHTML = data.map(item => `
+      const { data, error } = await sb.from('works').select('*').order('created_at', { ascending: false });
+      const el = document.getElementById('list-works');
+      if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
+      if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      el.innerHTML = data.map(item => `
         <div class="data-item">
           <div class="data-info">
-            <h4>${escapeHtml(item.title)}</h4>
-            <p>作者: ${escapeHtml(item.author || '未知')}</p>
-            <p>类型: ${item.type}</p>
-            ${item.content ? `<p>内容: ${escapeHtml(item.content.substring(0, 50))}...</p>` : ''}
+            <h4>${h(item.title)}</h4>
+            <p>作者: ${h(item.author || '未知')} | 类型: ${h(item.type)}</p>
+            ${item.content ? `<p>内容: ${h(item.content.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
-              <span>${item.archive_id}</span>
+              <span>${h(item.archive_id)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger" onclick="deleteWork('${item.id}')">删除</button>
+            <button class="btn btn-danger btn-sm" onclick="delWorks('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    // 删除创作
-    async function deleteWork(id) {
-      if (!confirm('确定要删除这条创作吗？')) return;
-      
-      const { error } = await supabase.from('works').delete().eq('id', id);
-      
-      if (error) {
-        showMessage('error', '删除失败: ' + error.message, 'worksMsg');
-      } else {
-        showMessage('success', '✅ 删除成功！', 'worksMsg');
-        loadWorks();
-      }
+    async function delWorks(id) {
+      if (!confirm('确定删除？')) return;
+      const { error } = await sb.from('works').delete().eq('id', id);
+      if (error) showMsg('msg-works', 'error', '删除失败');
+      else { showMsg('msg-works', 'success', '✅ 删除成功'); loadWorks(); }
     }
-    
-    // HTML 转义
-    function escapeHtml(str) {
-      if (!str) return '';
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-    
-    // 回车键提交登录
-    document.getElementById('passwordInput').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        checkPassword();
-      }
-    });
-    
-    // 页面加载时检查登录状态
-    checkLoginStatus();
   </script>
 </body>
 </html>
