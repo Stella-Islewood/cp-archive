@@ -1,141 +1,94 @@
 /**
  * ========================================
  * CP同人档案馆 - 档案页面脚本
- * HTML 中已有静态卡片，此脚本处理图集 Modal 和回到顶部
+ * HTML 中已有静态卡片，此脚本处理图集 Lightbox
  * ========================================
  */
 
 (function() {
   'use strict';
 
-  // 图片查看 Modal
-  let galleryModal = null;
-  let currentGalleryIndex = 0;
-  let currentGalleryImages = [];
+  // Lightbox 状态
+  let lightbox = null;
+  let lightboxImages = [];
+  let currentImageIndex = 0;
 
   /**
    * 初始化档案页面
    */
   function init() {
-    createGalleryModal();
+    bindLightbox();
     bindBackToTop();
-    bindGalleryClicks();
   }
 
   /**
-   * 绑定图集点击事件
+   * 绑定 Lightbox 事件
    */
-  function bindGalleryClicks() {
-    const galleryItems = document.querySelectorAll('.gallery-item');
-    galleryItems.forEach((item, i) => {
-      item.addEventListener('click', function() {
-        const charId = item.closest('.character-profile').getAttribute('data-character');
-        const images = getGalleryImages(charId);
-        openGalleryModal(images, i);
+  function bindLightbox() {
+    lightbox = document.getElementById('lightbox');
+    if (!lightbox) return;
+
+    const closeBtn = document.getElementById('lightboxClose');
+    const prevBtn = document.getElementById('lightboxPrev');
+    const nextBtn = document.getElementById('lightboxNext');
+    const img = document.getElementById('lightboxImage');
+
+    // 绑定图片点击事件
+    const galleryImages = document.querySelectorAll('.gallery-image');
+    galleryImages.forEach(function(image, index) {
+      image.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // 收集当前角色所有可见的图片
+        const charProfile = image.closest('.character-profile');
+        const visibleImages = Array.from(charProfile.querySelectorAll('.gallery-image'))
+          .filter(img => img.style.display !== 'none');
+        lightboxImages = visibleImages.map(img => img.src);
+        currentImageIndex = visibleImages.indexOf(image);
+        if (currentImageIndex === -1) currentImageIndex = 0;
+        openLightbox();
       });
     });
-  }
 
-  /**
-   * 创建图片查看 Modal
-   */
-  function createGalleryModal() {
-    if (galleryModal) return;
+    // 关闭
+    closeBtn.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', function(e) {
+      if (e.target === lightbox) closeLightbox();
+    });
 
-    const modal = document.createElement('div');
-    modal.className = 'gallery-modal';
-    modal.id = 'galleryModal';
-    modal.innerHTML = `
-      <button class="gallery-modal-close" aria-label="关闭">×</button>
-      <button class="gallery-modal-nav prev" aria-label="上一张">‹</button>
-      <div class="gallery-modal-content">
-        <img src="" alt="" />
-      </div>
-      <button class="gallery-modal-nav next" aria-label="下一张">›</button>
-    `;
-
-    document.body.appendChild(modal);
-    galleryModal = modal;
-
-    // 绑定事件
-    modal.querySelector('.gallery-modal-close').addEventListener('click', closeGalleryModal);
-    modal.querySelector('.prev').addEventListener('click', prevGalleryImage);
-    modal.querySelector('.next').addEventListener('click', nextGalleryImage);
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        closeGalleryModal();
-      }
+    // 导航
+    prevBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navigateLightbox(-1);
+    });
+    nextBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      navigateLightbox(1);
     });
 
     // 键盘导航
     document.addEventListener('keydown', function(e) {
-      if (!modal.classList.contains('active')) return;
-      if (e.key === 'Escape') closeGalleryModal();
-      if (e.key === 'ArrowLeft') prevGalleryImage();
-      if (e.key === 'ArrowRight') nextGalleryImage();
+      if (!lightbox.classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      if (e.key === 'ArrowRight') navigateLightbox(1);
     });
   }
 
-  /**
-   * 打开图片查看 Modal
-   */
-  function openGalleryModal(images, index) {
-    if (!galleryModal) return;
-    currentGalleryImages = images;
-    currentGalleryIndex = index;
-
-    const modal = galleryModal;
-    const img = modal.querySelector('.gallery-modal-content img');
-    img.src = images[index];
-    modal.classList.add('active');
+  function openLightbox() {
+    const img = document.getElementById('lightboxImage');
+    img.src = lightboxImages[currentImageIndex];
+    lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
 
-  /**
-   * 关闭图片查看 Modal
-   */
-  function closeGalleryModal() {
-    if (!galleryModal) return;
-    galleryModal.classList.remove('active');
+  function closeLightbox() {
+    lightbox.classList.remove('active');
     document.body.style.overflow = '';
   }
 
-  /**
-   * 上一张图片
-   */
-  function prevGalleryImage() {
-    if (currentGalleryImages.length === 0) return;
-    currentGalleryIndex = (currentGalleryIndex - 1 + currentGalleryImages.length) % currentGalleryImages.length;
-    updateGalleryImage();
-  }
-
-  /**
-   * 下一张图片
-   */
-  function nextGalleryImage() {
-    if (currentGalleryImages.length === 0) return;
-    currentGalleryIndex = (currentGalleryIndex + 1) % currentGalleryImages.length;
-    updateGalleryImage();
-  }
-
-  /**
-   * 更新 Modal 图片
-   */
-  function updateGalleryImage() {
-    if (!galleryModal) return;
-    const img = galleryModal.querySelector('.gallery-modal-content img');
-    img.src = currentGalleryImages[currentGalleryIndex];
-  }
-
-  /**
-   * 获取图集图片路径
-   */
-  function getGalleryImages(charId) {
-    const images = [];
-    for (let i = 1; i <= 4; i++) {
-      images.push('images/gallery/' + charId + '-' + i + '.jpg');
-    }
-    return images;
+  function navigateLightbox(direction) {
+    currentImageIndex = (currentImageIndex + direction + lightboxImages.length) % lightboxImages.length;
+    document.getElementById('lightboxImage').src = lightboxImages[currentImageIndex];
   }
 
   /**
