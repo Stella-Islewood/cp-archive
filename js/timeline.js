@@ -9,9 +9,9 @@
   'use strict';
 
   // Supabase 配置
-  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidmZybXF3bHlpdGFybW5obXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMyMjY0MjAsImV4cCI6MjA0ODgwMjQyMH0.example';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.window.sb.co';
+  const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+  window.sb = window.window.sb.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // localStorage 键名
   const STORAGE_KEY = 'timeline-likes';
@@ -46,11 +46,11 @@
     try {
       const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
       
-      const { data, error } = await supabase
+      const { data, error } = await window.sb
         .from('timeline')
         .select('*')
         .eq('archive_id', theme)
-        .order('date', { ascending: true });
+        .order('date', { ascending: false });
 
       if (error) throw error;
 
