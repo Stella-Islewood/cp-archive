@@ -1,79 +1,62 @@
 /**
  * ========================================
  * CP同人档案馆 - 作品页面脚本
+ * 从 Supabase 读取数据
  * ========================================
  */
 
 (function() {
   'use strict';
 
+  // Supabase 配置
+  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidmZybXF3bHlpdGFybW5obXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMyMjY0MjAsImV4cCI6MjA0ODgwMjQyMH0.example';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   // localStorage 键名
   const FAVORITES_KEY = 'works-favorites';
   const COMMENTS_KEY = 'works-comments';
   const COMMENT_LIKES_KEY = 'works-comment-likes';
 
+  // 缓存的作品数据
+  let cachedWorks = [];
+
   // 当前打开的详情作品 ID
   let currentWorkId = null;
 
-  // 作品数据
-  const WORKS_DATA = {
-    'work-1': {
-      id: 'work-1',
-      title: '冰雪与烈焰',
-      author: '画师：霜月',
-      category: '图片',
-      categoryClass: 'image',
-      date: '2026-01-15',
-      placeholderType: 'image'
-    },
-    'work-2': {
-      id: 'work-2',
-      title: '永恒的共振',
-      author: '作曲：夜阑',
-      category: '音乐',
-      categoryClass: 'music',
-      date: '2026-02-08',
-      placeholderType: 'music'
-    },
-    'work-3': {
-      id: 'work-3',
-      title: '双生的低语',
-      author: '作者：星河',
-      category: '文字',
-      categoryClass: 'text',
-      date: '2026-02-20',
-      placeholderType: 'text'
-    },
-    'work-4': {
-      id: 'work-4',
-      title: '羁绊的瞬间',
-      author: '剪辑：流光',
-      category: '视频',
-      categoryClass: 'video',
-      date: '2026-03-01',
-      placeholderType: 'video'
-    }
-  };
-
-  // 获取封面 SVG
+  /**
+   * 获取封面 SVG
+   */
   function getCoverSVG(type) {
     switch(type) {
-      case 'music':
+      case '音乐':
         return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M9 18V5l12-2v13"/>
           <circle cx="6" cy="18" r="3"/>
           <circle cx="18" cy="16" r="3"/>
         </svg>`;
-      case 'text':
+      case '文字':
         return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
           <line x1="8" y1="7" x2="16" y2="7"/>
           <line x1="8" y1="11" x2="14" y2="11"/>
         </svg>`;
-      case 'video':
+      case '视频':
         return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
           <polygon points="5 3 19 12 5 21 5 3"/>
+        </svg>`;
+      case '玩偶':
+        return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
+          <circle cx="12" cy="8" r="5"/>
+          <path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/>
+        </svg>`;
+      case '游戏':
+        return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
+          <rect x="2" y="6" width="20" height="12" rx="2"/>
+          <path d="M6 12h4M8 10v4"/>
+          <circle cx="16" cy="11" r="1"/>
+          <circle cx="18" cy="13" r="1"/>
         </svg>`;
       default:
         return `<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
@@ -84,43 +67,129 @@
     }
   }
 
-  // 等待 CPData 加载
-  function waitForCPData(callback) {
-    if (window.CPData) {
-      callback();
-    } else {
-      setTimeout(() => waitForCPData(callback), 50);
-    }
-  }
-
   /**
    * 初始化作品页面
    */
   function init() {
-    waitForCPData(() => {
-      initLayout();
-      bindEvents();
-      bindBackToTop();
-      updateFavoriteBadges();
-      updateCommentCounts();
+    loadWorksFromSupabase();
+    initLayout();
+    bindEvents();
+    bindBackToTop();
+    updateFavoriteBadges();
+    updateCommentCounts();
 
-      // 检查是否需要滚动到评论区
-      const urlParams = new URLSearchParams(window.location.search);
-      const scrollToComments = urlParams.get('comments');
-      if (scrollToComments) {
-        const workId = urlParams.get('work');
-        if (workId) {
-          openWorkDetail(workId);
-          // 延迟滚动以等待动画完成
-          setTimeout(() => {
-            const commentsSection = document.getElementById('detailComments');
-            if (commentsSection) {
-              commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          }, 400);
-        }
+    // 检查是否需要滚动到评论区
+    const urlParams = new URLSearchParams(window.location.search);
+    const scrollToComments = urlParams.get('comments');
+    if (scrollToComments) {
+      const workId = urlParams.get('work');
+      if (workId) {
+        openWorkDetail(workId);
+        setTimeout(() => {
+          const commentsSection = document.getElementById('detailComments');
+          if (commentsSection) {
+            commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 400);
       }
-    });
+    }
+  }
+
+  /**
+   * 从 Supabase 加载作品数据
+   */
+  async function loadWorksFromSupabase() {
+    const grid = document.getElementById('worksGrid');
+    if (!grid) return;
+
+    try {
+      const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
+      
+      const { data, error } = await supabase
+        .from('works')
+        .select('*')
+        .eq('archive_id', theme)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      cachedWorks = data || [];
+      renderWorks();
+    } catch (error) {
+      console.error('加载作品失败:', error);
+      cachedWorks = [];
+      renderWorks();
+    }
+  }
+
+  /**
+   * 渲染作品卡片
+   */
+  function renderWorks() {
+    const grid = document.getElementById('worksGrid');
+    if (!grid) return;
+
+    if (cachedWorks.length === 0) {
+      grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;grid-column:1/-1;">暂无作品数据</p>';
+      return;
+    }
+
+    grid.innerHTML = cachedWorks.map((item) => {
+      const typeClass = getTypeClass(item.type);
+      const isMusic = item.type === '音乐';
+      
+      return `
+        <article class="work-card ${isMusic ? 'is-music' : ''}" data-category="${typeClass}" data-work-id="${item.id}">
+          <div class="favorite-badge" style="display: none;">❤</div>
+          ${isMusic ? `
+            <div class="vinyl-container">
+              <div class="vinyl">
+                <div class="vinyl-label"></div>
+                <div class="vinyl-hole"></div>
+              </div>
+            </div>
+          ` : ''}
+          <div class="work-cover">
+            <div class="cover-placeholder ${typeClass}-cover">
+              ${getCoverSVG(item.type)}
+            </div>
+          </div>
+          <div class="work-info">
+            <h3 class="work-title">${escapeHtml(item.title)}</h3>
+            <p class="work-author">${escapeHtml(item.author || '未知作者')}</p>
+            <span class="work-tag">${item.type}</span>
+          </div>
+          <div class="work-actions">
+            <button class="btn-action btn-favorite" data-work-id="${item.id}">
+              <span class="action-icon favorite-icon">♡</span>
+              <span class="action-count favorite-count">0</span>
+            </button>
+            <button class="btn-action btn-comment" data-work-id="${item.id}" data-scroll-to-comments="true">
+              <span class="action-icon">💬</span>
+              <span class="action-count comment-count">0</span>
+            </button>
+          </div>
+        </article>
+      `;
+    }).join('');
+
+    // 重新绑定收藏按钮事件
+    bindFavoriteEvents();
+  }
+
+  /**
+   * 获取类型对应的 CSS 类
+   */
+  function getTypeClass(type) {
+    const map = {
+      '文字': 'text',
+      '图片': 'image',
+      '音乐': 'music',
+      '视频': 'video',
+      '玩偶': 'doll',
+      '游戏': 'game'
+    };
+    return map[type] || 'image';
   }
 
   /**
@@ -134,11 +203,24 @@
   }
 
   /**
+   * 绑定收藏按钮事件
+   */
+  function bindFavoriteEvents() {
+    document.querySelectorAll('.btn-favorite').forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const workId = this.dataset.workId;
+        toggleFavorite(workId);
+      });
+    });
+  }
+
+  /**
    * 绑定事件
    */
   function bindEvents() {
     // Tab 切换
-    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabBtns = document.querySelectorAll('.works-tabs .tab-btn');
     tabBtns.forEach(btn => {
       btn.addEventListener('click', function() {
         const category = this.dataset.category;
@@ -170,19 +252,9 @@
     // 作品卡片点击 - 进入详情页
     document.querySelectorAll('.work-card').forEach(card => {
       card.addEventListener('click', function(e) {
-        // 如果点击的是按钮，不触发展开
         if (e.target.closest('.btn-action')) return;
         const workId = this.dataset.workId;
         openWorkDetail(workId);
-      });
-    });
-
-    // 收藏按钮
-    document.querySelectorAll('.btn-favorite').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const workId = this.dataset.workId;
-        toggleFavorite(workId);
       });
     });
 
@@ -192,7 +264,6 @@
         e.stopPropagation();
         const workId = this.dataset.workId;
         openWorkDetail(workId);
-        // 滚动到评论区
         setTimeout(() => {
           const commentsSection = document.getElementById('detailComments');
           if (commentsSection) {
@@ -248,7 +319,7 @@
    */
   function openWorkDetail(workId) {
     currentWorkId = workId;
-    const work = WORKS_DATA[workId];
+    const work = cachedWorks.find(w => w.id === workId);
     if (!work) return;
 
     // 更新 URL
@@ -266,13 +337,28 @@
 
     // 更新详情页内容
     const coverPlaceholder = document.getElementById('detailCoverPlaceholder');
-    coverPlaceholder.innerHTML = getCoverSVG(work.placeholderType);
-    coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${work.categoryClass}-cover`;
+    coverPlaceholder.innerHTML = getCoverSVG(work.type);
+    coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${getTypeClass(work.type)}-cover`;
 
-    document.getElementById('detailTitle').textContent = work.title;
-    document.getElementById('detailAuthor').textContent = work.author;
-    document.getElementById('detailTag').textContent = work.category;
-    document.getElementById('detailDate').textContent = work.date;
+    document.getElementById('detailTitle').textContent = work.title || '无标题';
+    document.getElementById('detailAuthor').textContent = work.author || '未知作者';
+    document.getElementById('detailTag').textContent = work.type;
+    document.getElementById('detailDate').textContent = formatDate(work.created_at);
+
+    // 更新内容
+    const detailContent = document.getElementById('detailContent');
+    if (detailContent) {
+      if (work.content && work.content.trim() !== '') {
+        // 判断是否是 URL
+        if (isImageUrl(work.content)) {
+          detailContent.innerHTML = `<img src="${escapeHtml(work.content)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;">`;
+        } else {
+          detailContent.innerHTML = `<p style="white-space:pre-wrap;">${escapeHtml(work.content)}</p>`;
+        }
+      } else {
+        detailContent.innerHTML = '<p style="color:#888;">暂无内容</p>';
+      }
+    }
 
     // 更新收藏按钮状态
     updateDetailFavoriteButton();
@@ -283,6 +369,14 @@
 
     // 滚动到顶部
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /**
+   * 判断是否是图片 URL
+   */
+  function isImageUrl(str) {
+    if (!str) return false;
+    return /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(str);
   }
 
   /**
@@ -338,14 +432,12 @@
     const count = btn.querySelector('.favorite-count');
     
     if (favorites.includes(workId)) {
-      // 取消收藏
       const index = favorites.indexOf(workId);
       favorites.splice(index, 1);
       btn.classList.remove('liked');
       icon.textContent = '♡';
       badge.classList.remove('show');
     } else {
-      // 添加收藏
       favorites.push(workId);
       btn.classList.add('liked');
       icon.textContent = '❤';
@@ -447,11 +539,11 @@
       return;
     }
     
-    list.innerHTML = comments.map((comment, index) => {
+    list.innerHTML = comments.map((comment) => {
       const likes = commentLikes[currentWorkId]?.[comment.id] || 0;
       return `
         <div class="comment-item" data-comment-id="${comment.id}">
-          <div class="comment-avatar">${comment.nickname.charAt(0).toUpperCase()}</div>
+          <div class="comment-avatar">${(comment.nickname || '?').charAt(0).toUpperCase()}</div>
           <div class="comment-body">
             <div class="comment-header">
               <span class="comment-nickname">${escapeHtml(comment.nickname)}</span>
@@ -542,15 +634,28 @@
    * HTML 转义
    */
   function escapeHtml(text) {
+    if (!text) return '';
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
   }
 
   /**
-   * 格式化时间
+   * 格式化日期时间
    */
   function formatTime(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }
+
+  /**
+   * 格式化日期
+   */
+  function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, '0');
     const d = String(date.getDate()).padStart(2, '0');
@@ -579,6 +684,11 @@
       });
     });
   }
+
+  // 监听主题切换
+  window.addEventListener('themechange', function(e) {
+    loadWorksFromSupabase();
+  });
 
   // 监听浏览器前进后退
   window.addEventListener('popstate', function() {

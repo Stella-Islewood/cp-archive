@@ -1,28 +1,30 @@
 /**
  * ========================================
  * CP同人档案馆 - 时间线页面脚本
- * 使用 CPData 统一管理时间线数据
+ * 从 Supabase 读取数据
  * ========================================
  */
 
 (function() {
   'use strict';
 
+  // Supabase 配置
+  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZidmZybXF3bHlpdGFybW5obXl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMyMjY0MjAsImV4cCI6MjA0ODgwMjQyMH0.example';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
   // localStorage 键名
   const STORAGE_KEY = 'timeline-likes';
   const COMMENTS_KEY = 'timeline-comments';
+
+  // 缓存的时间线数据
+  let cachedTimeline = [];
 
   /**
    * 初始化时间线功能
    */
   function init() {
-    // 等待 CPData 加载
-    if (!window.CPData) {
-      setTimeout(init, 50);
-      return;
-    }
-
-    renderTimeline();
+    loadTimelineFromSupabase();
     bindRandomEvent();
     bindBackToTop();
     restoreLikes();
@@ -35,15 +37,39 @@
   }
 
   /**
+   * 从 Supabase 加载时间线数据
+   */
+  async function loadTimelineFromSupabase() {
+    const container = document.getElementById('timeline');
+    if (!container) return;
+
+    try {
+      const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
+      
+      const { data, error } = await supabase
+        .from('timeline')
+        .select('*')
+        .eq('archive_id', theme)
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+
+      cachedTimeline = data || [];
+      renderTimeline();
+    } catch (error) {
+      console.error('加载时间线失败:', error);
+      // 如果加载失败，尝试使用空数组
+      cachedTimeline = [];
+      renderTimeline();
+    }
+  }
+
+  /**
    * 渲染时间线
    */
   function renderTimeline() {
     const container = document.getElementById('timeline');
     if (!container) return;
-    
-    const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
-    const cp = CPData.getCPByTheme(theme);
-    const timeline = cp.timeline;
     
     // 保存当前点赞和评论状态
     const currentLikes = getCurrentLikes();
@@ -51,7 +77,13 @@
     
     // 清空并重新渲染
     container.innerHTML = '';
-    timeline.forEach((item, index) => {
+    
+    if (cachedTimeline.length === 0) {
+      container.innerHTML = '<p style="text-align:center;color:#888;padding:40px;">暂无时间线数据</p>';
+      return;
+    }
+    
+    cachedTimeline.forEach((item, index) => {
       const article = createTimelineItem(item, index, currentLikes[index], currentComments[index]);
       container.appendChild(article);
       
@@ -115,7 +147,7 @@
     article.className = 'timeline-item';
     article.dataset.index = index;
     
-    const displayLikes = savedLikes ? savedLikes.count : item.likes;
+    const displayLikes = savedLikes ? savedLikes.count : 0;
     const isLiked = savedLikes ? savedLikes.liked : false;
     
     article.innerHTML = `
@@ -125,11 +157,12 @@
       <div class="timeline-content card">
         <div class="timeline-header">
           <time class="timeline-date">${item.date}</time>
-          <h3 class="timeline-title">${item.title}</h3>
+          <h3 class="timeline-title">${escapeHtml(item.title)}</h3>
         </div>
         <div class="timeline-body">
-          <p>${item.content}</p>
+          <p>${escapeHtml(item.content || '')}</p>
         </div>
+        ${item.mood_tag ? `<div class="timeline-mood"><span>${escapeHtml(item.mood_tag)}</span></div>` : ''}
         <div class="timeline-actions">
           <button class="btn-toggle" aria-expanded="false">
             <span class="toggle-text">展开</span>
@@ -453,6 +486,7 @@
    * HTML 转义
    */
   function escapeHtml(str) {
+    if (!str) return '';
     const div = document.createElement('div');
     div.textContent = str;
     return div.innerHTML;
