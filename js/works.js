@@ -16,6 +16,7 @@
 
   // 缓存的作品数据
   let cachedWorks = [];
+  let displayedWorks = [];
 
   // 当前打开的详情作品 ID
   let currentWorkId = null;
@@ -58,10 +59,15 @@
       if (error) throw error;
 
       cachedWorks = data || [];
+      displayedWorks = [...cachedWorks];
+      // 清空搜索框
+      const searchInput = document.getElementById('worksSearch');
+      if (searchInput) searchInput.value = '';
       renderWorks();
     } catch (error) {
       console.error('加载作品失败:', error);
       cachedWorks = [];
+      displayedWorks = [];
       renderWorks();
     }
   }
@@ -204,16 +210,21 @@
 
     const favorites = getFavorites();
     const commentCounts = {};
-    cachedWorks.forEach(w => {
+    displayedWorks.forEach(w => {
       commentCounts[w.id] = getComments(w.id).length;
     });
 
-    if (cachedWorks.length === 0) {
-      grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;grid-column:1/-1;">暂无作品数据</p>';
+    if (displayedWorks.length === 0) {
+      const query = document.getElementById('worksSearch').value.trim();
+      if (query) {
+        grid.innerHTML = '<p class="search-no-results">没有找到相关内容</p>';
+      } else {
+        grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;grid-column:1/-1;">暂无作品数据</p>';
+      }
       return;
     }
 
-    grid.innerHTML = cachedWorks.map((item) => {
+    grid.innerHTML = displayedWorks.map((item) => {
       const typeClass = getTypeClass(item.type);
       const isFav = favorites.includes(item.id);
       const commentCount = commentCounts[item.id] || 0;
@@ -331,6 +342,14 @@
    * 绑定事件（全部使用事件委托）
    */
   function bindEvents() {
+    // ========== 搜索功能 ==========
+    const searchInput = document.getElementById('worksSearch');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        applyFilters();
+      });
+    }
+
     const grid = document.getElementById('worksGrid');
 
     // ========== 文字卡片：阅读器弹窗 ==========
@@ -539,12 +558,42 @@
   });
 
   /**
-   * 筛选作品
+   * 筛选作品（支持搜索 + 分类联合过滤）
+   */
+  function applyFilters() {
+    const searchQuery = (document.getElementById('worksSearch') || { value: '' }).value.trim().toLowerCase();
+    const activeTab = document.querySelector('.works-tabs .tab-btn.active');
+    const category = activeTab ? activeTab.dataset.category : 'all';
+
+    // 从缓存过滤
+    let works = cachedWorks;
+
+    // 分类过滤
+    if (category !== 'all') {
+      const typeMap = { '文字': 'text', '图片': 'image', '音乐': 'music', '视频': 'video', '玩偶': 'doll', '游戏': 'game' };
+      works = works.filter(item => {
+        return typeMap[item.type] === category;
+      });
+    }
+
+    // 搜索过滤
+    if (searchQuery) {
+      works = works.filter(item => {
+        const title = (item.title || '').toLowerCase();
+        const author = (item.author || '').toLowerCase();
+        return title.includes(searchQuery) || author.includes(searchQuery);
+      });
+    }
+
+    displayedWorks = works;
+    renderWorks();
+  }
+
+  /**
+   * 筛选作品（由 Tab 切换触发）
    */
   function filterWorks(category) {
-    document.querySelectorAll('.work-card').forEach(card => {
-      card.style.display = (category === 'all' || card.dataset.category === category) ? '' : 'none';
-    });
+    applyFilters();
   }
 
   /**

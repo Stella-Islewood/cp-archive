@@ -81,7 +81,29 @@
       tagline: "冰与光的永恒羁绊",
       heroTitle: { lion: "Lion", mio: "Mio" },
       logoInitials: "LM",
-      characters: [DEFAULT_CHARACTERS.lion, DEFAULT_CHARACTERS.mio]
+      characters: [DEFAULT_CHARACTERS.lion, DEFAULT_CHARACTERS.mio],
+      fortunes: [
+        { rank: "大吉", text: "今日与TA心灵相通，所思皆同频" },
+        { rank: "大吉", text: "共振值爆表，宜重温最爱的名场面" },
+        { rank: "大吉", text: "命运之线紧紧相连，今日诸事皆顺" },
+        { rank: "吉", text: "今日适合创作关于他们的故事" },
+        { rank: "吉", text: "翻开旧存档，会发现被遗忘的感动" },
+        { rank: "吉", text: "今日与同好相遇，缘分不浅" },
+        { rank: "吉", text: "TA在某处也想着你所想的事" },
+        { rank: "中吉", text: "平静之日，适合细细品味细节" },
+        { rank: "中吉", text: "不必心急，他们的故事还很长" },
+        { rank: "中吉", text: "今日宜安静陪伴，无需言语" },
+        { rank: "中吉", text: "缘分在积累，共鸣在生长" },
+        { rank: "小吉", text: "今日缘分稍淡，但羁绊永在" },
+        { rank: "小吉", text: "风平浪静，是为了更大的共鸣" },
+        { rank: "小吉", text: "今日适合整理收藏，回顾来时路" },
+        { rank: "末吉", text: "即使平淡，也是他们故事的一部分" },
+        { rank: "末吉", text: "静待时机，最美的相遇从不缺席" },
+        { rank: "末吉", text: "今日能量稍弱，听一首他们的歌吧" },
+        { rank: "末吉", text: "低潮是序章，高光在后面等着" },
+        { rank: "吉", text: "今日适合给喜欢的同人作品点一个赞" },
+        { rank: "大吉", text: "羁绊穿越时间，今日尤为闪耀" }
+      ]
     },
     "lucasmia": {
       id: "lucasmia",
@@ -89,7 +111,29 @@
       tagline: "火与暗的浪漫邂逅",
       heroTitle: { lion: "Lucas", mio: "Mia" },
       logoInitials: "LM",
-      characters: [DEFAULT_CHARACTERS.lucas, DEFAULT_CHARACTERS.mia]
+      characters: [DEFAULT_CHARACTERS.lucas, DEFAULT_CHARACTERS.mia],
+      fortunes: [
+        { rank: "大吉", text: "今日与TA心灵相通，所思皆同频" },
+        { rank: "大吉", text: "共振值爆表，宜重温最爱的名场面" },
+        { rank: "大吉", text: "命运之线紧紧相连，今日诸事皆顺" },
+        { rank: "吉", text: "今日适合创作关于他们的故事" },
+        { rank: "吉", text: "翻开旧存档，会发现被遗忘的感动" },
+        { rank: "吉", text: "今日与同好相遇，缘分不浅" },
+        { rank: "吉", text: "TA在某处也想着你所想的事" },
+        { rank: "中吉", text: "平静之日，适合细细品味细节" },
+        { rank: "中吉", text: "不必心急，他们的故事还很长" },
+        { rank: "中吉", text: "今日宜安静陪伴，无需言语" },
+        { rank: "中吉", text: "缘分在积累，共鸣在生长" },
+        { rank: "小吉", text: "今日缘分稍淡，但羁绊永在" },
+        { rank: "小吉", text: "风平浪静，是为了更大的共鸣" },
+        { rank: "小吉", text: "今日适合整理收藏，回顾来时路" },
+        { rank: "末吉", text: "即使平淡，也是他们故事的一部分" },
+        { rank: "末吉", text: "静待时机，最美的相遇从不缺席" },
+        { rank: "末吉", text: "今日能量稍弱，听一首他们的歌吧" },
+        { rank: "末吉", text: "低潮是序章，高光在后面等着" },
+        { rank: "吉", text: "今日适合给喜欢的同人作品点一个赞" },
+        { rank: "大吉", text: "羁绊穿越时间，今日尤为闪耀" }
+      ]
     }
   };
 

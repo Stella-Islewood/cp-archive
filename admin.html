@@ -161,21 +161,67 @@
               </select>
             </div>
             <div class="form-group">
-              <label>标题</label>
-              <input type="text" id="cm-title" placeholder="约稿标题" required>
+              <label>内容类型</label>
+              <select id="cm-type" onchange="toggleCommissionFields()">
+                <option value="图片">图片</option>
+                <option value="文字">文字</option>
+                <option value="音乐">音乐</option>
+                <option value="视频">视频</option>
+              </select>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
+              <label>标题</label>
+              <input type="text" id="cm-title" placeholder="约稿标题" required>
+            </div>
+            <div class="form-group">
               <label>画师名</label>
               <input type="text" id="cm-artist" placeholder="画师昵称" required>
             </div>
-            <div class="form-group">
-              <label>图片 URL</label>
-              <input type="text" id="cm-image" placeholder="https://...">
-              <p style="font-size:12px;color:#888;margin-top:4px;">可填写图床链接，如 imgur、SM.MS 等</p>
+          </div>
+
+          <!-- 图片类型字段 -->
+          <div id="cm-field-image">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>图片 URL</label>
+                <input type="text" id="cm-image" placeholder="https://...">
+                <p style="font-size:12px;color:#888;margin-top:4px;">可填写图床链接，如 imgur、SM.MS 等</p>
+              </div>
             </div>
           </div>
+
+          <!-- 文字类型字段 -->
+          <div id="cm-field-text" style="display:none;">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>文字内容</label>
+                <textarea id="cm-text" placeholder="约稿文字内容..." style="min-height:120px;"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- 音乐类型字段 -->
+          <div id="cm-field-music" style="display:none;">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>音乐链接</label>
+                <input type="text" id="cm-music" placeholder="https://music.163.com/...">
+              </div>
+            </div>
+          </div>
+
+          <!-- 视频类型字段 -->
+          <div id="cm-field-video" style="display:none;">
+            <div class="form-row">
+              <div class="form-group full">
+                <label>视频链接</label>
+                <input type="text" id="cm-video" placeholder="https://b23.tv/... 或 https://youtube.com/...">
+              </div>
+            </div>
+          </div>
+
           <div class="form-row">
             <div class="form-group full">
               <label>创始人笔记</label>
@@ -184,7 +230,7 @@
           </div>
           <button type="submit" class="btn">添加约稿</button>
         </form>
-        
+
         <div class="data-list">
           <h3>已有约稿</h3>
           <div id="list-commission"><div class="loading">加载中...</div></div>
@@ -357,27 +403,48 @@
     }
     
     // ========== 约稿 ==========
-    
+
+    // 约稿类型字段切换
+    function toggleCommissionFields() {
+      const type = document.getElementById('cm-type').value;
+      document.getElementById('cm-field-image').style.display = type === '图片' ? '' : 'none';
+      document.getElementById('cm-field-text').style.display = type === '文字' ? '' : 'none';
+      document.getElementById('cm-field-music').style.display = type === '音乐' ? '' : 'none';
+      document.getElementById('cm-field-video').style.display = type === '视频' ? '' : 'none';
+    }
+
     async function submitCommission(e) {
       e.preventDefault();
+      const type = document.getElementById('cm-type').value;
       const data = {
         archive_id: document.getElementById('cm-site').value,
+        type: type,
         title: document.getElementById('cm-title').value,
         artist: document.getElementById('cm-artist').value,
-        image_url: document.getElementById('cm-image').value,
         founder_notes: document.getElementById('cm-notes').value,
         created_at: new Date().toISOString()
       };
+      // 根据类型设置内容字段
+      if (type === '图片') {
+        data.image_url = document.getElementById('cm-image').value;
+      } else if (type === '文字') {
+        data.text_content = document.getElementById('cm-text').value;
+      } else if (type === '音乐') {
+        data.image_url = document.getElementById('cm-music').value;
+      } else if (type === '视频') {
+        data.image_url = document.getElementById('cm-video').value;
+      }
       const { error } = await window.sb.from('commissions').insert([data]);
       if (error) {
         showMsg('msg-commission', 'error', '保存失败: ' + error.message);
       } else {
         showMsg('msg-commission', 'success', '✅ 保存成功！');
         document.getElementById('form-commission').reset();
+        toggleCommissionFields();
         loadCommission();
       }
     }
-    
+
     async function loadCommission() {
       const { data, error } = await window.sb.from('commissions').select('*').order('created_at', { ascending: false });
       const el = document.getElementById('list-commission');
@@ -386,9 +453,10 @@
       el.innerHTML = data.map(item => `
         <div class="data-item">
           <div class="data-info">
-            <h4>${h(item.title)}</h4>
+            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type || '图片')}</span></h4>
             <p>画师: ${h(item.artist)}</p>
-            ${item.image_url ? `<p>图片: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
+            ${item.image_url ? `<p>链接: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
+            ${item.text_content ? `<p>内容: ${h(item.text_content.substring(0, 60))}...</p>` : ''}
             ${item.founder_notes ? `<p>笔记: ${h(item.founder_notes.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
               <span>${h(item.archive_id)}</span>

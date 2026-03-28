@@ -75,81 +75,18 @@
         <p class="page-subtitle">每一张都是独一无二的回忆</p>
       </section>
 
+      <!-- 搜索框 -->
+      <div class="search-container">
+        <input type="text" class="search-input" id="commissionSearch" placeholder="搜索标题、画师名..." autocomplete="off">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+      </div>
+
       <!-- Masonry 瀑布流网格 -->
       <div class="commission-grid" id="commissionGrid">
-        
-        <!-- 约稿卡片1 -->
-        <article class="commission-card" data-index="0">
-          <div class="card-image">
-            <div class="image-placeholder">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-          </div>
-          <div class="card-info">
-            <h3 class="card-title">星月夜梦</h3>
-            <p class="card-artist">画师：霜月</p>
-            <p class="card-date">2026.01.15</p>
-          </div>
-        </article>
-
-        <!-- 约稿卡片2 -->
-        <article class="commission-card" data-index="1">
-          <div class="card-image">
-            <div class="image-placeholder tall">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-          </div>
-          <div class="card-info">
-            <h3 class="card-title">永恒的瞬间</h3>
-            <p class="card-artist">画师：夜阑</p>
-            <p class="card-date">2026.02.14</p>
-          </div>
-        </article>
-
-        <!-- 约稿卡片3 -->
-        <article class="commission-card" data-index="2">
-          <div class="card-image">
-            <div class="image-placeholder">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-          </div>
-          <div class="card-info">
-            <h3 class="card-title">双生花</h3>
-            <p class="card-artist">画师：星河</p>
-            <p class="card-date">2026.03.01</p>
-          </div>
-        </article>
-
-        <!-- 约稿卡片4 -->
-        <article class="commission-card" data-index="3">
-          <div class="card-image">
-            <div class="image-placeholder">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <path d="M21 15l-5-5L5 21"/>
-              </svg>
-            </div>
-          </div>
-          <div class="card-info">
-            <h3 class="card-title">命运之轮</h3>
-            <p class="card-artist">画师：流光</p>
-            <p class="card-date">2026.03.20</p>
-          </div>
-        </article>
-
+        <!-- 由 JS 动态生成 -->
       </div>
     </div>
   </main>
@@ -204,6 +141,7 @@
   </footer>
 
   <!-- 脚本 -->
+  <script src="js/cp-data.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/theme-switcher.js"></script>
   <script src="js/petals.js"></script>

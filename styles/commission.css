@@ -1,5 +1,5 @@
 /* ========================================
-   CP同人档案馆 - 约稿展示页面样式
+   约稿展示页面样式
    ======================================== */
 
 /* 页面头部 */
@@ -18,6 +18,55 @@
   font-size: 1rem;
   color: var(--text-muted);
   letter-spacing: 0.15em;
+}
+
+/* ========================================
+   搜索框
+   ======================================== */
+.search-container {
+  position: relative;
+  max-width: 480px;
+  margin: 0 auto 2.5rem;
+}
+
+.search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 2.5rem 0 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 22px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+}
+
+.search-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-no-results {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+  font-size: 1rem;
+  grid-column: 1 / -1;
 }
 
 /* ========================================
@@ -318,6 +367,201 @@
   border-color: var(--accent);
   color: var(--btn-text);
   transform: translateY(-2px);
+}
+
+/* ========================================
+   文字卡片
+   ======================================== */
+.commission-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-body-text {
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #F8F8FF, #E8F4FF);
+  min-height: 120px;
+}
+
+[data-theme="lucasmia"] .card-body-text {
+  background: linear-gradient(135deg, #FFF0F5, #FFE4EC);
+}
+
+.text-preview {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+/* ========================================
+   音乐卡片
+   ======================================== */
+.card-body-music {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #E8FFE8, #D0F0D0);
+  min-height: 80px;
+}
+
+[data-theme="lucasmia"] .card-body-music {
+  background: linear-gradient(135deg, #1A2E1A, #2A4A2A);
+}
+
+.card-music-emoji {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.card-music-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.card-music-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-music-artist {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-music-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.card-music-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* ========================================
+   视频卡片
+   ======================================== */
+.card-body-video {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #E0F0FF, #B8D4FF);
+  min-height: 80px;
+}
+
+[data-theme="lucasmia"] .card-body-video {
+  background: linear-gradient(135deg, #2D2035, #A06080);
+}
+
+.card-video-emoji {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.card-video-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.card-video-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-video-artist {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-video-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.card-video-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* ========================================
+   Lightbox 文字/媒体内容区
+   ======================================== */
+.lightbox-text-content {
+  width: 100%;
+  max-width: 680px;
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: 75vh;
+}
+
+.lightbox-media-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.lightbox-media-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 25px;
+  font-size: 1rem;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: background 0.2s;
+}
+
+.lightbox-media-btn:hover {
+  background: var(--accent-hover);
 }
 
 /* ========================================
