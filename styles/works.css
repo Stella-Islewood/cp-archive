@@ -148,51 +148,228 @@
   cursor: pointer;
 }
 
-/* 封面图 */
-.work-cover {
+/* ========================================
+   作品卡片主体（新结构，替换 work-cover）
+   ======================================== */
+
+/* 卡片主体容器 */
+.work-card-body {
   position: relative;
   width: 100%;
-  aspect-ratio: 4/3;
   overflow: hidden;
 }
 
-.cover-placeholder {
+/* 图片主体：填满卡片上半部 */
+.work-card-body-image {
+  aspect-ratio: 4/3;
+}
+
+.card-body-img {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 视频主体 */
+.work-card-body-video video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+
+/* 默认占位封面 */
+.work-card-body-default .cover-placeholder {
+  width: 100%;
+  aspect-ratio: 4/3;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #EAF4FF, #C8DEFF);
   color: var(--text-muted);
-  transition: background 0.3s ease;
 }
 
-[data-theme="lucasmia"] .cover-placeholder {
+[data-theme="lucasmia"] .work-card-body-default .cover-placeholder {
   background: linear-gradient(135deg, #3D2535, #C4728A);
 }
 
-.text-cover {
-  background: linear-gradient(135deg, #FFF9E6, #FFE4B5);
+/* ========================================
+   音乐卡片
+   ======================================== */
+.work-card-body-music {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #E8FFE8, #D0F0D0);
+  min-height: 80px;
 }
 
-[data-theme="lucasmia"] .text-cover {
-  background: linear-gradient(135deg, #4A3548, #D4A0B0);
+[data-theme="lucasmia"] .work-card-body-music {
+  background: linear-gradient(135deg, #1A2E1A, #2A4A2A);
 }
 
-.video-cover {
+[data-theme="lucasmia"] .work-card-body-music .music-song,
+[data-theme="lucasmia"] .work-card-body-music .music-author {
+  color: #A8D8A8;
+}
+
+.music-icon-wrap {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-rgb), 0.15);
+  border-radius: 50%;
+  color: var(--accent);
+}
+
+.music-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.music-song {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-title);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-author {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.music-link-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.8rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.music-link-btn:hover {
+  background: var(--accent-hover);
+}
+
+/* ========================================
+   视频卡片
+   ======================================== */
+.work-card-body-video {
+  position: relative;
+}
+
+.video-cover-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   background: linear-gradient(135deg, #E0F0FF, #B8D4FF);
+  color: var(--text-muted);
 }
 
-[data-theme="lucasmia"] .video-cover {
+[data-theme="lucasmia"] .video-cover-placeholder {
   background: linear-gradient(135deg, #2D2035, #A06080);
 }
 
-.music-cover {
-  background: linear-gradient(135deg, #E8FFE8, #B8E8B8);
+.video-cover-card span {
+  font-size: 0.8rem;
 }
 
-[data-theme="lucasmia"] .music-cover {
-  background: linear-gradient(135deg, #203520, #80A080);
+.video-link-btn {
+  position: absolute;
+  bottom: 0.6rem;
+  right: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0.7rem;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.video-link-btn:hover {
+  background: rgba(0,0,0,0.9);
+}
+
+/* ========================================
+   文字卡片
+   ======================================== */
+.work-card.work-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.work-card-body-text {
+  flex: 1;
+  padding: 1rem 1.2rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+  cursor: default;
+}
+
+.text-body-preview {
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: color var(--transition-duration) var(--transition-easing);
+  margin: 0;
+}
+
+.text-ellipsis {
+  color: var(--text-muted);
+}
+
+.text-expand-btn {
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--accent);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.text-expand-btn:hover {
+  background: rgba(var(--accent-rgb), 0.1);
+  border-color: var(--accent);
+}
+
+/* 文字卡片 info 区域可点击 */
+.work-card.work-card-text .work-info {
+  cursor: pointer;
+}
+
+.work-card.work-card-text .work-info:hover .work-title {
+  color: var(--accent);
 }
 
 /* 作品信息 */
@@ -292,69 +469,6 @@
 
 .favorite-badge.show {
   display: flex !important;
-}
-
-/* ========================================
-   音乐卡片 - 黑胶唱片动画
-   ======================================== */
-.work-card.is-music {
-  position: relative;
-}
-
-.vinyl-container {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  z-index: 10;
-  pointer-events: none;
-}
-
-.vinyl {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: 
-    repeating-radial-gradient(
-      circle at center,
-      transparent 0px,
-      transparent 2px,
-      rgba(0, 0, 0, 0.1) 2px,
-      rgba(0, 0, 0, 0.1) 4px
-    ),
-    linear-gradient(135deg, #1a1a1a 0%, #333 50%, #1a1a1a 100%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transform: scale(0.8) rotate(-20deg);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-
-.work-card.is-music:hover .vinyl {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
-  animation: vinylSpin 4s linear infinite;
-}
-
-@keyframes vinylSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.vinyl-label {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
-}
-
-.vinyl-hole {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--bg-primary);
 }
 
 @keyframes heartBeat {
