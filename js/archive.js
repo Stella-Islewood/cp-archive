@@ -12,13 +12,33 @@
   let currentGalleryIndex = 0;
   let currentGalleryImages = [];
 
-  // 等待 CPData 加载
+  // 等待 CPData 和数据加载完成
   function waitForCPData(callback) {
-    if (window.CPData) {
-      callback();
-    } else {
-      setTimeout(() => waitForCPData(callback), 50);
+    function checkAndRun() {
+      if (window.CPData && typeof CPData.isLoaded === 'function') {
+        // CPData 存在且有 isLoaded 方法
+        if (CPData.isLoaded()) {
+          callback();
+          return true;
+        }
+      }
+      return false;
     }
+
+    // 如果已经加载完成，直接执行
+    if (checkAndRun()) return;
+
+    // 否则监听事件
+    window.addEventListener('cpDataLoaded', function handler() {
+      window.removeEventListener('cpDataLoaded', handler);
+      callback();
+    });
+
+    // 超时 fallback：2秒后强制执行
+    setTimeout(function() {
+      window.removeEventListener('cpDataLoaded', handler);
+      callback();
+    }, 2000);
   }
 
   /**
@@ -164,8 +184,8 @@
     const otherChar = CPData.getCurrentCP().characters.find(c => c.id !== char.id);
     const otherName = otherChar ? otherChar.name : 'TA';
 
-    // 头像图片路径
-    const avatarPath = char.avatar || `images/characters/${char.id}.jpg`;
+    // 头像图片路径 - 使用大写 JPG
+    const avatarPath = `images/characters/${char.id}.JPG`;
 
     // 处理空数据 - 显示"待补充"灰色斜体
     const formatValue = (val) => {
@@ -175,7 +195,7 @@
       return val;
     };
 
-    // 头像内容
+    // 头像内容 - 加载失败时显示首字母占位
     const avatarContent = `<img src="${avatarPath}" alt="${char.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'profile-avatar-placeholder\\'>${char.initial || char.name?.charAt(0) || '?'}</span>'" />`;
 
     // 性格标签
@@ -183,13 +203,17 @@
       `<span class="profile-trait">${trait}</span>`
     ).join('');
 
+    // 经典台词和关系描述暂时显示"待补充"
+    const quoteDisplay = '<span class="pending-text">待补充</span>';
+    const relationshipDisplay = '<span class="pending-text">待补充</span>';
+
     article.innerHTML = `
       <div class="profile-avatar-section">
         <div class="profile-avatar" id="avatar-${char.id}">
           ${avatarContent}
         </div>
         <h3 class="profile-name">${char.name}</h3>
-        <p class="profile-tagline">${char.tagline || char.element || ''}</p>
+        <p class="profile-tagline">${formatValue(char.tagline || char.element)}</p>
       </div>
       <div class="profile-info">
         <div class="profile-info-row">
@@ -222,12 +246,12 @@
         
         <div class="profile-section">
           <span class="profile-section-title">经典台词</span>
-          <p class="profile-quote">${formatValue(char.quote)}</p>
+          <p class="profile-quote">${quoteDisplay}</p>
         </div>
         
         <div class="profile-section">
           <span class="profile-section-title">与 ${otherName} 的关系</span>
-          <p class="profile-relationship">${formatValue(char.relationship)}</p>
+          <p class="profile-relationship">${relationshipDisplay}</p>
         </div>
 
         <!-- 角色图集 -->

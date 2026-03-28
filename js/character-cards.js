@@ -8,13 +8,29 @@
 (function() {
   'use strict';
 
-  // 等待 CPData 加载
+  // 等待 CPData 和数据加载完成
   function waitForCPData(callback) {
-    if (window.CPData) {
-      callback();
-    } else {
-      setTimeout(() => waitForCPData(callback), 50);
+    function checkAndRun() {
+      if (window.CPData && typeof CPData.isLoaded === 'function') {
+        if (CPData.isLoaded()) {
+          callback();
+          return true;
+        }
+      }
+      return false;
     }
+
+    if (checkAndRun()) return;
+
+    window.addEventListener('cpDataLoaded', function handler() {
+      window.removeEventListener('cpDataLoaded', handler);
+      callback();
+    });
+
+    setTimeout(function() {
+      window.removeEventListener('cpDataLoaded', handler);
+      callback();
+    }, 2000);
   }
 
   /**
