@@ -243,50 +243,6 @@ button {
   color: var(--accent);
 }
 
-/* 导航 */
-.main-nav .nav-list {
-  display: flex;
-  list-style: none;
-  gap: 0.3rem;
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  display: block;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  color: var(--nav-text);
-  letter-spacing: 0.05em;
-  position: relative;
-  transition: color var(--transition-duration) var(--transition-easing);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: 0.2rem;
-  left: 50%;
-  width: 0;
-  height: 1px;
-  background: var(--nav-underline);
-  transition: width 0.3s ease, left 0.3s ease;
-}
-
-.nav-link:hover {
-  color: var(--nav-text-hover);
-}
-
-.nav-link:hover::after,
-.nav-link.active::after {
-  width: 60%;
-  left: 20%;
-}
-
-.nav-link.active {
-  color: var(--nav-text-hover);
-}
-
 /* ========================================
    Hero 区域
    ======================================== */
@@ -797,109 +753,105 @@ body {
    响应式设计 - 完整移动端适配
    ======================================== */
 
-/* 汉堡菜单按钮 */
-.hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
+/* 桌面端导航 - 默认显示 */
+.desktop-nav {
+  display: flex;
   align-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 10px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  z-index: 1001;
+  gap: 0.3rem;
 }
 
-.hamburger span {
+.desktop-nav .nav-link {
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--nav-text);
+  letter-spacing: 0.05em;
+  position: relative;
+  transition: color var(--transition-duration) var(--transition-easing);
+  text-decoration: none;
+}
+
+.desktop-nav .nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0.2rem;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: var(--nav-underline);
+  transition: width 0.3s ease, left 0.3s ease;
+}
+
+.desktop-nav .nav-link:hover {
+  color: var(--nav-text-hover);
+}
+
+.desktop-nav .nav-link:hover::after,
+.desktop-nav .nav-link.active::after {
+  width: 60%;
+  left: 20%;
+}
+
+.desktop-nav .nav-link.active {
+  color: var(--nav-text-hover);
+}
+
+/* 手机端汉堡按钮 - 默认隐藏 */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.hamburger-btn span {
   display: block;
   width: 24px;
   height: 2px;
   background: var(--text-primary);
-  margin: 5px 0;
-  transition: all 0.3s;
+  border-radius: 2px;
 }
 
-/* 全屏移动端导航 */
-.mobile-nav-overlay {
+/* 手机端全屏菜单 - 默认隐藏 */
+.mobile-menu {
   display: none;
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 998;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.mobile-nav {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 80%;
-  max-width: 320px;
-  height: 100%;
-  background: var(--card-bg);
+  background: var(--bg-primary);
   z-index: 999;
-  transition: right 0.3s ease;
-  padding: 2rem;
-  overflow-y: auto;
-}
-
-.mobile-nav.active {
-  right: 0;
-}
-
-.mobile-nav-overlay.active {
-  display: block;
-  opacity: 1;
-}
-
-.mobile-nav-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border: none;
-  font-size: 2rem;
-  color: var(--text-primary);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-}
-
-.mobile-nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 3rem 0 0 0;
-}
-
-.mobile-nav-list .nav-item {
-  margin-bottom: 0.5rem;
-}
-
-.mobile-nav-list .nav-link {
-  display: block;
-  padding: 1rem;
-  font-size: 1.1rem;
-  color: var(--text-primary);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  min-height: 44px;
-  display: flex;
   align-items: center;
+  gap: 1rem;
 }
 
-.mobile-nav-list .nav-link:hover,
-.mobile-nav-list .nav-link.active {
+.mobile-menu a {
+  display: block;
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  min-height: 44px;
+  width: 100%;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.mobile-menu a:hover,
+.mobile-menu a.active {
   background: var(--accent);
   color: var(--btn-text);
+}
+
+/* 手机端菜单展开状态 */
+.mobile-menu.open {
+  display: flex;
 }
 
 /* ========================================
@@ -935,11 +887,11 @@ body {
   }
 
   /* 隐藏桌面端导航，显示汉堡按钮 */
-  .main-nav {
+  .desktop-nav {
     display: none;
   }
 
-  .hamburger {
+  .hamburger-btn {
     display: flex;
   }
 
@@ -1307,12 +1259,11 @@ body {
    ======================================== */
 @media (min-width: 769px) and (max-width: 1024px) {
 
-  .hamburger {
+  .hamburger-btn {
     display: none;
   }
 
-  .mobile-nav,
-  .mobile-nav-overlay {
+  .mobile-menu {
     display: none !important;
   }
 
@@ -1342,11 +1293,11 @@ body {
     animation: none;
   }
 
-  .hamburger span {
+  .hamburger-btn span {
     transition: none;
   }
 
-  .mobile-nav {
+  .mobile-menu {
     transition: none;
   }
 }
