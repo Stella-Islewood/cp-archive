@@ -4,65 +4,59 @@
  * ========================================
  */
 
-(function() {
-  'use strict';
+document.addEventListener('DOMContentLoaded', function() {
+  var hamburger = document.getElementById('hamburger');
+  var mobileNav = document.getElementById('mobileNav');
+  var mobileNavOverlay = document.getElementById('mobileNavOverlay');
+  var mobileNavClose = document.getElementById('mobileNavClose');
 
-  /**
-   * 初始化汉堡菜单
-   */
-  function init() {
-    const hamburger = document.getElementById('hamburger');
-    const mobileNav = document.getElementById('mobileNav');
-    const mobileNavOverlay = document.getElementById('mobileNavOverlay');
-    const mobileNavClose = document.getElementById('mobileNavClose');
+  if (!hamburger || !mobileNav) {
+    console.warn('Mobile navigation elements not found');
+    return;
+  }
 
-    if (!hamburger || !mobileNav) return;
-
-    // 打开菜单
-    hamburger.addEventListener('click', function() {
-      mobileNav.classList.add('active');
-      mobileNavOverlay.classList.add('active');
-      hamburger.setAttribute('aria-expanded', 'true');
-      document.body.style.overflow = 'hidden';
-    });
-
-    // 关闭菜单
-    function closeMenu() {
-      mobileNav.classList.remove('active');
-      mobileNavOverlay.classList.remove('active');
-      hamburger.setAttribute('aria-expanded', 'false');
-      document.body.style.overflow = '';
-    }
-
-    if (mobileNavClose) {
-      mobileNavClose.addEventListener('click', closeMenu);
-    }
-
+  // 打开菜单
+  hamburger.addEventListener('click', function() {
+    mobileNav.classList.add('active');
     if (mobileNavOverlay) {
-      mobileNavOverlay.addEventListener('click', closeMenu);
+      mobileNavOverlay.classList.add('active');
     }
+    hamburger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  });
 
-    // ESC 键关闭菜单
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
-        closeMenu();
-      }
-    });
-
-    // 点击导航链接后关闭菜单
-    const mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
-    mobileNavLinks.forEach(function(link) {
-      link.addEventListener('click', function() {
-        closeMenu();
-      });
-    });
+  // 关闭菜单函数
+  function closeMenu() {
+    mobileNav.classList.remove('active');
+    if (mobileNavOverlay) {
+      mobileNavOverlay.classList.remove('active');
+    }
+    hamburger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
   }
 
-  // DOM 加载完成后初始化
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  // 关闭按钮
+  if (mobileNavClose) {
+    mobileNavClose.addEventListener('click', closeMenu);
   }
 
-})();
+  // 点击遮罩关闭
+  if (mobileNavOverlay) {
+    mobileNavOverlay.addEventListener('click', closeMenu);
+  }
+
+  // ESC 键关闭
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && mobileNav.classList.contains('active')) {
+      closeMenu();
+    }
+  });
+
+  // 点击导航链接后关闭菜单
+  var mobileNavLinks = mobileNav.querySelectorAll('.nav-link');
+  for (var i = 0; i < mobileNavLinks.length; i++) {
+    mobileNavLinks[i].addEventListener('click', function() {
+      closeMenu();
+    });
+  }
+});
