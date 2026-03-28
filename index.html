@@ -123,7 +123,61 @@
       <section class="archive-preview" id="archive">
         <h2 class="section-title">角色档案</h2>
         <div class="character-cards" id="character-cards">
-          <!-- 卡片内容由 JavaScript 动态切换 -->
+          <!-- Lion 卡片 - LionMio 主题显示 -->
+          <article class="character-card simple-card" data-character="lion" data-theme="lionmio">
+            <div class="character-avatar lionmio-avatar">
+              <span>L</span>
+            </div>
+            <h3 class="character-name">Lion</h3>
+            <p class="character-tagline">严于律己，也严于他人的完美主义者</p>
+            <div class="character-traits">
+              <span class="trait-tag">严谨</span>
+              <span class="trait-tag">冷静</span>
+              <span class="trait-tag">高标准</span>
+            </div>
+          </article>
+
+          <!-- Mio 卡片 - LionMio 主题显示 -->
+          <article class="character-card simple-card" data-character="mio" data-theme="lionmio">
+            <div class="character-avatar lucasmia-avatar">
+              <span>M</span>
+            </div>
+            <h3 class="character-name">Mio</h3>
+            <p class="character-tagline">不擅表达，内心却很热闹</p>
+            <div class="character-traits">
+              <span class="trait-tag">内向</span>
+              <span class="trait-tag">细腻</span>
+              <span class="trait-tag">温柔</span>
+            </div>
+          </article>
+
+          <!-- Lucas 卡片 - LucasMia 主题显示 -->
+          <article class="character-card simple-card" data-character="lucas" data-theme="lucasmia" style="display:none;">
+            <div class="character-avatar lucasmia-avatar">
+              <span>L</span>
+            </div>
+            <h3 class="character-name">Lucas</h3>
+            <p class="character-tagline">神秘而克制的吸血鬼</p>
+            <div class="character-traits">
+              <span class="trait-tag">冷静</span>
+              <span class="trait-tag">克制</span>
+              <span class="trait-tag">孤独</span>
+            </div>
+          </article>
+
+          <!-- Mia 卡片 - LucasMia 主题显示 -->
+          <article class="character-card simple-card" data-character="mia" data-theme="lucasmia" style="display:none;">
+            <div class="character-avatar lionmio-avatar">
+              <span>M</span>
+            </div>
+            <h3 class="character-name">Mia</h3>
+            <p class="character-tagline">直率勇敢的眼盲少女</p>
+            <div class="character-traits">
+              <span class="trait-tag">勇敢</span>
+              <span class="trait-tag">温柔</span>
+              <span class="trait-tag">纯真</span>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -185,5 +239,28 @@
   <script src="js/daily-quote.js"></script>
   <script src="js/visitor-counter.js"></script>
   <script src="js/mobile-nav.js"></script>
+  <script>
+    // 首页角色卡片主题切换
+    (function() {
+      function updateCharacterCards() {
+        var theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
+        var cards = document.querySelectorAll('#character-cards .character-card');
+        cards.forEach(function(card) {
+          var cardTheme = card.getAttribute('data-theme');
+          if (cardTheme === theme) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+      
+      // 初始化
+      updateCharacterCards();
+      
+      // 监听主题切换
+      window.addEventListener('themechange', updateCharacterCards);
+    })();
+  </script>
 </body>
 </html>

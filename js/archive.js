@@ -1,6 +1,7 @@
 /**
  * ========================================
  * CP同人档案馆 - 档案页面脚本
+ * HTML 中已有静态卡片，此脚本处理图集 Modal 和回到顶部
  * ========================================
  */
 
@@ -12,47 +13,25 @@
   let currentGalleryIndex = 0;
   let currentGalleryImages = [];
 
-  // 等待 CPData 和数据加载完成
-  function waitForCPData(callback) {
-    function checkAndRun() {
-      if (window.CPData && typeof CPData.isLoaded === 'function') {
-        // CPData 存在且有 isLoaded 方法
-        if (CPData.isLoaded()) {
-          callback();
-          return true;
-        }
-      }
-      return false;
-    }
-
-    // 如果已经加载完成，直接执行
-    if (checkAndRun()) return;
-
-    // 否则监听事件
-    window.addEventListener('cpDataLoaded', function handler() {
-      window.removeEventListener('cpDataLoaded', handler);
-      callback();
-    });
-
-    // 超时 fallback：2秒后强制执行
-    setTimeout(function() {
-      window.removeEventListener('cpDataLoaded', handler);
-      callback();
-    }, 2000);
-  }
-
   /**
    * 初始化档案页面
    */
   function init() {
-    waitForCPData(() => {
-      createGalleryModal();
-      renderProfiles();
-      bindBackToTop();
-      
-      // 监听主题切换
-      window.addEventListener('themechange', function(e) {
-        renderProfiles();
+    createGalleryModal();
+    bindBackToTop();
+    bindGalleryClicks();
+  }
+
+  /**
+   * 绑定图集点击事件
+   */
+  function bindGalleryClicks() {
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    galleryItems.forEach((item, i) => {
+      item.addEventListener('click', function() {
+        const charId = item.closest('.character-profile').getAttribute('data-character');
+        const images = getGalleryImages(charId);
+        openGalleryModal(images, i);
       });
     });
   }
@@ -149,156 +128,12 @@
   }
 
   /**
-   * 渲染角色档案
-   */
-  function renderProfiles() {
-    const container = document.getElementById('archiveSection');
-    if (!container) return;
-
-    const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
-    const cp = CPData.getCPByTheme(theme);
-
-    // 清空现有内容
-    container.innerHTML = '';
-
-    // 为每个角色创建档案卡
-    cp.characters.forEach((char, index) => {
-      const profile = createProfileCard(char, index, theme);
-      container.appendChild(profile);
-    });
-  }
-
-  /**
-   * 创建角色档案卡片
-   * @param {Object} char - 角色数据
-   * @param {number} index - 索引
-   * @param {string} theme - 当前主题
-   * @returns {HTMLElement}
-   */
-  function createProfileCard(char, index, theme) {
-    const article = document.createElement('article');
-    article.className = 'character-profile';
-    article.dataset.index = index;
-
-    // 获取另一角色的名字
-    const otherChar = CPData.getCurrentCP().characters.find(c => c.id !== char.id);
-    const otherName = otherChar ? otherChar.name : 'TA';
-
-    // 头像图片路径 - 使用大写 JPG
-    const avatarPath = `images/characters/${char.id}.JPG`;
-
-    // 处理空数据 - 显示"待补充"灰色斜体
-    const formatValue = (val) => {
-      if (!val || val.trim() === '') {
-        return '<span class="pending-text">待补充</span>';
-      }
-      return val;
-    };
-
-    // 头像内容 - 加载失败时显示首字母占位
-    const avatarContent = `<img src="${avatarPath}" alt="${char.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'profile-avatar-placeholder\\'>${char.initial || char.name?.charAt(0) || '?'}</span>'" />`;
-
-    // 性格标签
-    const traitsHTML = (char.traits || []).slice(0, 3).map(trait => 
-      `<span class="profile-trait">${trait}</span>`
-    ).join('');
-
-    // 经典台词和关系描述暂时显示"待补充"
-    const quoteDisplay = '<span class="pending-text">待补充</span>';
-    const relationshipDisplay = '<span class="pending-text">待补充</span>';
-
-    article.innerHTML = `
-      <div class="profile-avatar-section">
-        <div class="profile-avatar" id="avatar-${char.id}">
-          ${avatarContent}
-        </div>
-        <h3 class="profile-name">${char.name}</h3>
-        <p class="profile-tagline">${formatValue(char.tagline || char.element)}</p>
-      </div>
-      <div class="profile-info">
-        <div class="profile-info-row">
-          <div class="profile-info-item">
-            <span class="profile-info-label">生日</span>
-            <span class="profile-info-value">${formatValue(char.birthday)}</span>
-          </div>
-          <div class="profile-info-item">
-            <span class="profile-info-label">身高</span>
-            <span class="profile-info-value">${formatValue(char.height)}</span>
-          </div>
-          <div class="profile-info-item">
-            <span class="profile-info-label">属性</span>
-            <span class="profile-info-value">${formatValue(char.element)}</span>
-          </div>
-        </div>
-        
-        <div class="profile-divider"></div>
-        
-        <div class="profile-traits">
-          ${traitsHTML || '<span class="pending-text">待补充</span>'}
-        </div>
-        
-        <div class="profile-divider"></div>
-        
-        <div class="profile-section">
-          <span class="profile-section-title">个人简介</span>
-          <p class="profile-section-content">${formatValue(char.description)}</p>
-        </div>
-        
-        <div class="profile-section">
-          <span class="profile-section-title">经典台词</span>
-          <p class="profile-quote">${quoteDisplay}</p>
-        </div>
-        
-        <div class="profile-section">
-          <span class="profile-section-title">与 ${otherName} 的关系</span>
-          <p class="profile-relationship">${relationshipDisplay}</p>
-        </div>
-
-        <!-- 角色图集 -->
-        <div class="profile-gallery">
-          <h4 class="gallery-title">角色图集</h4>
-          <div class="gallery-grid" id="gallery-${char.id}">
-            ${generateGalleryItems(char.id)}
-          </div>
-        </div>
-      </div>
-    `;
-
-    // 绑定图集点击事件
-    const galleryItems = article.querySelectorAll('.gallery-item');
-    galleryItems.forEach((item, i) => {
-      item.addEventListener('click', function() {
-        const images = getGalleryImages(char.id);
-        openGalleryModal(images, i);
-      });
-    });
-
-    return article;
-  }
-
-  /**
-   * 生成图集项 HTML
-   */
-  function generateGalleryItems(charId) {
-    let html = '';
-    for (let i = 1; i <= 4; i++) {
-      const imgPath = `images/gallery/${charId}-${i}.jpg`;
-      html += `
-        <div class="gallery-item">
-          <img src="${imgPath}" alt="${charId} 图集 ${i}" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'gallery-placeholder\\'>${i}</div>'" />
-        </div>
-      `;
-    }
-    return html;
-  }
-
-  /**
    * 获取图集图片路径
    */
   function getGalleryImages(charId) {
     const images = [];
     for (let i = 1; i <= 4; i++) {
-      images.push(`images/gallery/${charId}-${i}.jpg`);
+      images.push('images/gallery/' + charId + '-' + i + '.jpg');
     }
     return images;
   }

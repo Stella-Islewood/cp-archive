@@ -26,10 +26,8 @@
       "height": "181cm",
       "traits": ["冷静", "守护", "深邃"],
       "element": "冰",
-      "avatar": "images/characters/lion.jpg",
-      "description": "冰蓝主题的代表，冰之继承者。冷静沉稳的外表下藏着温柔的心，像冬日的冰晶一样透明纯粹。",
-      "quote": "我会一直在这里，直到永远。",
-      "relationship": "彼此的唯一"
+      "avatar": "images/characters/lion.JPG",
+      "description": "冰蓝主题的代表，冰之继承者。冷静沉稳的外表下藏着温柔的心，像冬日的冰晶一样透明纯粹。"
     },
     {
       "id": "mio",
@@ -40,10 +38,8 @@
       "height": "165cm",
       "traits": ["温柔", "细腻", "明亮"],
       "element": "光",
-      "avatar": "images/characters/mio.jpg",
-      "description": "光之延续，用温柔照亮身边的人。总是带着明媚的笑容，像夏日的微风一样令人舒适。",
-      "quote": "只要有你在，一切都会好起来的。",
-      "relationship": "彼此的唯一"
+      "avatar": "images/characters/mio.JPG",
+      "description": "光之延续，用温柔照亮身边的人。总是带着明媚的笑容，像夏日的微风一样令人舒适。"
     },
     {
       "id": "lucas",
@@ -54,10 +50,8 @@
       "height": "185cm",
       "traits": ["热情", "开拓", "温暖"],
       "element": "火",
-      "avatar": "images/characters/lucas.jpg",
-      "description": "深红主题的代表，火之传承。热烈奔放的性格像燃烧的火焰，照亮黑暗中的一切。",
-      "quote": "无论发生什么，我都会找到你。",
-      "relationship": "彼此的唯一"
+      "avatar": "images/characters/lucas.JPG",
+      "description": "深红主题的代表，火之传承。热烈奔放的性格像燃烧的火焰，照亮黑暗中的一切。"
     },
     {
       "id": "mia",
@@ -68,10 +62,8 @@
       "height": "162cm",
       "traits": ["神秘", "守望", "浪漫"],
       "element": "暗",
-      "avatar": "images/characters/mia.jpg",
-      "description": "暗之守护，神秘莫测的存在。静谧深邃的眼眸中藏着不为人知的温柔与坚持。",
-      "quote": "在黑暗中，我也能找到你的方向。",
-      "relationship": "彼此的唯一"
+      "avatar": "images/characters/mia.JPG",
+      "description": "暗之守护，神秘莫测的存在。静谧深邃的眼眸中藏着不为人知的温柔与坚持。"
     }
   ],
   "works": [
