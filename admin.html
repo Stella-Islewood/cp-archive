@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>后台管理 | CP同人档案馆</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.addEventListener('load', function() {
+      window.sb = supabase.createClient(
+        'https://vbvfrmqwlyitarmnhmyw.supabase.co',
+        'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH'
+      );
+    });
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #333; line-height: 1.6; }
@@ -237,10 +245,6 @@
 
   <script>
     // Supabase 配置
-    const SB_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
-    const SB_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-    const sb = supabase.createClient(SB_URL, SB_KEY);
-    
     const ADMIN_PW = 'lionmio2024';
     
     // 检查登录状态
@@ -311,7 +315,7 @@
         mood_tag: document.getElementById('tl-mood').value,
         created_at: new Date().toISOString()
       };
-      const { error } = await sb.from('timeline').insert([data]);
+      const { error } = await window.sb.from('timeline').insert([data]);
       if (error) {
         showMsg('msg-timeline', 'error', '保存失败: ' + error.message);
       } else {
@@ -322,7 +326,7 @@
     }
     
     async function loadTimeline() {
-      const { data, error } = await sb.from('timeline').select('*').order('created_at', { ascending: false });
+      const { data, error } = await window.sb.from('timeline').select('*').order('created_at', { ascending: false });
       const el = document.getElementById('list-timeline');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
@@ -346,7 +350,7 @@
     
     async function delTimeline(id) {
       if (!confirm('确定删除？')) return;
-      const { error } = await sb.from('timeline').delete().eq('id', id);
+      const { error } = await window.sb.from('timeline').delete().eq('id', id);
       if (error) showMsg('msg-timeline', 'error', '删除失败');
       else { showMsg('msg-timeline', 'success', '✅ 删除成功'); loadTimeline(); }
     }
@@ -363,7 +367,7 @@
         founder_notes: document.getElementById('cm-notes').value,
         created_at: new Date().toISOString()
       };
-      const { error } = await sb.from('commissions').insert([data]);
+      const { error } = await window.sb.from('commissions').insert([data]);
       if (error) {
         showMsg('msg-commission', 'error', '保存失败: ' + error.message);
       } else {
@@ -374,7 +378,7 @@
     }
     
     async function loadCommission() {
-      const { data, error } = await sb.from('commissions').select('*').order('created_at', { ascending: false });
+      const { data, error } = await window.sb.from('commissions').select('*').order('created_at', { ascending: false });
       const el = document.getElementById('list-commission');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
@@ -398,7 +402,7 @@
     
     async function delCommission(id) {
       if (!confirm('确定删除？')) return;
-      const { error } = await sb.from('commissions').delete().eq('id', id);
+      const { error } = await window.sb.from('commissions').delete().eq('id', id);
       if (error) showMsg('msg-commission', 'error', '删除失败');
       else { showMsg('msg-commission', 'success', '✅ 删除成功'); loadCommission(); }
     }
@@ -415,7 +419,7 @@
         content: document.getElementById('wk-content').value,
         created_at: new Date().toISOString()
       };
-      const { error } = await sb.from('works').insert([data]);
+      const { error } = await window.sb.from('works').insert([data]);
       if (error) {
         showMsg('msg-works', 'error', '保存失败: ' + error.message);
       } else {
@@ -426,7 +430,7 @@
     }
     
     async function loadWorks() {
-      const { data, error } = await sb.from('works').select('*').order('created_at', { ascending: false });
+      const { data, error } = await window.sb.from('works').select('*').order('created_at', { ascending: false });
       const el = document.getElementById('list-works');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
@@ -449,7 +453,7 @@
     
     async function delWorks(id) {
       if (!confirm('确定删除？')) return;
-      const { error } = await sb.from('works').delete().eq('id', id);
+      const { error } = await window.sb.from('works').delete().eq('id', id);
       if (error) showMsg('msg-works', 'error', '删除失败');
       else { showMsg('msg-works', 'success', '✅ 删除成功'); loadWorks(); }
     }
