@@ -34,7 +34,7 @@
 .bamboo-container {
   position: relative;
   width: 200px;
-  height: 280px;
+  height: 200px;
   margin-bottom: 2rem;
 }
 
@@ -42,12 +42,14 @@
 .bamboo-shaker {
   position: relative;
   width: 100%;
-  height: 240px;
+  height: 180px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
   transform-origin: bottom center;
+  padding: 20px;
 }
 
 /* 摇晃动画 */
@@ -68,44 +70,37 @@
   90% { transform: rotate(-1deg); }
 }
 
-/* 竹签样式 */
+/* 竹签样式 - 使用竹子emoji */
 .bamboo-tube {
-  width: 12px;
-  height: 45px;
-  background: linear-gradient(90deg, #8B7355 0%, #A08060 50%, #8B7355 100%);
-  border-radius: 3px 3px 6px 6px;
-  position: relative;
-  box-shadow: 
-    inset 1px 0 2px rgba(255, 255, 255, 0.2),
-    inset -1px 0 2px rgba(0, 0, 0, 0.2);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
 }
 
+/* 竹签内容通过CSS添加 */
 .bamboo-tube::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background: linear-gradient(90deg, #6B5344 0%, #8B7355 50%, #6B5344 100%);
-  border-radius: 3px 3px 0 0;
+  content: '🎋';
 }
 
 /* 不同竹签的随机角度 */
-.bamboo-tube:nth-child(odd) { transform: rotate(-2deg); }
-.bamboo-tube:nth-child(even) { transform: rotate(1deg); }
-.bamboo-tube:nth-child(3n) { transform: rotate(2deg); }
-.bamboo-tube:nth-child(4n) { height: 50px; }
-.bamboo-tube:nth-child(5n) { height: 42px; }
-.bamboo-tube:nth-child(7n) { transform: rotate(-1deg); }
-.bamboo-tube:nth-child(11n) { transform: rotate(3deg); }
+.bamboo-tube:nth-child(odd) { transform: rotate(-8deg) scale(1); }
+.bamboo-tube:nth-child(even) { transform: rotate(5deg) scale(1.05); }
+.bamboo-tube:nth-child(3n) { transform: rotate(-3deg) scale(0.95); }
+.bamboo-tube:nth-child(4n) { transform: rotate(7deg) scale(1.1); }
+.bamboo-tube:nth-child(5n) { transform: rotate(-5deg) scale(1); }
+.bamboo-tube:nth-child(7n) { transform: rotate(3deg) scale(0.9); }
+.bamboo-tube:nth-child(11n) { transform: rotate(-6deg) scale(1.05); }
 
 /* 竹签筒底座 */
 .bamboo-base {
-  width: 180px;
-  height: 30px;
-  background: linear-gradient(90deg, #5D4E37 0%, #7D6B55 50%, #5D4E37 100%);
-  border-radius: 8px 8px 12px 12px;
+  width: 120px;
+  height: 20px;
+  background: #5D4E37;
+  border-radius: 10px;
   margin: 0 auto;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

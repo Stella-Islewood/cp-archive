@@ -26,6 +26,7 @@ body {
   background: var(--bg-gradient);
   background-attachment: fixed;
   min-height: 100vh;
+  max-width: 100%;
   overflow-x: hidden;
 }
 
@@ -248,13 +249,14 @@ button {
    ======================================== */
 .hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   overflow: hidden;
+  max-width: 100%;
 }
 
 /* 背景纹理 */
@@ -822,22 +824,30 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
-  background: var(--bg-primary);
-  z-index: 999;
+  height: 100vh;
+  background: #FFFFFF;
+  z-index: 9999;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 1rem;
+  gap: 0;
+}
+
+/* LucasMia 主题手机端菜单背景 */
+[data-theme="lucasmia"] .mobile-menu {
+  background: #2D1F2D;
 }
 
 .mobile-menu a {
-  display: block;
-  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   font-size: 1.2rem;
+  line-height: 3rem;
   color: var(--text-primary);
   text-decoration: none;
-  min-height: 44px;
+  min-height: 3rem;
   width: 100%;
   text-align: center;
   transition: background 0.2s ease;
@@ -862,6 +872,8 @@ body {
   /* 基础字体缩小 */
   body {
     font-size: 14px;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   h1, h2, h3 {
@@ -871,6 +883,13 @@ body {
   /* Header */
   .site-header {
     padding: 0.6rem 1rem;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .header-container {
+    max-width: 100%;
+    overflow: visible;
   }
 
   .header-logo {
@@ -897,6 +916,8 @@ body {
 
   /* Container padding 减半 */
   .container {
+    max-width: 100%;
+    overflow-x: hidden;
     padding-left: 1rem;
     padding-right: 1rem;
   }
@@ -904,24 +925,20 @@ body {
   /* Main content */
   .main-content {
     padding-top: 70px;
-  }
-
-  /* 页面标题 */
-  .page-header {
-    padding: 1.5rem 0 1rem;
-  }
-
-  .page-title {
-    font-size: 1.8rem;
-  }
-
-  .page-subtitle {
-    font-size: 0.9rem;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Hero 区域 */
+  .hero {
+    min-height: 100svh;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
   .hero-content {
     padding: 1rem;
+    max-width: 100%;
   }
 
   .hero-eyebrow {
@@ -932,11 +949,25 @@ body {
 
   .hero-title {
     font-size: 2rem;
+    word-break: break-word;
   }
 
   .hero-description {
     font-size: 0.9rem;
     padding: 0 0.5rem;
+  }
+
+  /* 页面标题 */
+  .page-header {
+    padding: 5rem 1rem 1.5rem;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
   }
 
   .hero-buttons {
@@ -1012,31 +1043,76 @@ body {
     font-size: 0.8rem;
   }
 
+  /* 档案页 - 角色卡片 */
+  .archive-section {
+    padding: 1rem 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .character-profile,
+  .character-profile:nth-child(even) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 1rem;
+    margin: 0 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .profile-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 1.8rem;
+  }
+
+  .profile-info-row {
+    justify-content: center;
+  }
+
+  .profile-traits {
+    justify-content: center;
+  }
+
+  .profile-quote {
+    text-align: left;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   /* 时间线 - 单列左对齐 */
   .timeline {
-    padding-left: 1.5rem;
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  .timeline-item {
-    padding-left: 1.5rem;
-    margin-bottom: 2rem;
+  .timeline::before {
+    left: 15px;
+    width: 30px;
   }
 
-  .timeline-item::before {
-    left: 0;
-  }
-
-  .timeline-item:nth-child(even) .timeline-content,
-  .timeline-item:nth-child(odd) .timeline-content {
-    text-align: left;
-    margin-left: 0;
+  .timeline-item,
+  .timeline-item:nth-child(even) {
+    margin-left: 50px;
     margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    justify-content: flex-start;
   }
 
-  .timeline-dot {
-    left: -4px;
-    width: 12px;
-    height: 12px;
+  .timeline-connector {
+    left: 15px;
+  }
+
+  .timeline-content {
+    max-width: 100%;
+    padding: 1rem;
   }
 
   /* 便签墙 */
