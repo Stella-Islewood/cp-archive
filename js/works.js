@@ -13,7 +13,6 @@
   // localStorage 键名
   const FAVORITES_KEY = 'works-favorites';
   const COMMENTS_KEY = 'works-comments';
-  const COMMENT_LIKES_KEY = 'works-comment-likes';
 
   // 缓存的作品数据
   let cachedWorks = [];
@@ -69,11 +68,8 @@
    */
   function init() {
     loadWorksFromSupabase();
-    initLayout();
     bindEvents();
     bindBackToTop();
-    updateFavoriteBadges();
-    updateCommentCounts();
 
     // 检查是否需要滚动到评论区
     const urlParams = new URLSearchParams(window.location.search);
@@ -101,7 +97,7 @@
 
     try {
       const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
-      
+
       const { data, error } = await window.dbClient
         .from('works')
         .select('*')
@@ -126,6 +122,13 @@
     const grid = document.getElementById('worksGrid');
     if (!grid) return;
 
+    // 记录当前页面上已收藏的作品
+    const favorites = getFavorites();
+    const commentCounts = {};
+    cachedWorks.forEach(w => {
+      commentCounts[w.id] = getComments(w.id).length;
+    });
+
     if (cachedWorks.length === 0) {
       grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;grid-column:1/-1;">暂无作品数据</p>';
       return;
@@ -134,10 +137,12 @@
     grid.innerHTML = cachedWorks.map((item) => {
       const typeClass = getTypeClass(item.type);
       const isMusic = item.type === '音乐';
-      
+      const isFav = favorites.includes(item.id);
+      const commentCount = commentCounts[item.id] || 0;
+
       return `
         <article class="work-card ${isMusic ? 'is-music' : ''}" data-category="${typeClass}" data-work-id="${item.id}">
-          <div class="favorite-badge" style="display: none;">❤</div>
+          <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
           ${isMusic ? `
             <div class="vinyl-container">
               <div class="vinyl">
@@ -154,24 +159,21 @@
           <div class="work-info">
             <h3 class="work-title">${escapeHtml(item.title)}</h3>
             <p class="work-author">${escapeHtml(item.author || '未知作者')}</p>
-            <span class="work-tag">${item.type}</span>
+            <span class="work-tag">${escapeHtml(item.type)}</span>
           </div>
           <div class="work-actions">
             <button class="btn-action btn-favorite" data-work-id="${item.id}">
-              <span class="action-icon favorite-icon">♡</span>
-              <span class="action-count favorite-count">0</span>
+              <span class="action-icon favorite-icon">${isFav ? '❤' : '♡'}</span>
+              <span class="action-count favorite-count">${isFav ? '1' : '0'}</span>
             </button>
             <button class="btn-action btn-comment" data-work-id="${item.id}" data-scroll-to-comments="true">
               <span class="action-icon">💬</span>
-              <span class="action-count comment-count">0</span>
+              <span class="action-count comment-count">${commentCount}</span>
             </button>
           </div>
         </article>
       `;
     }).join('');
-
-    // 重新绑定收藏按钮事件
-    bindFavoriteEvents();
   }
 
   /**
@@ -190,85 +192,47 @@
   }
 
   /**
-   * 初始化布局
-   */
-  function initLayout() {
-    const worksGrid = document.getElementById('worksGrid');
-    if (worksGrid) {
-      worksGrid.classList.add('masonry');
-    }
-  }
-
-  /**
-   * 绑定收藏按钮事件
-   */
-  function bindFavoriteEvents() {
-    document.querySelectorAll('.btn-favorite').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const workId = this.dataset.workId;
-        toggleFavorite(workId);
-      });
-    });
-  }
-
-  /**
-   * 绑定事件
+   * 绑定事件（全部使用事件委托）
    */
   function bindEvents() {
-    // Tab 切换
-    const tabBtns = document.querySelectorAll('.works-tabs .tab-btn');
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const category = this.dataset.category;
-        filterWorks(category);
-        
-        tabBtns.forEach(b => {
-          b.classList.remove('active');
-          b.setAttribute('aria-selected', 'false');
-        });
-        this.classList.add('active');
-        this.setAttribute('aria-selected', 'true');
-      });
+    // ===== 事件委托：作品卡片区域 =====
+    const grid = document.getElementById('worksGrid');
+
+    // 卡片点击（排除按钮）—— 进入详情
+    grid.addEventListener('click', function(e) {
+      const card = e.target.closest('.work-card');
+      if (!card) return;
+      // 忽略操作按钮
+      if (e.target.closest('.btn-action')) return;
+      const workId = card.dataset.workId;
+      openWorkDetail(workId);
     });
 
-    // 布局切换
-    const layoutBtns = document.querySelectorAll('.layout-btn');
-    const worksGrid = document.getElementById('worksGrid');
-    layoutBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const layout = this.dataset.layout;
-        worksGrid.classList.remove('masonry', 'grid');
-        worksGrid.classList.add(layout);
-        
-        layoutBtns.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-      });
+    // 收藏按钮
+    grid.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-favorite');
+      if (!btn) return;
+      e.stopPropagation();
+      const workId = btn.dataset.workId;
+      toggleFavorite(workId);
     });
 
-    // 作品卡片点击 - 进入详情页
-    document.querySelectorAll('.work-card').forEach(card => {
-      card.addEventListener('click', function(e) {
-        if (e.target.closest('.btn-action')) return;
-        const workId = this.dataset.workId;
-        openWorkDetail(workId);
-      });
+    // 评论按钮
+    grid.addEventListener('click', function(e) {
+      const btn = e.target.closest('.btn-comment');
+      if (!btn) return;
+      e.stopPropagation();
+      const workId = btn.dataset.workId;
+      openWorkDetail(workId);
+      setTimeout(() => {
+        const commentsSection = document.getElementById('detailComments');
+        if (commentsSection) {
+          commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 400);
     });
 
-    // 留言按钮
-    document.querySelectorAll('.btn-comment').forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const workId = this.dataset.workId;
-        openWorkDetail(workId);
-        setTimeout(() => {
-          const commentsSection = document.getElementById('detailComments');
-          if (commentsSection) {
-            commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 400);
-      });
-    });
+    // ===== 详情视图事件 =====
 
     // 返回按钮
     const backBtn = document.getElementById('btnBack');
@@ -295,14 +259,39 @@
         submitComment();
       });
     }
+
+    // ===== Tab 切换（直接绑定，数量少不需委托） =====
+    document.querySelectorAll('.works-tabs .tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const category = this.dataset.category;
+        filterWorks(category);
+        document.querySelectorAll('.works-tabs .tab-btn').forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-selected', 'false');
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+      });
+    });
+
+    // ===== 布局切换 =====
+    document.querySelectorAll('.layout-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const layout = this.dataset.layout;
+        const worksGrid = document.getElementById('worksGrid');
+        worksGrid.classList.remove('masonry', 'grid');
+        worksGrid.classList.add(layout);
+        document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
   }
 
   /**
    * 筛选作品
    */
   function filterWorks(category) {
-    const cards = document.querySelectorAll('.work-card');
-    cards.forEach(card => {
+    document.querySelectorAll('.work-card').forEach(card => {
       if (category === 'all' || card.dataset.category === category) {
         card.style.display = '';
       } else {
@@ -326,41 +315,39 @@
     window.history.pushState({}, '', url);
 
     // 隐藏列表，显示详情
-    const listView = document.getElementById('worksListView');
-    const detailView = document.getElementById('worksDetailView');
-    
-    listView.classList.add('hidden');
-    detailView.classList.remove('hidden');
+    document.getElementById('worksListView').classList.add('hidden');
+    document.getElementById('worksDetailView').classList.remove('hidden');
 
-    // 更新详情页内容
+    // 更新封面
     const coverPlaceholder = document.getElementById('detailCoverPlaceholder');
-    coverPlaceholder.innerHTML = getCoverSVG(work.type);
-    coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${getTypeClass(work.type)}-cover`;
-
-    document.getElementById('detailTitle').textContent = work.title || '无标题';
-    document.getElementById('detailAuthor').textContent = work.author || '未知作者';
-    document.getElementById('detailTag').textContent = work.type;
-    document.getElementById('detailDate').textContent = formatDate(work.created_at);
-
-    // 更新内容
-    const detailContent = document.getElementById('detailContent');
-    if (detailContent) {
-      if (work.content && work.content.trim() !== '') {
-        // 判断是否是 URL
-        if (isImageUrl(work.content)) {
-          detailContent.innerHTML = `<img src="${escapeHtml(work.content)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;">`;
-        } else {
-          detailContent.innerHTML = `<p style="white-space:pre-wrap;">${escapeHtml(work.content)}</p>`;
-        }
-      } else {
-        detailContent.innerHTML = '<p style="color:#888;">暂无内容</p>';
-      }
+    if (coverPlaceholder) {
+      coverPlaceholder.innerHTML = getCoverSVG(work.type);
+      coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${getTypeClass(work.type)}-cover`;
     }
 
-    // 更新收藏按钮状态
+    // 更新基本信息
+    const detailTitle = document.getElementById('detailTitle');
+    if (detailTitle) detailTitle.textContent = work.title || '无标题';
+
+    const detailAuthor = document.getElementById('detailAuthor');
+    if (detailAuthor) detailAuthor.textContent = '作者：' + (work.author || '未知作者');
+
+    const detailTag = document.getElementById('detailTag');
+    if (detailTag) detailTag.textContent = work.type || '';
+
+    const detailDate = document.getElementById('detailDate');
+    if (detailDate) detailDate.textContent = work.created_at ? formatDate(work.created_at) : '';
+
+    // 更新作品内容区
+    const detailContent = document.getElementById('detailContent');
+    if (detailContent) {
+      detailContent.innerHTML = buildDetailContent(work);
+    }
+
+    // 更新收藏按钮
     updateDetailFavoriteButton();
 
-    // 渲染留言列表
+    // 渲染评论
     renderCommentsList();
     updateCommentsCount();
 
@@ -369,11 +356,55 @@
   }
 
   /**
+   * 构建详情页内容 HTML
+   */
+  function buildDetailContent(work) {
+    const parts = [];
+
+    // 1. image_url 图片（优先显示）
+    if (work.image_url && work.image_url.trim() !== '') {
+      parts.push(`<img src="${escapeHtml(work.image_url)}" alt="${escapeHtml(work.title)}" class="detail-content-img" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
+    }
+
+    // 2. content 内容
+    const content = work.content && work.content.trim() !== '' ? work.content.trim() : '';
+
+    if (content !== '') {
+      if (isImageUrl(content)) {
+        parts.push(`<img src="${escapeHtml(content)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
+      } else if (isExternalLink(content)) {
+        parts.push(`<a href="${escapeHtml(content)}" target="_blank" rel="noopener noreferrer" class="detail-content-link">🔗 ${escapeHtml(content)}</a>`);
+      } else {
+        parts.push(`<div class="detail-content-text" style="white-space:pre-wrap;line-height:1.8;">${escapeHtml(content)}</div>`);
+      }
+    }
+
+    if (parts.length === 0) {
+      return '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    }
+
+    return parts.join('');
+  }
+
+  /**
    * 判断是否是图片 URL
    */
   function isImageUrl(str) {
     if (!str) return false;
     return /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(str);
+  }
+
+  /**
+   * 判断是否是外部链接
+   */
+  function isExternalLink(str) {
+    if (!str) return false;
+    try {
+      const url = new URL(str);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -390,11 +421,8 @@
     window.history.pushState({}, '', url);
 
     // 隐藏详情，显示列表
-    const listView = document.getElementById('worksListView');
-    const detailView = document.getElementById('worksDetailView');
-    
-    detailView.classList.add('hidden');
-    listView.classList.remove('hidden');
+    document.getElementById('worksDetailView').classList.add('hidden');
+    document.getElementById('worksListView').classList.remove('hidden');
   }
 
   /**
@@ -403,18 +431,19 @@
   function updateDetailFavoriteButton() {
     if (!currentWorkId) return;
     const btn = document.getElementById('btnDetailFavorite');
+    if (!btn) return;
     const icon = btn.querySelector('.favorite-icon-large');
     const text = btn.querySelector('.favorite-text');
     const favorites = getFavorites();
 
     if (favorites.includes(currentWorkId)) {
       btn.classList.add('liked');
-      icon.textContent = '❤';
-      text.textContent = '已收藏';
+      if (icon) icon.textContent = '❤';
+      if (text) text.textContent = '已收藏';
     } else {
       btn.classList.remove('liked');
-      icon.textContent = '♡';
-      text.textContent = '收藏';
+      if (icon) icon.textContent = '♡';
+      if (text) text.textContent = '收藏';
     }
   }
 
@@ -423,26 +452,39 @@
    */
   function toggleFavorite(workId) {
     const favorites = getFavorites();
-    const btn = document.querySelector(`.btn-favorite[data-work-id="${workId}"]`);
-    const badge = document.querySelector(`.work-card[data-work-id="${workId}"] .favorite-badge`);
-    const icon = btn.querySelector('.favorite-icon');
-    const count = btn.querySelector('.favorite-count');
-    
-    if (favorites.includes(workId)) {
-      const index = favorites.indexOf(workId);
-      favorites.splice(index, 1);
-      btn.classList.remove('liked');
-      icon.textContent = '♡';
-      badge.classList.remove('show');
+    const isNowFav = favorites.includes(workId);
+
+    if (isNowFav) {
+      const idx = favorites.indexOf(workId);
+      favorites.splice(idx, 1);
     } else {
       favorites.push(workId);
-      btn.classList.add('liked');
-      icon.textContent = '❤';
-      badge.classList.add('show');
     }
-    
+
     saveFavorites(favorites);
-    count.textContent = favorites.includes(workId) ? '1' : '0';
+
+    // 更新列表卡片
+    const card = document.querySelector(`.work-card[data-work-id="${workId}"]`);
+    if (card) {
+      const btn = card.querySelector('.btn-favorite');
+      const badge = card.querySelector('.favorite-badge');
+      const icon = btn.querySelector('.favorite-icon');
+      const count = btn.querySelector('.favorite-count');
+
+      if (!isNowFav) {
+        btn.classList.add('liked');
+        icon.textContent = '❤';
+        count.textContent = '1';
+        badge.style.display = '';
+        badge.classList.add('show');
+      } else {
+        btn.classList.remove('liked');
+        icon.textContent = '♡';
+        count.textContent = '0';
+        badge.style.display = 'none';
+        badge.classList.remove('show');
+      }
+    }
   }
 
   /**
@@ -461,28 +503,7 @@
   }
 
   /**
-   * 更新收藏标记显示
-   */
-  function updateFavoriteBadges() {
-    const favorites = getFavorites();
-    document.querySelectorAll('.work-card').forEach(card => {
-      const workId = card.dataset.workId;
-      const btn = card.querySelector('.btn-favorite');
-      const badge = card.querySelector('.favorite-badge');
-      const icon = btn.querySelector('.favorite-icon');
-      const count = btn.querySelector('.favorite-count');
-      
-      if (favorites.includes(workId)) {
-        btn.classList.add('liked');
-        icon.textContent = '❤';
-        badge.classList.add('show');
-        count.textContent = '1';
-      }
-    });
-  }
-
-  /**
-   * 获取留言列表
+   * 获取留言列表（按作品 id 存储）
    */
   function getComments(workId) {
     const stored = localStorage.getItem(`${COMMENTS_KEY}-${workId}`);
@@ -497,29 +518,19 @@
   }
 
   /**
-   * 更新留言数量显示
-   */
-  function updateCommentCounts() {
-    document.querySelectorAll('.work-card').forEach(card => {
-      const workId = card.dataset.workId;
-      const comments = getComments(workId);
-      const count = card.querySelector('.comment-count');
-      if (count) {
-        count.textContent = comments.length;
-      }
-    });
-  }
-
-  /**
-   * 更新评论数量
+   * 更新评论数量（详情页标题 + 列表卡片）
    */
   function updateCommentsCount() {
     if (!currentWorkId) return;
-    const comments = getComments(currentWorkId);
+    const count = getComments(currentWorkId).length;
+
+    // 详情页标题
     const countEl = document.getElementById('commentsCount');
-    if (countEl) {
-      countEl.textContent = `(${comments.length})`;
-    }
+    if (countEl) countEl.textContent = `(${count})`;
+
+    // 列表卡片
+    const card = document.querySelector(`.work-card[data-work-id="${currentWorkId}"] .comment-count`);
+    if (card) card.textContent = count;
   }
 
   /**
@@ -528,42 +539,26 @@
   function renderCommentsList() {
     if (!currentWorkId) return;
     const list = document.getElementById('commentsList');
+    if (!list) return;
     const comments = getComments(currentWorkId);
-    const commentLikes = getCommentLikes();
-    
+
     if (comments.length === 0) {
       list.innerHTML = '<p class="comments-list-empty">还没有留言，快来抢沙发吧~</p>';
       return;
     }
-    
-    list.innerHTML = comments.map((comment) => {
-      const likes = commentLikes[currentWorkId]?.[comment.id] || 0;
-      return `
-        <div class="comment-item" data-comment-id="${comment.id}">
-          <div class="comment-avatar">${(comment.nickname || '?').charAt(0).toUpperCase()}</div>
-          <div class="comment-body">
-            <div class="comment-header">
-              <span class="comment-nickname">${escapeHtml(comment.nickname)}</span>
-              <span class="comment-time">${comment.time}</span>
-            </div>
-            <p class="comment-text">${escapeHtml(comment.content)}</p>
-            <button class="btn-like-comment" data-work-id="${currentWorkId}" data-comment-id="${comment.id}">
-              <span>❤</span>
-              <span class="like-count">${likes}</span>
-            </button>
-          </div>
-        </div>
-      `;
-    }).join('');
 
-    // 绑定同感按钮
-    list.querySelectorAll('.btn-like-comment').forEach(btn => {
-      btn.addEventListener('click', function() {
-        const workId = this.dataset.workId;
-        const commentId = this.dataset.commentId;
-        toggleCommentLike(workId, commentId);
-      });
-    });
+    list.innerHTML = comments.map(comment => `
+      <div class="comment-item" data-comment-id="${comment.id}">
+        <div class="comment-avatar">${(comment.nickname || '?').charAt(0).toUpperCase()}</div>
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-nickname">${escapeHtml(comment.nickname)}</span>
+            <span class="comment-time">${comment.time || ''}</span>
+          </div>
+          <p class="comment-text">${escapeHtml(comment.content)}</p>
+        </div>
+      </div>
+    `).join('');
   }
 
   /**
@@ -572,11 +567,12 @@
   function submitComment() {
     if (!currentWorkId) return;
     const form = document.getElementById('commentsForm');
+    if (!form) return;
     const nickname = form.querySelector('.comment-nickname').value.trim();
     const content = form.querySelector('.comment-content').value.trim();
-    
+
     if (!nickname || !content) return;
-    
+
     const comments = getComments(currentWorkId);
     comments.push({
       id: 'comment-' + Date.now(),
@@ -584,47 +580,11 @@
       content: content,
       time: formatTime(new Date())
     });
-    
+
     saveComments(currentWorkId, comments);
-    updateCommentCounts();
     updateCommentsCount();
     renderCommentsList();
     form.reset();
-  }
-
-  /**
-   * 获取留言点赞数据
-   */
-  function getCommentLikes() {
-    const stored = localStorage.getItem(COMMENT_LIKES_KEY);
-    return stored ? JSON.parse(stored) : {};
-  }
-
-  /**
-   * 保存留言点赞数据
-   */
-  function saveCommentLikes(data) {
-    localStorage.setItem(COMMENT_LIKES_KEY, JSON.stringify(data));
-  }
-
-  /**
-   * 切换留言同感
-   */
-  function toggleCommentLike(workId, commentId) {
-    const likes = getCommentLikes();
-    if (!likes[workId]) likes[workId] = {};
-    
-    if (likes[workId][commentId]) {
-      likes[workId][commentId]--;
-      if (likes[workId][commentId] <= 0) {
-        delete likes[workId][commentId];
-      }
-    } else {
-      likes[workId][commentId] = 1;
-    }
-    
-    saveCommentLikes(likes);
-    renderCommentsList();
   }
 
   /**
@@ -638,7 +598,7 @@
   }
 
   /**
-   * 格式化日期时间
+   * 格式化时间
    */
   function formatTime(date) {
     const y = date.getFullYear();
@@ -667,23 +627,16 @@
     if (!btn) return;
 
     window.addEventListener('scroll', function() {
-      if (window.scrollY > 300) {
-        btn.classList.add('visible');
-      } else {
-        btn.classList.remove('visible');
-      }
+      btn.classList.toggle('visible', window.scrollY > 300);
     });
 
     btn.addEventListener('click', function() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
-  // 监听主题切换
-  window.addEventListener('themechange', function(e) {
+  // 监听主题切换，重新加载数据
+  window.addEventListener('themechange', function() {
     loadWorksFromSupabase();
   });
 
