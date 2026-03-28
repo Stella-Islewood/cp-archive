@@ -127,123 +127,34 @@
       return buildCardBodyDefault(item);
     }
 
-    // 音乐创作：显示播放按钮 + 歌曲信息 + 链接
+    // 音乐创作：音符 emoji + 歌曲信息 + 收听按钮
     if (type === '音乐') {
       const mediaUrl = img || content;
-      const platform = getMediaPlatform(mediaUrl);
-      let playerHtml = '';
-
-      if (platform === 'music') {
-        const displayUrl = mediaUrl.length > 60 ? mediaUrl.substring(0, 60) + '…' : mediaUrl;
-        playerHtml = `
-          <div class="work-card-body work-card-body-music">
-            <div class="music-icon-wrap">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 18V5l12-2v13"/>
-                <circle cx="6" cy="18" r="3"/>
-                <circle cx="18" cy="16" r="3"/>
-              </svg>
-            </div>
-            <div class="music-info">
-              <span class="music-song">${escapeHtml(item.title)}</span>
-              <span class="music-author">${escapeHtml(item.author || '')}</span>
-            </div>
-            ${isExternalLink(mediaUrl) ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn" title="前往播放">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              播放
-            </a>` : ''}
-          </div>`;
-      } else if (platform === 'bilibili') {
-        playerHtml = `
-          <div class="work-card-body work-card-body-music">
-            <div class="music-icon-wrap">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 18V5l12-2v13"/>
-                <circle cx="6" cy="18" r="3"/>
-                <circle cx="18" cy="16" r="3"/>
-              </svg>
-            </div>
-            <div class="music-info">
-              <span class="music-song">${escapeHtml(item.title)}</span>
-              <span class="music-author">${escapeHtml(item.author || '')}</span>
-            </div>
-            <a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn" title="B站">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              B站
-            </a>
-          </div>`;
-      } else if (isExternalLink(mediaUrl)) {
-        playerHtml = `
-          <div class="work-card-body work-card-body-music">
-            <div class="music-icon-wrap">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 18V5l12-2v13"/>
-                <circle cx="6" cy="18" r="3"/>
-                <circle cx="18" cy="16" r="3"/>
-              </svg>
-            </div>
-            <div class="music-info">
-              <span class="music-song">${escapeHtml(item.title)}</span>
-              <span class="music-author">${escapeHtml(item.author || '')}</span>
-            </div>
-            <a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              播放
-            </a>
-          </div>`;
-      } else {
-        return buildCardBodyDefault(item);
-      }
-      return playerHtml;
+      const hasLink = isExternalLink(mediaUrl);
+      return `
+        <div class="work-card-body work-card-body-music">
+          <span class="music-emoji">🎵</span>
+          <div class="music-info">
+            <span class="music-song">${escapeHtml(item.title)}</span>
+            <span class="music-author">${escapeHtml(item.author || '')}</span>
+          </div>
+          ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn">🎵 点击收听</a>` : ''}
+        </div>`;
     }
 
-    // 视频创作
+    // 视频创作：emoji + 视频信息 + 观看按钮
     if (type === '视频') {
       const mediaUrl = img || content;
-
-      if (platform === 'bilibili' || platform === 'youtube') {
-        const platformName = platform === 'bilibili' ? 'B站' : 'YouTube';
-        const platformLabel = platform === 'bilibili' ? 'B站' : 'YT';
-        return `
-          <div class="work-card-body work-card-body-video">
-            <div class="video-cover-placeholder video-cover-card">
-              <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polygon points="5 3 19 12 5 21 5 3"/>
-              </svg>
-              <span>${platformName} 视频</span>
-            </div>
-            ${isExternalLink(mediaUrl) ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="video-link-btn" title="${platformName}">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              ${platformLabel}
-            </a>` : ''}
-          </div>`;
-      }
-
-      if (/\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(mediaUrl)) {
-        return `
-          <div class="work-card-body work-card-body-video">
-            <video src="${escapeHtml(mediaUrl)}" class="card-body-video" preload="none" controls></video>
-          </div>`;
-      }
-
-      if (isImageUrl(mediaUrl)) {
-        return `
-          <div class="work-card-body work-card-body-image">
-            <img src="${escapeHtml(mediaUrl)}" alt="${escapeHtml(item.title)}" class="card-body-img" loading="lazy">
-          </div>`;
-      }
-
-      return buildCardBodyDefault(item);
+      const hasLink = isExternalLink(mediaUrl);
+      return `
+        <div class="work-card-body work-card-body-video">
+          <span class="video-emoji">🎬</span>
+          <div class="video-info">
+            <span class="video-title">${escapeHtml(item.title)}</span>
+            <span class="video-author">${escapeHtml(item.author || '')}</span>
+          </div>
+          ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="video-link-btn">▶ 点击观看</a>` : ''}
+        </div>`;
     }
 
     // 默认：显示封面占位图
@@ -264,19 +175,23 @@
   }
 
   /**
-   * 构建文字卡片主体
+   * 构建文字卡片主体（纯文字，无封面）
    */
   function buildTextCardBody(item) {
     const content = (item.content || '').trim();
-    const isLong = content.length > 200;
-    const preview = content.substring(0, 200);
+    const previewLength = 150;
+    const isLong = content.length > previewLength;
+    const preview = content.substring(0, previewLength);
     const escaped = escapeHtml(content);
     const escapedPreview = escapeHtml(preview);
 
     return `
-      <div class="work-card-body work-card-body-text" data-work-id="${item.id}" data-full="${encodeURIComponent(escaped)}">
-        <p class="text-body-preview" data-full="${encodeURIComponent(escaped)}">${escapedPreview}${isLong ? '<span class="text-ellipsis">…</span>' : ''}</p>
-        ${isLong ? '<button class="text-expand-btn" type="button">展开</button>' : ''}
+      <div class="work-card-body work-card-body-text">
+        <span class="text-card-tag">${escapeHtml(item.type)}</span>
+        <h3 class="text-card-title">${escapeHtml(item.title)}</h3>
+        <p class="text-card-author">${escapeHtml(item.author || '未知作者')}</p>
+        <p class="text-card-preview">${escapedPreview}${isLong ? '…' : ''}</p>
+        ${isLong ? '<button class="text-readmore-btn" type="button">阅读更多 ▾</button>' : ''}
       </div>`;
   }
 
@@ -309,6 +224,27 @@
         ? buildTextCardBody(item)
         : buildCardBody(item);
 
+      if (isText) {
+        // 文字卡片：自带所有信息（标签/标题/作者/预览），底部放操作按钮
+        return `
+          <article class="work-card work-card-text" data-category="${typeClass}" data-work-id="${item.id}">
+            <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
+            ${body}
+            <div class="work-actions">
+              <button class="btn-action btn-favorite" data-work-id="${item.id}">
+                <span class="action-icon favorite-icon">${isFav ? '❤' : '♡'}</span>
+                <span class="action-count favorite-count">${isFav ? '1' : '0'}</span>
+              </button>
+              <button class="btn-action btn-comment" data-work-id="${item.id}" data-scroll-to-comments="true">
+                <span class="action-icon">💬</span>
+                <span class="action-count comment-count">${commentCount}</span>
+              </button>
+            </div>
+          </article>
+        `;
+      }
+
+      // 其他卡片：保留原有 info 区结构
       return `
         <article class="work-card ${isText ? 'work-card-text' : ''}" data-category="${typeClass}" data-work-id="${item.id}">
           <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
@@ -397,35 +333,36 @@
   function bindEvents() {
     const grid = document.getElementById('worksGrid');
 
-    // 文字卡片：展开/收起内容
+    // ========== 文字卡片：阅读器弹窗 ==========
     grid.addEventListener('click', function(e) {
-      const expandBtn = e.target.closest('.text-expand-btn');
-      if (expandBtn) {
+      // 阅读更多按钮
+      const readmoreBtn = e.target.closest('.text-readmore-btn');
+      if (readmoreBtn) {
         e.stopPropagation();
-        const body = expandBtn.closest('.work-card-body-text');
-        toggleTextExpand(body, expandBtn);
+        const card = readmoreBtn.closest('.work-card');
+        if (card) openTextReader(card.dataset.workId);
         return;
       }
 
-      const collapseBtn = e.target.closest('.text-collapse-btn');
-      if (collapseBtn) {
+      // 文字卡片整体点击（不在按钮/标签上）→ 展开阅读器
+      const textBody = e.target.closest('.work-card-body-text');
+      if (textBody) {
         e.stopPropagation();
-        const body = collapseBtn.closest('.work-card-body-text');
-        const workId = body.dataset.workId;
-        collapseText(body, workId);
+        const card = textBody.closest('.work-card');
+        if (card) openTextReader(card.dataset.workId);
         return;
       }
     });
 
-    // 卡片主体点击：图片/视频卡片 → 进入详情
+    // ========== 卡片主体点击：图片/视频/音乐卡片 → 进入详情 ==========
     grid.addEventListener('click', function(e) {
       const cardBody = e.target.closest('.work-card-body');
       if (!cardBody) return;
-      // 忽略链接、按钮、视频控制
+      // 忽略链接、按钮、视频
       if (e.target.closest('a, button, video')) return;
       const card = cardBody.closest('.work-card');
       if (!card) return;
-      // 忽略文字卡片（文字卡片由 action 按钮或 info 区触发）
+      // 文字卡片走阅读器
       if (card.classList.contains('work-card-text')) return;
       openWorkDetail(card.dataset.workId);
     });
@@ -448,16 +385,6 @@
         const section = document.getElementById('detailComments');
         if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 400);
-    });
-
-    // 文字卡片 info 区点击 → 进入详情
-    grid.addEventListener('click', function(e) {
-      const info = e.target.closest('.work-info');
-      if (!info) return;
-      const card = info.closest('.work-card');
-      if (!card || !card.classList.contains('work-card-text')) return;
-      if (e.target.closest('.work-tag')) return; // 忽略标签点击
-      openWorkDetail(card.dataset.workId);
     });
 
     // Tab 切换
@@ -505,38 +432,111 @@
     if (commentsForm) commentsForm.addEventListener('submit', submitComment);
   }
 
-  /**
-   * 切换文字卡片展开/收起
-   */
-  function toggleTextExpand(body, btn) {
-    const workId = body.dataset.workId;
-    const full = decodeURIComponent(body.dataset.full);
-    const preview = decodeURIComponent(body.querySelector('.text-body-preview').dataset.full).substring(0, 200);
-    const isExpanded = body.classList.contains('is-expanded');
+  // ========== 文字阅读器 ==========
 
-    if (isExpanded) {
-      // 收起
-      body.classList.remove('is-expanded');
-      body.querySelector('.text-body-preview').textContent = preview + '…';
-      btn.textContent = '展开';
-    } else {
-      // 展开
-      body.classList.add('is-expanded');
-      body.querySelector('.text-body-preview').innerHTML = escapeHtml(full).replace(/\n/g, '<br>');
-      btn.textContent = '收起';
+  /**
+   * 打开文字阅读器弹窗
+   */
+  function openTextReader(workId) {
+    const work = cachedWorks.find(w => w.id === workId);
+    if (!work) return;
+
+    const overlay = document.getElementById('textReaderOverlay');
+    const content = work.content || '';
+
+    document.getElementById('readerTag').textContent = work.type || '';
+    document.getElementById('readerTitle').textContent = work.title || '无标题';
+    document.getElementById('readerAuthor').textContent = work.author ? `文 / ${work.author}` : '未知作者';
+    document.getElementById('readerContent').innerHTML = formatTextContent(content);
+
+    // 收藏状态
+    const isFav = getFavorites().includes(workId);
+    const favBtn = document.getElementById('readerFavoriteBtn');
+    const favIcon = favBtn.querySelector('.reader-fav-icon');
+    favBtn.classList.toggle('liked', isFav);
+    if (favIcon) favIcon.textContent = isFav ? '❤' : '♡';
+
+    // 事件绑定（一次性）
+    const newFavBtn = favBtn.cloneNode(true);
+    favBtn.parentNode.replaceChild(newFavBtn, favBtn);
+    newFavBtn.addEventListener('click', function() {
+      toggleFavorite(workId);
+      const nowFav = getFavorites().includes(workId);
+      newFavBtn.classList.toggle('liked', nowFav);
+      const icon = newFavBtn.querySelector('.reader-fav-icon');
+      if (icon) icon.textContent = nowFav ? '❤' : '♡';
+      // 同步更新卡片上的收藏按钮
+      syncFavoriteButton(workId, nowFav);
+    });
+
+    const newCommentBtn = document.getElementById('readerCommentBtn').cloneNode(true);
+    document.getElementById('readerCommentBtn').parentNode.replaceChild(newCommentBtn, document.getElementById('readerCommentBtn'));
+    newCommentBtn.addEventListener('click', function() {
+      closeTextReader();
+      openWorkDetail(workId);
+      setTimeout(() => {
+        const section = document.getElementById('detailComments');
+        if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    });
+
+    // 关闭按钮
+    const closeBtn = document.getElementById('readerClose');
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    newCloseBtn.addEventListener('click', closeTextReader);
+
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeTextReader();
+    });
+
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  /**
+   * 关闭文字阅读器弹窗
+   */
+  function closeTextReader() {
+    const overlay = document.getElementById('textReaderOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  /**
+   * 将纯文本内容格式化为适合阅读的 HTML（分段）
+   */
+  function formatTextContent(text) {
+    if (!text) return '<p style="color:#888;text-align:center;">暂无内容</p>';
+    const escaped = escapeHtml(text);
+    const paragraphs = escaped.split(/\n{2,}/);
+    return paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+  }
+
+  /**
+   * 同步收藏按钮状态到卡片
+   */
+  function syncFavoriteButton(workId, isFav) {
+    const card = document.querySelector(`.work-card[data-work-id="${workId}"]`);
+    if (!card) return;
+    const btn = card.querySelector('.btn-favorite');
+    const icon = btn.querySelector('.favorite-icon');
+    const count = btn.querySelector('.favorite-count');
+    const badge = card.querySelector('.favorite-badge');
+
+    btn.classList.toggle('liked', isFav);
+    if (icon) icon.textContent = isFav ? '❤' : '♡';
+    if (count) count.textContent = isFav ? '1' : '0';
+    if (badge) {
+      badge.style.display = isFav ? '' : 'none';
+      badge.classList.toggle('show', isFav);
     }
   }
 
-  /**
-   * 收起文字卡片
-   */
-  function collapseText(body, workId) {
-    const preview = decodeURIComponent(body.dataset.full).substring(0, 200);
-    body.classList.remove('is-expanded');
-    body.querySelector('.text-body-preview').innerHTML = escapeHtml(preview) + '<span class="text-ellipsis">…</span>';
-    const btn = body.querySelector('.text-expand-btn');
-    if (btn) btn.textContent = '展开';
-  }
+  // 监听 ESC 关闭阅读器
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeTextReader();
+  });
 
   /**
    * 筛选作品

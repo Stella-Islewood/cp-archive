@@ -187,6 +187,32 @@
         </article>
       </div>
 
+      <!-- ========== 文字阅读器弹窗 ========== -->
+      <div class="text-reader-overlay" id="textReaderOverlay">
+        <div class="text-reader-modal" id="textReaderModal">
+          <div class="text-reader-header">
+            <div class="text-reader-meta">
+              <span class="text-reader-tag" id="readerTag"></span>
+              <h2 class="text-reader-title" id="readerTitle"></h2>
+              <p class="text-reader-author" id="readerAuthor"></p>
+            </div>
+            <button class="text-reader-close" id="readerClose" aria-label="关闭">✕</button>
+          </div>
+          <div class="text-reader-body">
+            <div class="text-reader-content" id="readerContent"></div>
+          </div>
+          <div class="text-reader-footer">
+            <button class="reader-action-btn" id="readerFavoriteBtn">
+              <span class="reader-fav-icon">♡</span>
+              <span>收藏</span>
+            </button>
+            <button class="reader-action-btn" id="readerCommentBtn">
+              💬 留言
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
