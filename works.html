@@ -31,6 +31,32 @@
           <span class="site-name">LionMio</span>
         </span>
       </div>
+
+      <!-- 汉堡菜单按钮 -->
+      <button class="hamburger" id="hamburger" aria-label="打开菜单" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
+      <!-- 全屏导航菜单 -->
+      <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+      <nav class="mobile-nav" id="mobileNav" role="navigation" aria-label="移动端导航">
+        <button class="mobile-nav-close" id="mobileNavClose" aria-label="关闭菜单">
+          <span class="close-icon">×</span>
+        </button>
+        <ul class="mobile-nav-list">
+          <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+          <li class="nav-item"><a href="archive.html" class="nav-link">档案</a></li>
+          <li class="nav-item"><a href="timeline.html" class="nav-link">时间线</a></li>
+          <li class="nav-item"><a href="commission.html" class="nav-link">约稿</a></li>
+          <li class="nav-item"><a href="works.html" class="nav-link active">创作</a></li>
+          <li class="nav-item"><a href="guestbook.html" class="nav-link">留言板</a></li>
+          <li class="nav-item"><a href="suggestion.html" class="nav-link">建议箱</a></li>
+          <li class="nav-item"><a href="fortune.html" class="nav-link">运势</a></li>
+        </ul>
+      </nav>
+
       <nav class="main-nav" role="navigation" aria-label="主导航">
         <ul class="nav-list">
           <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
@@ -306,5 +332,6 @@
   <script src="js/petals.js"></script>
   <script src="js/music-player.js"></script>
   <script src="js/works.js"></script>
+  <script src="js/mobile-nav.js"></script>
 </body>
 </html>
