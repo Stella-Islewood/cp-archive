@@ -9,9 +9,9 @@
   'use strict';
 
   // Supabase 配置
-  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.window.sb.co';
+  const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-  window.sb = window.window.sb.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // localStorage 键名
   const FAVORITES_KEY = 'works-favorites';
@@ -105,7 +105,7 @@
     try {
       const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
       
-      const { data, error } = await window.sb
+      const { data, error } = await dbClient
         .from('works')
         .select('*')
         .eq('archive_id', theme)
