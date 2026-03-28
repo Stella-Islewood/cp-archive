@@ -1,185 +1,216 @@
 /**
- * ========================================
  * CP同人档案馆 - CP数据管理系统
- * 统一管理所有CP相关数据
- * ========================================
+ * 从 data/works.json 读取数据
  */
 
-window.CPData = {
-  // 主题常量
-  THEMES: {
-    LIONMIO: 'lionmio',
-    LUCASMIA: 'lucasmia'
-  },
+(function() {
+  "use strict";
 
-  // CP 配置
-  cps: {
-    lionmio: {
-      id: 'lionmio',
-      name: 'LionMio',
-      tagline: '冰与光的永恒羁绊',
-      heroTitle: { lion: 'Lion', mio: 'Mio' },
-      logoInitials: 'LM',
-      // 角色数据
-      characters: [
-        {
-          id: 'lion',
-          name: 'Lion',
-          initial: 'L',
-          avatarClass: 'lionmio-avatar',
-          traits: ['冷静', '守护', '深邃']
-        },
-        {
-          id: 'mio',
-          name: 'Mio',
-          initial: 'M',
-          avatarClass: 'lucasmia-avatar',
-          traits: ['温柔', '细腻', '明亮']
-        }
-      ],
-      // 时间线数据
-      timeline: [
-        {
-          date: '2024.06.15',
-          title: '第一次相遇',
-          content: '那是一个普通的夏日午后，冰与火在命运的安排下相遇了。',
-          likes: 42
-        },
-        {
-          date: '2024.09.21',
-          title: '双生契约',
-          content: '在那个满月之夜，他们交换了彼此的信物。',
-          likes: 128
-        },
-        {
-          date: '2026.03.27',
-          title: '档案馆开馆',
-          content: '经过漫长的筹备，CP同人档案馆终于正式开馆。',
-          likes: 256
-        }
-      ],
-      // 运势签文
-      fortunes: [
-        { rank: '大吉', text: '今日与TA心灵相通，所思皆同频' },
-        { rank: '大吉', text: '共振值爆表，宜重温最爱的名场面' },
-        { rank: '大吉', text: '命运之线紧紧相连，今日诸事皆顺' },
-        { rank: '吉', text: '今日适合创作关于他们的故事' },
-        { rank: '吉', text: '翻开旧存档，会发现被遗忘的感动' },
-        { rank: '吉', text: '今日与同好相遇，缘分不浅' },
-        { rank: '吉', text: 'TA在某处也想着你所想的事' },
-        { rank: '中吉', text: '平静之日，适合细细品味细节' },
-        { rank: '中吉', text: '不必心急，他们的故事还很长' },
-        { rank: '中吉', text: '今日宜安静陪伴，无需言语' },
-        { rank: '中吉', text: '缘分在积累，共鸣在生长' },
-        { rank: '小吉', text: '今日缘分稍淡，但羁绊永在' },
-        { rank: '小吉', text: '风平浪静，是为了更大的共鸣' },
-        { rank: '小吉', text: '今日适合整理收藏，回顾来时路' },
-        { rank: '末吉', text: '即使平淡，也是他们故事的一部分' },
-        { rank: '末吉', text: '静待时机，最美的相遇从不缺席' },
-        { rank: '末吉', text: '今日能量稍弱，听一首他们的歌吧' },
-        { rank: '末吉', text: '低潮是序章，高光在后面等着' },
-        { rank: '吉', text: '今日适合给喜欢的同人作品点一个赞' },
-        { rank: '大吉', text: '羁绊穿越时间，今日尤为闪耀' }
-      ]
+  var THEMES = {
+    LIONMIO: "lionmio",
+    LUCASMIA: "lucasmia"
+  };
+
+  var DEFAULT_CHARACTERS = {
+    lion: {
+      id: "lion",
+      name: "Lion",
+      initial: "L",
+      tagline: "冰之继承者",
+      avatarClass: "lionmio-avatar",
+      traits: ["冷静", "守护", "深邃"],
+      birthday: "01-15",
+      height: "181cm",
+      element: "冰",
+      description: "冰蓝主题的代表，冰之继承者",
+      quote: "我会一直在这里，直到永远。",
+      relationship: "彼此的唯一",
+      avatar: "images/characters/lion.jpg"
     },
-    lucasmia: {
-      id: 'lucasmia',
-      name: 'LucasMia',
-      tagline: '火与暗的浪漫邂逅',
-      heroTitle: { lion: 'Lucas', mio: 'Mia' },
-      logoInitials: 'LM',
-      // 角色数据
-      characters: [
-        {
-          id: 'lucas',
-          name: 'Lucas',
-          initial: 'L',
-          avatarClass: 'lucasmia-avatar',
-          traits: ['热情', '开拓', '温暖']
-        },
-        {
-          id: 'mia',
-          name: 'Mia',
-          initial: 'M',
-          avatarClass: 'lionmio-avatar',
-          traits: ['神秘', '守望', '浪漫']
-        }
-      ],
-      // 时间线数据
-      timeline: [
-        {
-          date: '2024.08.22',
-          title: '命运的相遇',
-          content: '在那个玫瑰盛开的夜晚，两道身影在人群中相遇。',
-          likes: 88
-        },
-        {
-          date: '2024.11.11',
-          title: '心动时刻',
-          content: '不经意的对视，让整个世界都安静了下来。',
-          likes: 156
-        },
-        {
-          date: '2026.03.27',
-          title: '档案馆开馆',
-          content: '我们的小天地终于建成，这里收藏着关于我们的所有回忆。',
-          likes: 299
-        }
-      ],
-      // 运势签文
-      fortunes: [
-        { rank: '大吉', text: '今日与TA心灵相通，所思皆同频' },
-        { rank: '大吉', text: '共振值爆表，宜重温最爱的名场面' },
-        { rank: '大吉', text: '命运之线紧紧相连，今日诸事皆顺' },
-        { rank: '吉', text: '今日适合创作关于他们的故事' },
-        { rank: '吉', text: '翻开旧存档，会发现被遗忘的感动' },
-        { rank: '吉', text: '今日与同好相遇，缘分不浅' },
-        { rank: '吉', text: 'TA在某处也想着你所想的事' },
-        { rank: '中吉', text: '平静之日，适合细细品味细节' },
-        { rank: '中吉', text: '不必心急，他们的故事还很长' },
-        { rank: '中吉', text: '今日宜安静陪伴，无需言语' },
-        { rank: '中吉', text: '缘分在积累，共鸣在生长' },
-        { rank: '小吉', text: '今日缘分稍淡，但羁绊永在' },
-        { rank: '小吉', text: '风平浪静，是为了更大的共鸣' },
-        { rank: '小吉', text: '今日适合整理收藏，回顾来时路' },
-        { rank: '末吉', text: '即使平淡，也是他们故事的一部分' },
-        { rank: '末吉', text: '静待时机，最美的相遇从不缺席' },
-        { rank: '末吉', text: '今日能量稍弱，听一首他们的歌吧' },
-        { rank: '末吉', text: '低潮是序章，高光在后面等着' },
-        { rank: '吉', text: '今日适合给喜欢的同人作品点一个赞' },
-        { rank: '大吉', text: '羁绊穿越时间，今日尤为闪耀' }
-      ]
+    mio: {
+      id: "mio",
+      name: "Mio",
+      initial: "M",
+      tagline: "光之延续",
+      avatarClass: "lucasmia-avatar",
+      traits: ["温柔", "细腻", "明亮"],
+      birthday: "08-22",
+      height: "165cm",
+      element: "光",
+      description: "光之延续，用温柔照亮身边的人",
+      quote: "只要有你在，一切都会好起来的。",
+      relationship: "彼此的唯一",
+      avatar: "images/characters/mio.jpg"
+    },
+    lucas: {
+      id: "lucas",
+      name: "Lucas",
+      initial: "L",
+      tagline: "火之传承",
+      avatarClass: "lucasmia-avatar",
+      traits: ["热情", "开拓", "温暖"],
+      birthday: "06-10",
+      height: "185cm",
+      element: "火",
+      description: "深红主题的代表，火之传承",
+      quote: "无论发生什么，我都会找到你。",
+      relationship: "彼此的唯一",
+      avatar: "images/characters/lucas.jpg"
+    },
+    mia: {
+      id: "mia",
+      name: "Mia",
+      initial: "M",
+      tagline: "暗之守护",
+      avatarClass: "lionmio-avatar",
+      traits: ["神秘", "守望", "浪漫"],
+      birthday: "12-25",
+      height: "162cm",
+      element: "暗",
+      description: "暗之守护，神秘莫测的存在",
+      quote: "在黑暗中，我也能找到你的方向。",
+      relationship: "彼此的唯一",
+      avatar: "images/characters/mia.jpg"
     }
-  },
+  };
 
-  // 今日一言
-  dailyQuotes: [
-    '他们之间的默契，是世界上最安静的奇迹',
-    '每一次回头，都有人在原地等着',
-    '羁绊不需要解释，懂的人自然懂',
-    '他们的故事还没写完，我们都是见证者',
-    '有些相遇，注定要用一生来回味',
-    '光与影从不分离，就像他们',
-    '再平凡的日子，因为有TA而发光',
-    '所有的巧合，都是命运的安排',
-    '他们不说的话，藏在每一个眼神里',
-    '这里收藏着关于他们的，所有美好'
-  ],
+  var DEFAULT_DATA = {
+    "lionmio": {
+      id: "lionmio",
+      name: "LionMio",
+      tagline: "冰与光的永恒羁绊",
+      heroTitle: { lion: "Lion", mio: "Mio" },
+      logoInitials: "LM",
+      characters: [DEFAULT_CHARACTERS.lion, DEFAULT_CHARACTERS.mio]
+    },
+    "lucasmia": {
+      id: "lucasmia",
+      name: "LucasMia",
+      tagline: "火与暗的浪漫邂逅",
+      heroTitle: { lion: "Lucas", mio: "Mia" },
+      logoInitials: "LM",
+      characters: [DEFAULT_CHARACTERS.lucas, DEFAULT_CHARACTERS.mia]
+    }
+  };
 
-  // 获取随机一言
-  getRandomQuote: function() {
-    const index = Math.floor(Math.random() * this.dailyQuotes.length);
-    return this.dailyQuotes[index];
-  },
+  var globalData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  var dataLoaded = false;
 
-  // 获取当前CP数据
-  getCurrentCP: function() {
-    const theme = localStorage.getItem('cp-archive-theme') || this.THEMES.LIONMIO;
-    return this.cps[theme] || this.cps[this.THEMES.LIONMIO];
-  },
+  function loadWorksData() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "data/works.json", true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            
+            if (data.characters) {
+              data.characters.forEach(function(char) {
+                var defaultChar = DEFAULT_CHARACTERS[char.id] || {};
+                var fullChar = {
+                  id: char.id,
+                  name: char.name || defaultChar.name || "?",
+                  initial: char.name ? char.name.charAt(0) : (defaultChar.initial || "?"),
+                  tagline: char.tagline || defaultChar.tagline || char.element || "",
+                  avatarClass: (char.id === "lucas" || char.id === "mia") ? "lucasmia-avatar" : "lionmio-avatar",
+                  traits: (char.traits && char.traits.length > 0) ? char.traits : (defaultChar.traits || []),
+                  birthday: char.birthday || "",
+                  height: char.height || "",
+                  element: char.element || "",
+                  description: char.description || "",
+                  quote: char.quote || "",
+                  relationship: char.relationship || "",
+                  avatar: char.avatar || ""
+                };
+                
+                if (char.id === "lion" || char.id === "mio") {
+                  for (var i = 0; i < globalData["lionmio"].characters.length; i++) {
+                    if (globalData["lionmio"].characters[i].id === char.id) {
+                      globalData["lionmio"].characters[i] = fullChar;
+                      break;
+                    }
+                  }
+                }
+                if (char.id === "lucas" || char.id === "mia") {
+                  for (var j = 0; j < globalData["lucasmia"].characters.length; j++) {
+                    if (globalData["lucasmia"].characters[j].id === char.id) {
+                      globalData["lucasmia"].characters[j] = fullChar;
+                      break;
+                    }
+                  }
+                }
+              });
+            }
 
-  // 获取指定主题的CP数据
-  getCPByTheme: function(theme) {
-    return this.cps[theme] || this.cps[this.THEMES.LIONMIO];
+            if (data.sites) {
+              if (data.sites["lionmio"]) {
+                globalData["lionmio"].name = data.sites["lionmio"].name || "LionMio";
+                globalData["lionmio"].tagline = data.sites["lionmio"].tagline || "";
+              }
+              if (data.sites["lucasmia"]) {
+                globalData["lucasmia"].name = data.sites["lucasmia"].name || "LucasMia";
+                globalData["lucasmia"].tagline = data.sites["lucasmia"].tagline || "";
+              }
+            }
+          } catch (e) {
+            console.warn("Error parsing works.json:", e);
+          }
+        }
+        dataLoaded = true;
+        window.dispatchEvent(new CustomEvent("cpDataLoaded"));
+      }
+    };
+    xhr.onerror = function() {
+      console.warn("Error loading works.json, using default data");
+      dataLoaded = true;
+      window.dispatchEvent(new CustomEvent("cpDataLoaded"));
+    };
+    xhr.send();
   }
-};
+
+  window.CPData = {
+    THEMES: THEMES,
+
+    getRandomQuote: function() {
+      var quotes = [
+        "他们之间的默契，是世界上最安静的奇迹",
+        "每一次回头，都有人在原地等着",
+        "羁绊不需要解释，懂的人自然懂",
+        "他们的故事还没写完，我们都是见证者",
+        "有些相遇，注定要用一生来回味",
+        "光与影从不分离，就像他们",
+        "再平凡的日子，因为有TA而发光",
+        "所有的巧合，都是命运的安排",
+        "他们不说的话，藏在每一个眼神里",
+        "这里收藏着关于他们的，所有美好"
+      ];
+      var index = Math.floor(Math.random() * quotes.length);
+      return quotes[index];
+    },
+
+    getCurrentCP: function() {
+      var theme = localStorage.getItem("cp-archive-theme") || THEMES.LIONMIO;
+      return this.getCPByTheme(theme);
+    },
+
+    getCPByTheme: function(theme) {
+      return globalData[theme] || globalData[THEMES.LIONMIO];
+    },
+
+    getCharacters: function() {
+      return DEFAULT_CHARACTERS;
+    },
+
+    getCharacterById: function(id) {
+      return DEFAULT_CHARACTERS[id];
+    },
+
+    isLoaded: function() {
+      return dataLoaded;
+    }
+  };
+
+  loadWorksData();
+
+})();

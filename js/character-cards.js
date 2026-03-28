@@ -66,29 +66,24 @@
     const article = document.createElement('article');
     article.className = 'character-card simple-card';
 
+    // 显示 tagline，如果为空则显示 element
+    const taglineText = char.tagline || char.element || '';
+
     // 生成性格标签HTML
-    const traitsHTML = char.traits.slice(0, 3).map(trait => 
+    const traitsHTML = (char.traits || []).slice(0, 3).map(trait => 
       `<span class="trait-tag">${trait}</span>`
     ).join('');
 
     article.innerHTML = `
       <div class="character-avatar ${char.avatarClass}">
-        <span>${char.initial}</span>
+        <span>${char.initial || char.name?.charAt(0) || '?'}</span>
       </div>
       <h3 class="character-name" data-name="${char.name}">${char.name}</h3>
+      <p class="character-tagline">${taglineText}</p>
       <div class="character-traits">
         ${traitsHTML}
       </div>
     `;
-
-    // 添加淡入动画
-    article.style.opacity = '0';
-    article.style.transform = 'translateY(20px)';
-    setTimeout(() => {
-      article.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-      article.style.opacity = '1';
-      article.style.transform = 'translateY(0)';
-    }, index * 150);
 
     // 绑定爱心粒子效果
     const nameEl = article.querySelector('.character-name');

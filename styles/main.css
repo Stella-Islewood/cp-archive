@@ -581,6 +581,15 @@ button {
   color: var(--text-title);
 }
 
+.character-tagline {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+  font-style: italic;
+  transition: color var(--transition-duration) var(--transition-easing);
+}
+
 .character-role {
   font-size: 0.85rem;
   color: var(--accent);

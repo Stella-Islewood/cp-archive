@@ -165,54 +165,69 @@
     const otherName = otherChar ? otherChar.name : 'TA';
 
     // 头像图片路径
-    const avatarPath = `images/characters/${char.id}.jpg`;
+    const avatarPath = char.avatar || `images/characters/${char.id}.jpg`;
+
+    // 处理空数据 - 显示"待补充"灰色斜体
+    const formatValue = (val) => {
+      if (!val || val.trim() === '') {
+        return '<span class="pending-text">待补充</span>';
+      }
+      return val;
+    };
+
+    // 头像内容
+    const avatarContent = `<img src="${avatarPath}" alt="${char.name}" onerror="this.style.display='none';this.parentElement.innerHTML='<span class=\\'profile-avatar-placeholder\\'>${char.initial || char.name?.charAt(0) || '?'}</span>'" />`;
+
+    // 性格标签
+    const traitsHTML = (char.traits || []).slice(0, 3).map(trait => 
+      `<span class="profile-trait">${trait}</span>`
+    ).join('');
 
     article.innerHTML = `
       <div class="profile-avatar-section">
         <div class="profile-avatar" id="avatar-${char.id}">
-          <img src="${avatarPath}" alt="${char.name}" onerror="this.parentElement.innerHTML='<span class=\\'profile-avatar-placeholder\\'>${char.initial}</span>'" />
+          ${avatarContent}
         </div>
         <h3 class="profile-name">${char.name}</h3>
+        <p class="profile-tagline">${char.tagline || char.element || ''}</p>
       </div>
       <div class="profile-info">
         <div class="profile-info-row">
           <div class="profile-info-item">
             <span class="profile-info-label">生日</span>
-            <span class="profile-info-value pending">待补充</span>
+            <span class="profile-info-value">${formatValue(char.birthday)}</span>
           </div>
           <div class="profile-info-item">
             <span class="profile-info-label">身高</span>
-            <span class="profile-info-value pending">待补充</span>
+            <span class="profile-info-value">${formatValue(char.height)}</span>
           </div>
           <div class="profile-info-item">
             <span class="profile-info-label">属性</span>
-            <span class="profile-info-value pending">待补充</span>
+            <span class="profile-info-value">${formatValue(char.element)}</span>
           </div>
         </div>
         
         <div class="profile-divider"></div>
         
         <div class="profile-traits">
-          ${char.traits.slice(0, 3).map(trait => 
-            `<span class="profile-trait">${trait}</span>`
-          ).join('')}
+          ${traitsHTML || '<span class="pending-text">待补充</span>'}
         </div>
         
         <div class="profile-divider"></div>
         
         <div class="profile-section">
           <span class="profile-section-title">个人简介</span>
-          <p class="profile-section-content pending">待补充</p>
+          <p class="profile-section-content">${formatValue(char.description)}</p>
         </div>
         
         <div class="profile-section">
           <span class="profile-section-title">经典台词</span>
-          <p class="profile-quote pending">待补充</p>
+          <p class="profile-quote">${formatValue(char.quote)}</p>
         </div>
         
         <div class="profile-section">
           <span class="profile-section-title">与 ${otherName} 的关系</span>
-          <p class="profile-relationship pending">待补充</p>
+          <p class="profile-relationship">${formatValue(char.relationship)}</p>
         </div>
 
         <!-- 角色图集 -->
@@ -233,13 +248,6 @@
         openGalleryModal(images, i);
       });
     });
-
-    // 添加淡入动画
-    article.style.opacity = '0';
-    setTimeout(() => {
-      article.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-      article.style.opacity = '1';
-    }, index * 200);
 
     return article;
   }
