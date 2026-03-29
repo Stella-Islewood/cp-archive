@@ -435,6 +435,18 @@
     const backBtn = document.getElementById('btnBack');
     if (backBtn) backBtn.addEventListener('click', closeWorkDetail);
 
+    // 悬浮沉浸阅读按钮
+    const floatBtn = document.getElementById('immersiveFloatBtn');
+    if (floatBtn) {
+      // 初始隐藏
+      floatBtn.style.display = 'none';
+      floatBtn.addEventListener('click', function() {
+        if (currentTextReaderWorkId) {
+          openImmersiveMode(currentTextReaderWorkId);
+        }
+      });
+    }
+
     // 详情页收藏按钮
     const detailFavBtn = document.getElementById('btnDetailFavorite');
     if (detailFavBtn) {
@@ -459,6 +471,8 @@
   function openTextReader(workId) {
     const work = cachedWorks.find(w => w.id === workId);
     if (!work) return;
+
+    currentTextReaderWorkId = workId;
 
     const overlay = document.getElementById('textReaderOverlay');
     const content = work.content || '';
@@ -499,16 +513,6 @@
       }, 300);
     });
 
-    // 沉浸阅读按钮
-    const immersiveBtn = document.getElementById('readerImmersiveBtn');
-    if (immersiveBtn) {
-      const newImmBtn = immersiveBtn.cloneNode(true);
-      immersiveBtn.parentNode.replaceChild(newImmBtn, immersiveBtn);
-      newImmBtn.addEventListener('click', function() {
-        openImmersiveMode(workId);
-      });
-    }
-
     // 关闭按钮
     const closeBtn = document.getElementById('readerClose');
     const newCloseBtn = closeBtn.cloneNode(true);
@@ -521,6 +525,19 @@
 
     overlay.classList.add('show');
     document.body.style.overflow = 'hidden';
+
+    // 显示悬浮沉浸阅读按钮
+    const floatBtn = document.getElementById('immersiveFloatBtn');
+    if (floatBtn) {
+      floatBtn.style.display = 'flex';
+      floatBtn.classList.remove('exit-mode');
+    }
+
+    // 打开后滚动到顶部
+    setTimeout(() => {
+      const modal = document.getElementById('textReaderModal');
+      if (modal) modal.scrollTop = 0;
+    }, 50);
   }
 
   /**
@@ -529,7 +546,14 @@
   function closeTextReader() {
     const overlay = document.getElementById('textReaderOverlay');
     overlay.classList.remove('show');
-    document.body.style.overflow = '';
+    // 沉浸模式打开时不能清 overflow
+    if (!document.getElementById('immersiveOverlay').classList.contains('show')) {
+      document.body.style.overflow = '';
+    }
+    currentTextReaderWorkId = null;
+    // 隐藏悬浮按钮
+    const floatBtn = document.getElementById('immersiveFloatBtn');
+    if (floatBtn) floatBtn.style.display = 'none';
   }
 
   /**
@@ -579,6 +603,8 @@
   let immersiveMouseHandler = null;
   let immersiveToolbarTimer = null;
   let currentImmersiveWorkId = null;
+  let currentTextReaderWorkId = null;
+  let immersiveSavedScrollTop = null;
 
   /**
    * 打开沉浸阅读模式
@@ -611,6 +637,15 @@
     // 隐藏工具栏
     document.getElementById('immersiveToolbar').classList.add('hidden');
 
+    // 隐藏悬浮按钮
+    const floatBtn = document.getElementById('immersiveFloatBtn');
+    if (floatBtn) floatBtn.style.display = 'none';
+
+    // 保存文字阅读器滚动位置，隐藏它
+    const textOverlay = document.getElementById('textReaderOverlay');
+    immersiveSavedScrollTop = textOverlay.scrollTop;
+    textOverlay.classList.remove('show');
+
     document.body.style.overflow = 'hidden';
 
     // 滚动到顶部
@@ -618,9 +653,6 @@
 
     // 绑定事件
     bindImmersiveEvents();
-
-    // 关闭文字阅读器
-    closeTextReader();
   }
 
   /**
@@ -639,8 +671,6 @@
   function closeImmersiveMode() {
     const overlay = document.getElementById('immersiveOverlay');
     overlay.classList.remove('show');
-    document.body.style.overflow = '';
-    currentImmersiveWorkId = null;
 
     // 移除滚动监听
     if (immersiveScrollHandler) {
@@ -657,6 +687,22 @@
       clearTimeout(immersiveToolbarTimer);
       immersiveToolbarTimer = null;
     }
+
+    // 恢复悬浮按钮
+    const floatBtn = document.getElementById('immersiveFloatBtn');
+    if (floatBtn && currentTextReaderWorkId) {
+      floatBtn.style.display = 'flex';
+    }
+
+    // 恢复文字阅读器
+    const textOverlay = document.getElementById('textReaderOverlay');
+    textOverlay.classList.add('show');
+    if (immersiveSavedScrollTop !== null) {
+      textOverlay.scrollTop = immersiveSavedScrollTop;
+      immersiveSavedScrollTop = null;
+    }
+
+    currentImmersiveWorkId = null;
   }
 
   /**
