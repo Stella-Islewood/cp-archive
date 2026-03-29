@@ -208,8 +208,8 @@
     // 图片创作：有 image_url 直接显示图片
     if (type === '图片') {
       if (img && isImageUrl(img)) {
-        return `<div class="work-card-body work-card-body-image">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" class="card-body-img" loading="lazy">
+        return `<div class="work-card-cover">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" loading="lazy">
         </div>`;
       }
       return buildCardBodyDefault(item);
@@ -218,8 +218,8 @@
     // 玩偶 / 游戏：有图片显示图片，没有显示图标
     if (type === '玩偶' || type === '游戏') {
       if (img && isImageUrl(img)) {
-        return `<div class="work-card-body work-card-body-image">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" class="card-body-img" loading="lazy">
+        return `<div class="work-card-cover">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" loading="lazy">
         </div>`;
       }
       return buildCardBodyDefault(item);
@@ -230,13 +230,9 @@
       const mediaUrl = img || content;
       const hasLink = isExternalLink(mediaUrl);
       return `
-        <div class="work-card-body work-card-body-music">
-          <span class="music-emoji">🎵</span>
-          <div class="music-info">
-            <span class="music-song">${escapeHtml(item.title)}</span>
-            <span class="music-author">${escapeHtml(item.author || '')}</span>
-          </div>
-          ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn">🎵 点击收听</a>` : ''}
+        <div class="work-card-cover gradient-music">
+          <span class="cover-icon">🎵</span>
+          ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="music-link-btn" onclick="event.stopPropagation();">🎵 点击收听</a>` : ''}
         </div>`;
     }
 
@@ -250,19 +246,14 @@
       if (isEmbed || isDirectVideo) {
         // 获取视频预览缩略图
         let thumbnailHtml = '';
-        let thumbnailClass = '';
-        
+
         if (isBilibiliUrl(mediaUrl)) {
           let bvid = '';
           const bilibiliMatch = mediaUrl.match(/bilibili\.com\/video\/([A-Za-z0-9]+)/i) ||
                                mediaUrl.match(/b23\.tv\/([A-Za-z0-9]+)/i);
           if (bilibiliMatch) bvid = bilibiliMatch[1];
           if (bvid) {
-            thumbnailClass = ' has-thumbnail';
-            thumbnailHtml = `<img src="https://i0.hdslb.com/bfs/archive/${bvid}.jpg" alt="Bilibili thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none'">
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>`;
+            thumbnailHtml = `<img src="https://i0.hdslb.com/bfs/archive/${bvid}.jpg" alt="thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'">`;
           }
         } else if (isYouTubeUrl(mediaUrl)) {
           let videoId = '';
@@ -270,40 +261,23 @@
                               mediaUrl.match(/youtu\.be\/([A-Za-z0-9_-]+)/i);
           if (youtubeMatch) videoId = youtubeMatch[1];
           if (videoId) {
-            thumbnailClass = ' has-thumbnail';
-            thumbnailHtml = `<img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="YouTube thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>`;
+            thumbnailHtml = `<img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;">`;
           }
-        } else if (isDirectVideo) {
-          thumbnailClass = ' has-thumbnail';
-          thumbnailHtml = `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          </div>`;
         }
 
+        const playIcon = `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>`;
+
         return `
-          <div class="work-card-body work-card-body-video${thumbnailClass}" style="position:relative;overflow:hidden;">
-            ${!thumbnailClass ? '<span class="video-emoji">🎬</span>' : ''}
+          <div class="work-card-cover" style="position:relative;overflow:hidden;background:linear-gradient(135deg, #1a1a2e, #16213e);">
             ${thumbnailHtml}
-            <div class="video-info">
-              <span class="video-title">${escapeHtml(item.title)}</span>
-              <span class="video-author">${escapeHtml(item.author || '')}</span>
-            </div>
+            ${playIcon}
           </div>`;
       }
 
       // 普通视频链接
-      const hasLink = isExternalLink(mediaUrl);
       return `
-        <div class="work-card-body work-card-body-video">
-          <span class="video-emoji">🎬</span>
-          <div class="video-info">
-            <span class="video-title">${escapeHtml(item.title)}</span>
-            <span class="video-author">${escapeHtml(item.author || '')}</span>
-          </div>
-          ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="video-link-btn">▶ 点击观看</a>` : ''}
+        <div class="work-card-cover gradient-video">
+          <span class="cover-icon">🎬</span>
         </div>`;
     }
 
@@ -317,8 +291,8 @@
   function buildCardBodyDefault(item) {
     const typeClass = getTypeClass(item.type);
     return `
-      <div class="work-card-body work-card-body-default">
-        <div class="cover-placeholder ${typeClass}-cover">
+      <div class="work-card-cover">
+        <div class="cover-placeholder">
           ${getCoverSVG(item.type)}
         </div>
       </div>`;
@@ -361,9 +335,9 @@
     if (displayedWorks.length === 0) {
       const query = document.getElementById('worksSearch').value.trim();
       if (query) {
-        grid.innerHTML = '<p class="search-no-results">没有找到相关内容</p>';
+        grid.innerHTML = '<p class="works-grid-empty">没有找到相关作品</p>';
       } else {
-        grid.innerHTML = '<p style="text-align:center;color:#888;padding:40px;grid-column:1/-1;">暂无作品数据</p>';
+        grid.innerHTML = '<p class="works-grid-empty">暂无作品数据</p>';
       }
       return;
     }
@@ -382,41 +356,43 @@
       if (isText) {
         // 文字卡片：自带所有信息（标签/标题/作者/预览），底部放操作按钮
         return `
-          <article class="work-card work-card-text" data-category="${typeClass}" data-work-id="${item.id}">
+          <article class="work-card" data-category="${typeClass}" data-work-id="${item.id}">
             <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
             ${body}
-            <div class="work-actions">
-              <button class="btn-action btn-favorite" data-work-id="${item.id}">
-                <span class="action-icon favorite-icon">${isFav ? '❤' : '♡'}</span>
-                <span class="action-count favorite-count">${isFav ? '1' : '0'}</span>
+            <div class="work-card-actions">
+              <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
+                <span>${isFav ? '❤' : '♡'}</span>
+                <span>收藏</span>
               </button>
-              <button class="btn-action btn-comment" data-work-id="${item.id}" data-scroll-to-comments="true">
-                <span class="action-icon">💬</span>
-                <span class="action-count comment-count">${commentCount}</span>
+              <button class="btn-card-action btn-comment" data-work-id="${item.id}">
+                <span>💬</span>
+                <span>${commentCount}</span>
               </button>
             </div>
           </article>
         `;
       }
 
-      // 其他卡片：保留原有 info 区结构
+      // 其他卡片：封面 + 内容区
       return `
-        <article class="work-card ${isText ? 'work-card-text' : ''}" data-category="${typeClass}" data-work-id="${item.id}">
+        <article class="work-card" data-category="${typeClass}" data-work-id="${item.id}">
           <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
           ${body}
-          <div class="work-info">
-            <h3 class="work-title">${escapeHtml(item.title)}</h3>
-            <p class="work-author">${escapeHtml(item.author || '未知作者')}</p>
-            <span class="work-tag">${escapeHtml(item.type)}</span>
+          <div class="work-card-content">
+            <span class="work-card-tag">${escapeHtml(item.type)}</span>
+            <h3 class="work-card-title">${escapeHtml(item.title)}</h3>
+            <p class="work-card-author">${escapeHtml(item.author || '未知作者')}</p>
+            ${item.created_at ? `<p class="work-card-date">${formatDate(item.created_at)}</p>` : ''}
+            ${!isText && item.content ? `<p class="work-card-excerpt">${escapeHtml(item.content.substring(0, 80))}${item.content.length > 80 ? '…' : ''}</p>` : ''}
           </div>
-          <div class="work-actions">
-            <button class="btn-action btn-favorite" data-work-id="${item.id}">
-              <span class="action-icon favorite-icon">${isFav ? '❤' : '♡'}</span>
-              <span class="action-count favorite-count">${isFav ? '1' : '0'}</span>
+          <div class="work-card-actions">
+            <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
+              <span>${isFav ? '❤' : '♡'}</span>
+              <span>收藏</span>
             </button>
-            <button class="btn-action btn-comment" data-work-id="${item.id}" data-scroll-to-comments="true">
-              <span class="action-icon">💬</span>
-              <span class="action-count comment-count">${commentCount}</span>
+            <button class="btn-card-action btn-comment" data-work-id="${item.id}">
+              <span>💬</span>
+              <span>${commentCount}</span>
             </button>
           </div>
         </article>
@@ -519,10 +495,12 @@
 
     // ========== 卡片主体点击：图片/视频/音乐卡片 → 进入详情 ==========
     grid.addEventListener('click', function(e) {
-      const cardBody = e.target.closest('.work-card-body');
+      // 忽略链接、按钮
+      if (e.target.closest('a, button')) return;
+
+      const cardBody = e.target.closest('.work-card-cover, .work-card-body');
       if (!cardBody) return;
-      // 忽略链接、按钮、视频
-      if (e.target.closest('a, button, video')) return;
+
       const card = cardBody.closest('.work-card');
       if (!card) return;
       // 文字卡片走阅读器
