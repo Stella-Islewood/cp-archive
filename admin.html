@@ -41,6 +41,8 @@
     .tab-content { display: none; background: #fff; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
     .tab-content.active { display: block; }
     .tab-content h2 { margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #eee; color: #333; font-size: 18px; }
+    .tab-content h2 .editing-badge { display: none; font-size: 12px; padding: 2px 8px; background: #f0ad4e; color: #fff; border-radius: 4px; margin-left: 10px; vertical-align: middle; }
+    .tab-content h2.editing-mode .editing-badge { display: inline; }
     
     /* 表单 */
     .form-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
@@ -56,6 +58,9 @@
     .btn-danger:hover { background: #a93025; }
     .btn-success { background: #28a745; }
     .btn-success:hover { background: #1e7e34; }
+    .btn-warning { background: #f0ad4e; }
+    .btn-warning:hover { background: #ec971f; }
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
     
     /* 消息 */
     .msg { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; display: none; font-size: 14px; }
@@ -85,6 +90,7 @@
     .data-list h3 { margin-bottom: 12px; color: #555; font-size: 16px; }
     .data-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; background: #fafafa; }
     .data-item:hover { background: #f5f5f5; }
+    .data-item.editing { border-color: #f0ad4e; background: #fffaf0; }
     .data-info { flex: 1; }
     .data-info h4 { margin-bottom: 4px; color: #333; }
     .data-info p { font-size: 13px; color: #888; margin-bottom: 3px; }
@@ -144,9 +150,10 @@
       
       <!-- 时间线 -->
       <div class="tab-content active" id="tab-timeline">
-        <h2>添加时间线节点</h2>
+        <h2 id="tl-form-title">添加时间线节点<span class="editing-badge">编辑中</span></h2>
         <div class="msg" id="msg-timeline"></div>
         <form id="form-timeline" onsubmit="submitTimeline(event)">
+          <input type="hidden" id="tl-editing-id" value="">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
@@ -176,7 +183,10 @@
               <textarea id="tl-content" placeholder="详细描述..."></textarea>
             </div>
           </div>
-          <button type="submit" class="btn">添加节点</button>
+          <div class="btn-group">
+            <button type="submit" class="btn" id="tl-submit-btn">添加节点</button>
+            <button type="button" class="btn btn-warning" id="tl-cancel-btn" style="display:none;" onclick="cancelEditTimeline()">取消编辑</button>
+          </div>
         </form>
         
         <div class="data-list">
@@ -187,9 +197,10 @@
       
       <!-- 约稿 -->
       <div class="tab-content" id="tab-commission">
-        <h2>添加约稿</h2>
+        <h2 id="cm-form-title">添加约稿<span class="editing-badge">编辑中</span></h2>
         <div class="msg" id="msg-commission"></div>
         <form id="form-commission" onsubmit="submitCommission(event)">
+          <input type="hidden" id="cm-editing-id" value="">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
@@ -280,7 +291,10 @@
               <textarea id="cm-notes" placeholder="关于这张约稿的故事..."></textarea>
             </div>
           </div>
-          <button type="submit" class="btn">添加约稿</button>
+          <div class="btn-group">
+            <button type="submit" class="btn" id="cm-submit-btn">添加约稿</button>
+            <button type="button" class="btn btn-warning" id="cm-cancel-btn" style="display:none;" onclick="cancelEditCommission()">取消编辑</button>
+          </div>
         </form>
 
         <div class="data-list">
@@ -291,9 +305,10 @@
       
       <!-- 创作 -->
       <div class="tab-content" id="tab-works">
-        <h2>添加创作</h2>
+        <h2 id="wk-form-title">添加创作<span class="editing-badge">编辑中</span></h2>
         <div class="msg" id="msg-works"></div>
         <form id="form-works" onsubmit="submitWorks(event)">
+          <input type="hidden" id="wk-editing-id" value="">
           <div class="form-row">
             <div class="form-group">
               <label>站点</label>
@@ -386,7 +401,10 @@
             </div>
           </div>
 
-          <button type="submit" class="btn">添加创作</button>
+          <div class="btn-group">
+            <button type="submit" class="btn" id="wk-submit-btn">添加创作</button>
+            <button type="button" class="btn btn-warning" id="wk-cancel-btn" style="display:none;" onclick="cancelEditWorks()">取消编辑</button>
+          </div>
         </form>
         
         <div class="data-list">
@@ -469,6 +487,13 @@
       return d.innerHTML;
     }
     
+    // 格式化日期
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+    
     // 加载所有数据
     function loadAll() {
       loadTimeline();
@@ -507,7 +532,8 @@
     function manualFillUrl(inputId) {
       const val = document.getElementById(inputId).value.trim();
       if (val) {
-        showMsg('msg-' + (inputId.startsWith('cm') ? 'commission' : 'works'), 'success', 'URL已确认填入');
+        const tab = inputId.startsWith('cm') ? 'commission' : 'works';
+        showMsg('msg-' + tab, 'success', 'URL已确认填入');
       }
     }
     
@@ -713,20 +739,40 @@
     
     async function submitTimeline(e) {
       e.preventDefault();
+      const editingId = document.getElementById('tl-editing-id').value;
+      const isEditing = editingId !== '';
+      
       const data = {
         archive_id: document.getElementById('tl-site').value,
         date: document.getElementById('tl-date').value,
         title: document.getElementById('tl-title').value,
         content: document.getElementById('tl-content').value,
-        mood_tag: document.getElementById('tl-mood').value,
-        created_at: new Date().toISOString()
+        mood_tag: document.getElementById('tl-mood').value
       };
-      const { error } = await window.sb.from('timeline').insert([data]);
+      
+      let error;
+      if (isEditing) {
+        // 更新模式
+        const { error: updateError } = await window.sb.from('timeline').update(data).eq('id', editingId);
+        error = updateError;
+        if (!error) {
+          showMsg('msg-timeline', 'success', '✅ 更新成功！');
+        }
+      } else {
+        // 新增模式
+        data.created_at = new Date().toISOString();
+        const { error: insertError } = await window.sb.from('timeline').insert([data]);
+        error = insertError;
+        if (!error) {
+          showMsg('msg-timeline', 'success', '✅ 保存成功！');
+        }
+      }
+      
       if (error) {
         showMsg('msg-timeline', 'error', '保存失败: ' + error.message);
       } else {
-        showMsg('msg-timeline', 'success', '✅ 保存成功！');
         document.getElementById('form-timeline').reset();
+        cancelEditTimeline();
         loadTimeline();
       }
     }
@@ -736,8 +782,9 @@
       const el = document.getElementById('list-timeline');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      const currentEditingId = document.getElementById('tl-editing-id').value;
       el.innerHTML = data.map(item => `
-        <div class="data-item">
+        <div class="data-item ${currentEditingId === item.id ? 'editing' : ''}" data-id="${item.id}">
           <div class="data-info">
             <h4>${h(item.title)}</h4>
             <p>${h(item.content || '无内容')}</p>
@@ -745,55 +792,123 @@
               <span>${h(item.date)}</span>
               <span>${h(item.mood_tag || '无')}</span>
               <span>${h(item.archive_id)}</span>
+              <span>${formatDate(item.created_at)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger btn-sm" onclick="delTimeline('${item.id}')">删除</button>
+            <button class="btn btn-sm" onclick="editTimeline('${item.id}')">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteTimeline('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    async function delTimeline(id) {
-      if (!confirm('确定删除？')) return;
+    function editTimeline(id) {
+      window.sb.from('timeline').select('*').eq('id', id).single().then(result => {
+        if (result.error) {
+          showMsg('msg-timeline', 'error', '加载数据失败');
+          return;
+        }
+        const item = result.data;
+        document.getElementById('tl-editing-id').value = id;
+        document.getElementById('tl-site').value = item.archive_id || 'lionmio';
+        document.getElementById('tl-date').value = item.date || '';
+        document.getElementById('tl-title').value = item.title || '';
+        document.getElementById('tl-content').value = item.content || '';
+        document.getElementById('tl-mood').value = item.mood_tag || '';
+        
+        // 切换到编辑模式
+        document.getElementById('tl-form-title').classList.add('editing-mode');
+        document.getElementById('tl-submit-btn').textContent = '保存更新';
+        document.getElementById('tl-cancel-btn').style.display = '';
+        
+        // 更新列表高亮
+        document.querySelectorAll('#list-timeline .data-item').forEach(el => el.classList.remove('editing'));
+        const currentItem = document.querySelector(`#list-timeline .data-item[data-id="${id}"]`);
+        if (currentItem) currentItem.classList.add('editing');
+        
+        // 滚动到表单
+        document.getElementById('form-timeline').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    
+    function cancelEditTimeline() {
+      document.getElementById('tl-editing-id').value = '';
+      document.getElementById('tl-form-title').classList.remove('editing-mode');
+      document.getElementById('tl-submit-btn').textContent = '添加节点';
+      document.getElementById('tl-cancel-btn').style.display = 'none';
+      document.querySelectorAll('#list-timeline .data-item').forEach(el => el.classList.remove('editing'));
+    }
+    
+    async function deleteTimeline(id) {
+      if (!confirm('确定要删除这条内容吗？')) return;
       const { error } = await window.sb.from('timeline').delete().eq('id', id);
-      if (error) showMsg('msg-timeline', 'error', '删除失败');
-      else { showMsg('msg-timeline', 'success', '✅ 删除成功'); loadTimeline(); }
+      if (error) {
+        showMsg('msg-timeline', 'error', '删除失败: ' + error.message);
+      } else {
+        showMsg('msg-timeline', 'success', '✅ 删除成功！');
+        // 如果正在编辑这条，撤销编辑状态
+        if (document.getElementById('tl-editing-id').value === id) {
+          cancelEditTimeline();
+        }
+        loadTimeline();
+      }
     }
     
     // ========== 约稿 ==========
 
     async function submitCommission(e) {
       e.preventDefault();
+      const editingId = document.getElementById('cm-editing-id').value;
+      const isEditing = editingId !== '';
       const type = document.getElementById('cm-type').value;
+      
       const data = {
         archive_id: document.getElementById('cm-site').value,
         type: type,
         title: document.getElementById('cm-title').value,
         artist: document.getElementById('cm-artist').value,
-        founder_notes: document.getElementById('cm-notes').value,
-        created_at: new Date().toISOString()
+        founder_notes: document.getElementById('cm-notes').value
       };
+      
       // 根据类型设置内容字段
       if (type === '图片') {
         data.image_url = document.getElementById('cm-image').value;
+        data.text_content = null;
       } else if (type === '文字') {
         data.text_content = document.getElementById('cm-text').value;
+        data.image_url = null;
       } else if (type === '音乐') {
         data.image_url = document.getElementById('cm-music').value;
+        data.text_content = null;
       } else if (type === '视频') {
         data.image_url = document.getElementById('cm-video').value;
+        data.text_content = null;
       }
-      const { error } = await window.sb.from('commissions').insert([data]);
+      
+      let error;
+      if (isEditing) {
+        // 更新模式
+        const { error: updateError } = await window.sb.from('commissions').update(data).eq('id', editingId);
+        error = updateError;
+        if (!error) {
+          showMsg('msg-commission', 'success', '✅ 更新成功！');
+        }
+      } else {
+        // 新增模式
+        data.created_at = new Date().toISOString();
+        const { error: insertError } = await window.sb.from('commissions').insert([data]);
+        error = insertError;
+        if (!error) {
+          showMsg('msg-commission', 'success', '✅ 保存成功！');
+        }
+      }
+      
       if (error) {
         showMsg('msg-commission', 'error', '保存失败: ' + error.message);
       } else {
-        showMsg('msg-commission', 'success', '✅ 保存成功！');
         document.getElementById('form-commission').reset();
-        // 重置预览
-        document.getElementById('cm-preview').style.display = 'none';
-        document.getElementById('cm-upload-status').textContent = '';
-        toggleCommissionFields();
+        cancelEditCommission();
         loadCommission();
       }
     }
@@ -803,8 +918,9 @@
       const el = document.getElementById('list-commission');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      const currentEditingId = document.getElementById('cm-editing-id').value;
       el.innerHTML = data.map(item => `
-        <div class="data-item">
+        <div class="data-item ${currentEditingId === item.id ? 'editing' : ''}" data-id="${item.id}">
           <div class="data-info">
             <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type || '图片')}</span></h4>
             <p>画师: ${h(item.artist)}</p>
@@ -813,26 +929,90 @@
             ${item.founder_notes ? `<p>笔记: ${h(item.founder_notes.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
               <span>${h(item.archive_id)}</span>
+              <span>${formatDate(item.created_at)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger btn-sm" onclick="delCommission('${item.id}')">删除</button>
+            <button class="btn btn-sm" onclick="editCommission('${item.id}')">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteCommission('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    async function delCommission(id) {
-      if (!confirm('确定删除？')) return;
+    function editCommission(id) {
+      window.sb.from('commissions').select('*').eq('id', id).single().then(result => {
+        if (result.error) {
+          showMsg('msg-commission', 'error', '加载数据失败');
+          return;
+        }
+        const item = result.data;
+        document.getElementById('cm-editing-id').value = id;
+        document.getElementById('cm-site').value = item.archive_id || 'lionmio';
+        document.getElementById('cm-type').value = item.type || '图片';
+        document.getElementById('cm-title').value = item.title || '';
+        document.getElementById('cm-artist').value = item.artist || '';
+        document.getElementById('cm-notes').value = item.founder_notes || '';
+        
+        // 根据类型填充内容字段
+        toggleCommissionFields();
+        if (item.type === '图片' || item.type === '音乐' || item.type === '视频') {
+          const fieldMap = { '图片': 'cm-image', '音乐': 'cm-music', '视频': 'cm-video' };
+          if (fieldMap[item.type]) {
+            document.getElementById(fieldMap[item.type]).value = item.image_url || '';
+          }
+        } else if (item.type === '文字') {
+          document.getElementById('cm-text').value = item.text_content || '';
+        }
+        
+        // 切换到编辑模式
+        document.getElementById('cm-form-title').classList.add('editing-mode');
+        document.getElementById('cm-submit-btn').textContent = '保存更新';
+        document.getElementById('cm-cancel-btn').style.display = '';
+        
+        // 更新列表高亮
+        document.querySelectorAll('#list-commission .data-item').forEach(el => el.classList.remove('editing'));
+        const currentItem = document.querySelector(`#list-commission .data-item[data-id="${id}"]`);
+        if (currentItem) currentItem.classList.add('editing');
+        
+        // 滚动到表单
+        document.getElementById('form-commission').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    
+    function cancelEditCommission() {
+      document.getElementById('cm-editing-id').value = '';
+      document.getElementById('cm-form-title').classList.remove('editing-mode');
+      document.getElementById('cm-submit-btn').textContent = '添加约稿';
+      document.getElementById('cm-cancel-btn').style.display = 'none';
+      document.querySelectorAll('#list-commission .data-item').forEach(el => el.classList.remove('editing'));
+      // 重置预览
+      document.getElementById('cm-preview').style.display = 'none';
+      document.getElementById('cm-upload-status').textContent = '';
+      toggleCommissionFields();
+    }
+    
+    async function deleteCommission(id) {
+      if (!confirm('确定要删除这条内容吗？')) return;
       const { error } = await window.sb.from('commissions').delete().eq('id', id);
-      if (error) showMsg('msg-commission', 'error', '删除失败');
-      else { showMsg('msg-commission', 'success', '✅ 删除成功'); loadCommission(); }
+      if (error) {
+        showMsg('msg-commission', 'error', '删除失败: ' + error.message);
+      } else {
+        showMsg('msg-commission', 'success', '✅ 删除成功！');
+        // 如果正在编辑这条，撤销编辑状态
+        if (document.getElementById('cm-editing-id').value === id) {
+          cancelEditCommission();
+        }
+        loadCommission();
+      }
     }
     
     // ========== 创作 ==========
     
     async function submitWorks(e) {
       e.preventDefault();
+      const editingId = document.getElementById('wk-editing-id').value;
+      const isEditing = editingId !== '';
       const type = document.getElementById('wk-type').value;
       const isImage = type === '图片' || type === '玩偶' || type === '游戏';
       
@@ -840,33 +1020,47 @@
         archive_id: document.getElementById('wk-site').value,
         type: type,
         title: document.getElementById('wk-title').value,
-        author: document.getElementById('wk-author').value,
-        created_at: new Date().toISOString()
+        author: document.getElementById('wk-author').value
       };
       
       // 根据类型设置内容字段
       if (isImage) {
+        data.content = null;
         data.image_url = document.getElementById('wk-image').value;
       } else if (type === '文字') {
+        data.image_url = null;
         data.content = document.getElementById('wk-text').value;
       } else if (type === '音乐') {
+        data.image_url = null;
         data.content = document.getElementById('wk-music').value;
       } else if (type === '视频') {
+        data.image_url = null;
         data.content = document.getElementById('wk-video').value;
       }
       
-      const { error } = await window.sb.from('works').insert([data]);
+      let error;
+      if (isEditing) {
+        // 更新模式
+        const { error: updateError } = await window.sb.from('works').update(data).eq('id', editingId);
+        error = updateError;
+        if (!error) {
+          showMsg('msg-works', 'success', '✅ 更新成功！');
+        }
+      } else {
+        // 新增模式
+        data.created_at = new Date().toISOString();
+        const { error: insertError } = await window.sb.from('works').insert([data]);
+        error = insertError;
+        if (!error) {
+          showMsg('msg-works', 'success', '✅ 保存成功！');
+        }
+      }
+      
       if (error) {
         showMsg('msg-works', 'error', '保存失败: ' + error.message);
       } else {
-        showMsg('msg-works', 'success', '✅ 保存成功！');
         document.getElementById('form-works').reset();
-        // 重置预览
-        document.getElementById('wk-preview').style.display = 'none';
-        document.getElementById('wk-upload-status').textContent = '';
-        document.getElementById('wk-video-upload-status').textContent = '';
-        document.getElementById('wk-video-embed-preview').style.display = 'none';
-        toggleWorksFields();
+        cancelEditWorks();
         loadWorks();
       }
     }
@@ -876,29 +1070,100 @@
       const el = document.getElementById('list-works');
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
+      const currentEditingId = document.getElementById('wk-editing-id').value;
       el.innerHTML = data.map(item => `
-        <div class="data-item">
+        <div class="data-item ${currentEditingId === item.id ? 'editing' : ''}" data-id="${item.id}">
           <div class="data-info">
-            <h4>${h(item.title)}</h4>
-            <p>作者: ${h(item.author || '未知')} | 类型: ${h(item.type)}</p>
+            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type)}</span></h4>
+            <p>作者: ${h(item.author || '未知')}</p>
             ${item.image_url ? `<p>图片: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
             ${item.content ? `<p>内容: ${h(item.content.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
               <span>${h(item.archive_id)}</span>
+              <span>${formatDate(item.created_at)}</span>
             </div>
           </div>
           <div class="data-actions">
-            <button class="btn btn-danger btn-sm" onclick="delWorks('${item.id}')">删除</button>
+            <button class="btn btn-sm" onclick="editWorks('${item.id}')">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteWorks('${item.id}')">删除</button>
           </div>
         </div>
       `).join('');
     }
     
-    async function delWorks(id) {
-      if (!confirm('确定删除？')) return;
+    function editWorks(id) {
+      window.sb.from('works').select('*').eq('id', id).single().then(result => {
+        if (result.error) {
+          showMsg('msg-works', 'error', '加载数据失败');
+          return;
+        }
+        const item = result.data;
+        document.getElementById('wk-editing-id').value = id;
+        document.getElementById('wk-site').value = item.archive_id || 'lionmio';
+        document.getElementById('wk-type').value = item.type || '文字';
+        document.getElementById('wk-title').value = item.title || '';
+        document.getElementById('wk-author').value = item.author || '';
+        
+        // 根据类型填充内容字段
+        toggleWorksFields();
+        const type = item.type || '文字';
+        if (type === '图片' || type === '玩偶' || type === '游戏') {
+          document.getElementById('wk-image').value = item.image_url || '';
+          if (item.image_url) {
+            const preview = document.getElementById('wk-preview');
+            preview.src = item.image_url;
+            preview.style.display = 'block';
+          }
+        } else if (type === '文字') {
+          document.getElementById('wk-text').value = item.content || '';
+        } else if (type === '音乐') {
+          document.getElementById('wk-music').value = item.content || '';
+        } else if (type === '视频') {
+          document.getElementById('wk-video').value = item.content || '';
+        }
+        
+        // 切换到编辑模式
+        document.getElementById('wk-form-title').classList.add('editing-mode');
+        document.getElementById('wk-submit-btn').textContent = '保存更新';
+        document.getElementById('wk-cancel-btn').style.display = '';
+        
+        // 更新列表高亮
+        document.querySelectorAll('#list-works .data-item').forEach(el => el.classList.remove('editing'));
+        const currentItem = document.querySelector(`#list-works .data-item[data-id="${id}"]`);
+        if (currentItem) currentItem.classList.add('editing');
+        
+        // 滚动到表单
+        document.getElementById('form-works').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+    
+    function cancelEditWorks() {
+      document.getElementById('wk-editing-id').value = '';
+      document.getElementById('wk-form-title').classList.remove('editing-mode');
+      document.getElementById('wk-submit-btn').textContent = '添加创作';
+      document.getElementById('wk-cancel-btn').style.display = 'none';
+      document.querySelectorAll('#list-works .data-item').forEach(el => el.classList.remove('editing'));
+      // 重置预览
+      document.getElementById('wk-preview').style.display = 'none';
+      document.getElementById('wk-upload-status').textContent = '';
+      document.getElementById('wk-video-upload-status').textContent = '';
+      document.getElementById('wk-video-embed-preview').style.display = 'none';
+      toggleWorksFields();
+    }
+    
+    async function deleteWorks(id) {
+      if (!confirm('确定要删除这条内容吗？')) return;
       const { error } = await window.sb.from('works').delete().eq('id', id);
-      if (error) showMsg('msg-works', 'error', '删除失败');
-      else { showMsg('msg-works', 'success', '✅ 删除成功'); loadWorks(); }
+      if (error) {
+        showMsg('msg-works', 'error', '删除失败: ' + error.message);
+      } else {
+        showMsg('msg-works', 'success', '✅ 删除成功！');
+        // 如果正在编辑这条，撤销编辑状态
+        if (document.getElementById('wk-editing-id').value === id) {
+          cancelEditWorks();
+        }
+        loadWorks();
+      }
     }
     
     // ========== 媒体库 ==========
