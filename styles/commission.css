@@ -8,6 +8,28 @@
   padding: 6rem 2rem 2rem;
 }
 
+/* 确保页面可以滚动 - 核心修复 */
+html, body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: auto;
+  min-height: 100vh;
+}
+
+.commission-page {
+  min-height: 100vh;
+}
+
+.commission-page .container {
+  min-height: calc(100vh - 80px);
+}
+
+/* 确保列表视图和详情视图高度正确 */
+.commission-list-view,
+.commission-detail-view {
+  min-height: calc(100vh - 150px);
+}
+
 .page-title {
   font-size: clamp(2rem, 5vw, 3rem);
   margin-bottom: 0.8rem;
@@ -49,7 +71,7 @@
 
 .search-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15);
+  box-shadow: 0 0 0 3px rgba(123, 167, 196, 0.15);
 }
 
 .search-icon {
@@ -79,6 +101,7 @@
   gap: 1.5rem;
   margin-bottom: 4rem;
   padding: 0 1rem;
+  overflow-y: visible;
 }
 
 /* 瀑布流卡片 */
@@ -180,7 +203,7 @@
 .card-type-tag {
   font-size: 0.7rem;
   padding: 2px 8px;
-  background: rgba(var(--accent-rgb), 0.15);
+  background: rgba(123, 167, 196, 0.15);
   color: var(--accent);
   border-radius: 10px;
 }
@@ -196,6 +219,9 @@
 .commission-list-view,
 .commission-detail-view {
   transition: opacity 0.3s ease;
+  min-height: calc(100vh - 180px);
+  overflow-y: auto;
+  padding-bottom: 2rem;
 }
 
 .commission-list-view.hidden,
@@ -339,7 +365,7 @@
 .detail-tag {
   display: inline-block;
   padding: 0.3em 0.8em;
-  background: rgba(var(--accent-rgb), 0.15);
+  background: rgba(123, 167, 196, 0.15);
   color: var(--accent);
   border-radius: 4px;
   font-size: 0.8rem;
