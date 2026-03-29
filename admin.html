@@ -54,11 +54,31 @@
     .btn-sm { padding: 6px 12px; font-size: 12px; }
     .btn-danger { background: #d93025; }
     .btn-danger:hover { background: #a93025; }
+    .btn-success { background: #28a745; }
+    .btn-success:hover { background: #1e7e34; }
     
     /* 消息 */
     .msg { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; display: none; font-size: 14px; }
     .msg.success { background: #d4edda; color: #155724; display: block; }
     .msg.error { background: #f8d7da; color: #721c24; display: block; }
+    
+    /* 图片上传组件 */
+    .upload-box { border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; }
+    .upload-box:hover { border-color: #1a73e8; background: #f0f7ff; }
+    .upload-preview { max-width: 200px; max-height: 150px; border-radius: 6px; margin: 10px auto; display: block; object-fit: contain; }
+    .upload-url-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+    .upload-url-row input { flex: 1; }
+    .upload-status { font-size: 12px; color: #666; margin-top: 8px; }
+    .upload-status.uploading { color: #1a73e8; }
+    .upload-status.success { color: #28a745; }
+    .upload-status.error { color: #d93025; }
+    
+    /* 视频上传组件 */
+    .video-upload-section { display: flex; gap: 12px; flex-wrap: wrap; }
+    .video-source-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .video-source-tab { padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
+    .video-source-tab.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+    .video-embed-preview { background: #f0f7ff; border-radius: 8px; padding: 12px; margin-top: 10px; font-size: 13px; color: #555; }
     
     /* 列表 */
     .data-list { margin-top: 30px; }
@@ -68,17 +88,34 @@
     .data-info { flex: 1; }
     .data-info h4 { margin-bottom: 4px; color: #333; }
     .data-info p { font-size: 13px; color: #888; margin-bottom: 3px; }
-    .data-meta { display: flex; gap: 8px; margin-top: 6px; }
+    .data-meta { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
     .data-meta span { font-size: 11px; padding: 2px 8px; background: #e8eaed; border-radius: 4px; color: #666; }
     .data-actions { display: flex; gap: 6px; flex-shrink: 0; }
     .empty { text-align: center; padding: 40px; color: #999; }
     .loading { text-align: center; padding: 30px; color: #888; }
-
+    
+    /* 媒体库 */
+    .media-stats { display: flex; gap: 20px; padding: 16px; background: #f0f7ff; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+    .media-stat { display: flex; align-items: center; gap: 8px; }
+    .media-stat strong { color: #1a73e8; }
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+    .media-item { border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: #fafafa; }
+    .media-item:hover { border-color: #1a73e8; }
+    .media-thumb { width: 100%; height: 120px; object-fit: cover; display: block; background: #eee; }
+    .media-thumb.video-thumb { display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px; flex-direction: column; gap: 4px; }
+    .media-info { padding: 10px; }
+    .media-name { font-size: 12px; color: #555; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 4px; }
+    .media-size { font-size: 11px; color: #999; }
+    .media-actions { padding: 0 10px 10px; display: flex; gap: 6px; }
+    .media-actions .btn { flex: 1; padding: 6px 8px; font-size: 11px; }
+    
     @media (max-width: 600px) {
       .form-row { flex-direction: column; }
       .form-group { min-width: 100%; }
       .data-item { flex-direction: column; gap: 10px; }
       .data-actions { width: 100%; }
+      .video-upload-section { flex-direction: column; }
+      .media-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
     }
   </style>
 </head>
@@ -102,6 +139,7 @@
         <button class="tab-btn active" onclick="switchTab('timeline')">时间线</button>
         <button class="tab-btn" onclick="switchTab('commission')">约稿</button>
         <button class="tab-btn" onclick="switchTab('works')">创作</button>
+        <button class="tab-btn" onclick="switchTab('media')">媒体库</button>
       </div>
       
       <!-- 时间线 -->
@@ -183,12 +221,19 @@
 
           <!-- 图片类型字段 -->
           <div id="cm-field-image">
-            <div class="form-row">
-              <div class="form-group full">
-                <label>图片 URL</label>
-                <input type="text" id="cm-image" placeholder="https://...">
-                <p style="font-size:12px;color:#888;margin-top:4px;">可填写图床链接，如 imgur、SM.MS 等</p>
+            <div class="form-group full">
+              <label>图片上传</label>
+              <div class="upload-box" id="cm-upload-box">
+                <input type="file" id="cm-file-input" accept="image/*" style="display:none;" onchange="handleCommissionFileSelect(event)">
+                <button type="button" class="btn btn-sm" onclick="document.getElementById('cm-file-input').click()">选择图片</button>
+                <img id="cm-preview" class="upload-preview" style="display:none;" alt="预览">
+                <div class="upload-status" id="cm-upload-status"></div>
               </div>
+              <div class="upload-url-row">
+                <input type="text" id="cm-image" placeholder="图片URL（上传后自动填入，也可手动输入）">
+                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('cm-image')">确认URL</button>
+              </div>
+              <p style="font-size:12px;color:#888;margin-top:8px;">支持 jpg、png、gif、webp 图片格式</p>
             </div>
           </div>
 
@@ -214,11 +259,18 @@
 
           <!-- 视频类型字段 -->
           <div id="cm-field-video" style="display:none;">
-            <div class="form-row">
-              <div class="form-group full">
-                <label>视频链接</label>
-                <input type="text" id="cm-video" placeholder="https://b23.tv/... 或 https://youtube.com/...">
+            <div class="form-group full">
+              <label>视频上传</label>
+              <div class="upload-box" id="cm-video-upload-box">
+                <input type="file" id="cm-video-file-input" accept="video/*" style="display:none;" onchange="handleCommissionVideoSelect(event)">
+                <button type="button" class="btn btn-sm" onclick="document.getElementById('cm-video-file-input').click()">选择视频</button>
+                <div class="upload-status" id="cm-video-upload-status"></div>
               </div>
+              <div class="upload-url-row">
+                <input type="text" id="cm-video" placeholder="视频URL（上传后自动填入，也可手动输入链接）">
+                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('cm-video')">确认URL</button>
+              </div>
+              <p style="font-size:12px;color:#888;margin-top:8px;">支持 mp4、webm 视频格式</p>
             </div>
           </div>
 
@@ -252,7 +304,7 @@
             </div>
             <div class="form-group">
               <label>类型</label>
-              <select id="wk-type">
+              <select id="wk-type" onchange="toggleWorksFields()">
                 <option value="文字">文字</option>
                 <option value="图片">图片</option>
                 <option value="音乐">音乐</option>
@@ -272,18 +324,89 @@
               <input type="text" id="wk-author" placeholder="作者昵称">
             </div>
           </div>
-          <div class="form-row">
+          
+          <!-- 图片/玩偶/游戏类型字段 -->
+          <div id="wk-field-image">
             <div class="form-group full">
-              <label>内容 / 图片 URL</label>
-              <textarea id="wk-content" placeholder="作品内容或图片链接..."></textarea>
+              <label>图片上传</label>
+              <div class="upload-box" id="wk-upload-box">
+                <input type="file" id="wk-file-input" accept="image/*" style="display:none;" onchange="handleWorksFileSelect(event)">
+                <button type="button" class="btn btn-sm" onclick="document.getElementById('wk-file-input').click()">选择图片</button>
+                <img id="wk-preview" class="upload-preview" style="display:none;" alt="预览">
+                <div class="upload-status" id="wk-upload-status"></div>
+              </div>
+              <div class="upload-url-row">
+                <input type="text" id="wk-image" placeholder="图片URL（上传后自动填入，也可手动输入）">
+                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('wk-image')">确认URL</button>
+              </div>
             </div>
           </div>
+
+          <!-- 文字类型字段 -->
+          <div id="wk-field-text" style="display:none;">
+            <div class="form-group full">
+              <label>文字内容</label>
+              <textarea id="wk-text" placeholder="作品文字内容..." style="min-height:150px;"></textarea>
+            </div>
+          </div>
+
+          <!-- 音乐类型字段 -->
+          <div id="wk-field-music" style="display:none;">
+            <div class="form-group full">
+              <label>音乐链接</label>
+              <input type="text" id="wk-music" placeholder="https://music.163.com/...">
+            </div>
+          </div>
+
+          <!-- 视频类型字段 -->
+          <div id="wk-field-video" style="display:none;">
+            <div class="form-group full">
+              <label>视频</label>
+              <div class="video-source-tabs">
+                <button type="button" class="video-source-tab active" onclick="switchVideoSource('upload')">本地上传</button>
+                <button type="button" class="video-source-tab" onclick="switchVideoSource('embed')">链接嵌入</button>
+              </div>
+              <!-- 本地上传 -->
+              <div id="wk-video-upload-section">
+                <div class="upload-box">
+                  <input type="file" id="wk-video-file-input" accept="video/*" style="display:none;" onchange="handleWorksVideoSelect(event)">
+                  <button type="button" class="btn btn-sm" onclick="document.getElementById('wk-video-file-input').click()">选择视频文件</button>
+                  <div class="upload-status" id="wk-video-upload-status"></div>
+                </div>
+              </div>
+              <!-- 链接嵌入 -->
+              <div id="wk-video-embed-section" style="display:none;">
+                <input type="text" id="wk-video-embed" placeholder="输入 Bilibili 或 YouTube 链接，如 https://www.bilibili.com/video/BVxxxxx" oninput="previewVideoEmbed(this.value)">
+                <div class="video-embed-preview" id="wk-video-embed-preview" style="display:none;"></div>
+              </div>
+              <div class="upload-url-row" style="margin-top:10px;">
+                <input type="text" id="wk-video" placeholder="视频URL（上传后或嵌入后自动填入）">
+                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('wk-video')">确认URL</button>
+              </div>
+            </div>
+          </div>
+
           <button type="submit" class="btn">添加创作</button>
         </form>
         
         <div class="data-list">
           <h3>已有创作</h3>
           <div id="list-works"><div class="loading">加载中...</div></div>
+        </div>
+      </div>
+
+      <!-- 媒体库 -->
+      <div class="tab-content" id="tab-media">
+        <h2>媒体库</h2>
+        <div class="msg" id="msg-media"></div>
+        <div class="media-stats" id="media-stats">
+          <div class="media-stat">
+            <span>文件总数：</span>
+            <strong id="media-count">0</strong>
+          </div>
+        </div>
+        <div class="media-grid" id="media-grid">
+          <div class="loading">加载中...</div>
         </div>
       </div>
       
@@ -325,6 +448,9 @@
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       document.querySelector(`.tab-btn[onclick="switchTab('${name}')"]`).classList.add('active');
       document.getElementById('tab-' + name).classList.add('active');
+      if (name === 'media') {
+        loadMediaLibrary();
+      }
     }
     
     // 显示消息
@@ -348,6 +474,239 @@
       loadTimeline();
       loadCommission();
       loadWorks();
+      loadMediaLibrary();
+    }
+    
+    // ========== 图片/视频上传到 Supabase Storage ==========
+    
+    async function uploadImage(file) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await window.sb.storage
+        .from('media')
+        .upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = window.sb.storage
+        .from('media')
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
+    }
+    
+    async function uploadVideo(file) {
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await window.sb.storage
+        .from('media')
+        .upload(fileName, file, { upsert: true });
+      if (error) throw error;
+      const { data: urlData } = window.sb.storage
+        .from('media')
+        .getPublicUrl(fileName);
+      return urlData.publicUrl;
+    }
+    
+    // 手动确认URL
+    function manualFillUrl(inputId) {
+      const val = document.getElementById(inputId).value.trim();
+      if (val) {
+        showMsg('msg-' + (inputId.startsWith('cm') ? 'commission' : 'works'), 'success', 'URL已确认填入');
+      }
+    }
+    
+    // ========== 约稿图片上传处理 ==========
+    
+    function handleCommissionFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // 显示预览
+      const preview = document.getElementById('cm-preview');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+      
+      // 上传
+      const status = document.getElementById('cm-upload-status');
+      status.textContent = '正在上传...';
+      status.className = 'upload-status uploading';
+      
+      uploadImage(file).then(url => {
+        document.getElementById('cm-image').value = url;
+        status.textContent = '上传成功！';
+        status.className = 'upload-status success';
+      }).catch(err => {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'upload-status error';
+      });
+    }
+    
+    // ========== 约稿视频上传处理 ==========
+    
+    function handleCommissionVideoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const status = document.getElementById('cm-video-upload-status');
+      status.textContent = '正在上传: ' + file.name + '...';
+      status.className = 'upload-status uploading';
+      
+      uploadVideo(file).then(url => {
+        document.getElementById('cm-video').value = url;
+        status.textContent = '上传成功！';
+        status.className = 'upload-status success';
+      }).catch(err => {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'upload-status error';
+      });
+    }
+    
+    // ========== 创作图片上传处理 ==========
+    
+    function handleWorksFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      // 显示预览
+      const preview = document.getElementById('wk-preview');
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+      
+      // 上传
+      const status = document.getElementById('wk-upload-status');
+      status.textContent = '正在上传...';
+      status.className = 'upload-status uploading';
+      
+      uploadImage(file).then(url => {
+        document.getElementById('wk-image').value = url;
+        status.textContent = '上传成功！';
+        status.className = 'upload-status success';
+      }).catch(err => {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'upload-status error';
+      });
+    }
+    
+    // ========== 创作视频上传处理 ==========
+    
+    function handleWorksVideoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const status = document.getElementById('wk-video-upload-status');
+      status.textContent = '正在上传: ' + file.name + '...';
+      status.className = 'upload-status uploading';
+      
+      uploadVideo(file).then(url => {
+        document.getElementById('wk-video').value = url;
+        status.textContent = '上传成功！';
+        status.className = 'upload-status success';
+      }).catch(err => {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'upload-status error';
+      });
+    }
+    
+    // ========== 视频嵌入链接转换 ==========
+    
+    function switchVideoSource(source) {
+      const uploadSection = document.getElementById('wk-video-upload-section');
+      const embedSection = document.getElementById('wk-video-embed-section');
+      const tabs = document.querySelectorAll('.video-source-tab');
+      
+      tabs.forEach(tab => tab.classList.remove('active'));
+      
+      if (source === 'upload') {
+        uploadSection.style.display = '';
+        embedSection.style.display = 'none';
+        tabs[0].classList.add('active');
+      } else {
+        uploadSection.style.display = 'none';
+        embedSection.style.display = '';
+        tabs[1].classList.add('active');
+      }
+    }
+    
+    function previewVideoEmbed(url) {
+      const preview = document.getElementById('wk-video-embed-preview');
+      const embedUrl = convertToEmbedUrl(url);
+      
+      if (embedUrl) {
+        preview.style.display = '';
+        preview.innerHTML = `<strong>嵌入预览：</strong>将转换为以下iframe<br>
+        <code style="word-break:break-all;font-size:11px;">${h(embedUrl)}</code>
+        <br><br>
+        <button type="button" class="btn btn-sm btn-success" onclick="applyVideoEmbed()">应用此嵌入</button>`;
+        preview.dataset.embedUrl = embedUrl;
+      } else if (url.trim()) {
+        preview.style.display = '';
+        preview.innerHTML = `<span style="color:#d93025;">无法识别此链接格式，请输入 Bilibili 或 YouTube 链接</span>`;
+        preview.dataset.embedUrl = '';
+      } else {
+        preview.style.display = 'none';
+        preview.dataset.embedUrl = '';
+      }
+    }
+    
+    function applyVideoEmbed() {
+      const preview = document.getElementById('wk-video-embed-preview');
+      const embedUrl = preview.dataset.embedUrl;
+      if (embedUrl) {
+        document.getElementById('wk-video').value = embedUrl;
+        showMsg('msg-works', 'success', '嵌入链接已应用！');
+      }
+    }
+    
+    function convertToEmbedUrl(url) {
+      if (!url) return null;
+      url = url.trim();
+      
+      // Bilibili
+      const bilibiliMatch = url.match(/bilibili\.com\/video\/([A-Za-z0-9]+)/i) || 
+                           url.match(/b23\.tv\/([A-Za-z0-9]+)/i);
+      if (bilibiliMatch) {
+        return `//player.bilibili.com/player.html?bvid=${bilibiliMatch[1]}`;
+      }
+      
+      // YouTube
+      const youtubeMatch = url.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]+)/i) ||
+                          url.match(/youtu\.be\/([A-Za-z0-9_-]+)/i);
+      if (youtubeMatch) {
+        return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+      }
+      
+      return null;
+    }
+    
+    // ========== 约稿类型字段切换 ==========
+    
+    function toggleCommissionFields() {
+      const type = document.getElementById('cm-type').value;
+      document.getElementById('cm-field-image').style.display = type === '图片' ? '' : 'none';
+      document.getElementById('cm-field-text').style.display = type === '文字' ? '' : 'none';
+      document.getElementById('cm-field-music').style.display = type === '音乐' ? '' : 'none';
+      document.getElementById('cm-field-video').style.display = type === '视频' ? '' : 'none';
+    }
+    
+    // ========== 创作类型字段切换 ==========
+    
+    function toggleWorksFields() {
+      const type = document.getElementById('wk-type').value;
+      const isImage = type === '图片' || type === '玩偶' || type === '游戏';
+      
+      document.getElementById('wk-field-image').style.display = isImage ? '' : 'none';
+      document.getElementById('wk-field-text').style.display = type === '文字' ? '' : 'none';
+      document.getElementById('wk-field-music').style.display = type === '音乐' ? '' : 'none';
+      document.getElementById('wk-field-video').style.display = type === '视频' ? '' : 'none';
+      
+      // 重置视频输入
+      if (type === '视频') {
+        switchVideoSource('upload');
+      }
     }
     
     // ========== 时间线 ==========
@@ -404,15 +763,6 @@
     
     // ========== 约稿 ==========
 
-    // 约稿类型字段切换
-    function toggleCommissionFields() {
-      const type = document.getElementById('cm-type').value;
-      document.getElementById('cm-field-image').style.display = type === '图片' ? '' : 'none';
-      document.getElementById('cm-field-text').style.display = type === '文字' ? '' : 'none';
-      document.getElementById('cm-field-music').style.display = type === '音乐' ? '' : 'none';
-      document.getElementById('cm-field-video').style.display = type === '视频' ? '' : 'none';
-    }
-
     async function submitCommission(e) {
       e.preventDefault();
       const type = document.getElementById('cm-type').value;
@@ -440,6 +790,9 @@
       } else {
         showMsg('msg-commission', 'success', '✅ 保存成功！');
         document.getElementById('form-commission').reset();
+        // 重置预览
+        document.getElementById('cm-preview').style.display = 'none';
+        document.getElementById('cm-upload-status').textContent = '';
         toggleCommissionFields();
         loadCommission();
       }
@@ -480,20 +833,40 @@
     
     async function submitWorks(e) {
       e.preventDefault();
+      const type = document.getElementById('wk-type').value;
+      const isImage = type === '图片' || type === '玩偶' || type === '游戏';
+      
       const data = {
         archive_id: document.getElementById('wk-site').value,
-        type: document.getElementById('wk-type').value,
+        type: type,
         title: document.getElementById('wk-title').value,
         author: document.getElementById('wk-author').value,
-        content: document.getElementById('wk-content').value,
         created_at: new Date().toISOString()
       };
+      
+      // 根据类型设置内容字段
+      if (isImage) {
+        data.image_url = document.getElementById('wk-image').value;
+      } else if (type === '文字') {
+        data.content = document.getElementById('wk-text').value;
+      } else if (type === '音乐') {
+        data.content = document.getElementById('wk-music').value;
+      } else if (type === '视频') {
+        data.content = document.getElementById('wk-video').value;
+      }
+      
       const { error } = await window.sb.from('works').insert([data]);
       if (error) {
         showMsg('msg-works', 'error', '保存失败: ' + error.message);
       } else {
         showMsg('msg-works', 'success', '✅ 保存成功！');
         document.getElementById('form-works').reset();
+        // 重置预览
+        document.getElementById('wk-preview').style.display = 'none';
+        document.getElementById('wk-upload-status').textContent = '';
+        document.getElementById('wk-video-upload-status').textContent = '';
+        document.getElementById('wk-video-embed-preview').style.display = 'none';
+        toggleWorksFields();
         loadWorks();
       }
     }
@@ -508,6 +881,7 @@
           <div class="data-info">
             <h4>${h(item.title)}</h4>
             <p>作者: ${h(item.author || '未知')} | 类型: ${h(item.type)}</p>
+            ${item.image_url ? `<p>图片: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
             ${item.content ? `<p>内容: ${h(item.content.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
               <span>${h(item.archive_id)}</span>
@@ -525,6 +899,147 @@
       const { error } = await window.sb.from('works').delete().eq('id', id);
       if (error) showMsg('msg-works', 'error', '删除失败');
       else { showMsg('msg-works', 'success', '✅ 删除成功'); loadWorks(); }
+    }
+    
+    // ========== 媒体库 ==========
+    
+    async function loadMediaLibrary() {
+      const el = document.getElementById('media-grid');
+      el.innerHTML = '<div class="loading">加载中...</div>';
+      
+      try {
+        const { data, error } = await window.sb.storage
+          .from('media')
+          .list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+        
+        if (error) throw error;
+        
+        document.getElementById('media-count').textContent = data ? data.length : 0;
+        
+        if (!data || data.length === 0) {
+          el.innerHTML = '<p class="empty">暂无上传的文件</p>';
+          return;
+        }
+        
+        // 过滤掉文件夹
+        const files = data.filter(f => f.id && f.name);
+        
+        if (files.length === 0) {
+          el.innerHTML = '<p class="empty">暂无上传的文件</p>';
+          return;
+        }
+        
+        el.innerHTML = files.map(file => {
+          const isImage = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(file.name) || 
+                         file.metadata?.mimetype?.startsWith('image/');
+          const isVideo = file.metadata?.mimetype?.startsWith('video/');
+          const size = formatFileSize(file.metadata?.size || 0);
+          const url = getMediaPublicUrl(file.name);
+          
+          if (isImage) {
+            return `
+              <div class="media-item" data-file="${h(file.name)}">
+                <img src="${h(url)}" class="media-thumb" alt="${h(file.name)}" loading="lazy" onclick="copyMediaUrl('${h(url.replace(/'/g, "\\'"))}')" style="cursor:pointer;" title="点击复制链接">
+                <div class="media-info">
+                  <div class="media-name" title="${h(file.name)}">${h(file.name)}</div>
+                  <div class="media-size">${size}</div>
+                </div>
+                <div class="media-actions">
+                  <button class="btn btn-sm" onclick="copyMediaUrl('${h(url.replace(/'/g, "\\'"))}')">复制链接</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteMediaFile('${h(file.name)}')">删除</button>
+                </div>
+              </div>
+            `;
+          } else if (isVideo) {
+            return `
+              <div class="media-item" data-file="${h(file.name)}">
+                <div class="media-thumb video-thumb">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                  </svg>
+                  <span>视频文件</span>
+                </div>
+                <div class="media-info">
+                  <div class="media-name" title="${h(file.name)}">${h(file.name)}</div>
+                  <div class="media-size">${size}</div>
+                </div>
+                <div class="media-actions">
+                  <button class="btn btn-sm" onclick="copyMediaUrl('${h(url.replace(/'/g, "\\'"))}')">复制链接</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteMediaFile('${h(file.name)}')">删除</button>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div class="media-item" data-file="${h(file.name)}">
+                <div class="media-thumb video-thumb">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                    <polyline points="13 2 13 9 20 9"/>
+                  </svg>
+                  <span>文件</span>
+                </div>
+                <div class="media-info">
+                  <div class="media-name" title="${h(file.name)}">${h(file.name)}</div>
+                  <div class="media-size">${size}</div>
+                </div>
+                <div class="media-actions">
+                  <button class="btn btn-sm" onclick="copyMediaUrl('${h(url.replace(/'/g, "\\'"))}')">复制链接</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteMediaFile('${h(file.name)}')">删除</button>
+                </div>
+              </div>
+            `;
+          }
+        }).join('');
+        
+      } catch (error) {
+        el.innerHTML = '<p class="empty">加载失败: ' + h(error.message) + '</p>';
+      }
+    }
+    
+    function getMediaPublicUrl(fileName) {
+      const { data } = window.sb.storage.from('media').getPublicUrl(fileName);
+      return data.publicUrl;
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function copyMediaUrl(url) {
+      navigator.clipboard.writeText(url).then(() => {
+        showMsg('msg-media', 'success', '链接已复制到剪贴板！');
+      }).catch(() => {
+        // fallback
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showMsg('msg-media', 'success', '链接已复制到剪贴板！');
+      });
+    }
+    
+    async function deleteMediaFile(fileName) {
+      if (!confirm('确定要删除文件 "' + fileName + '" 吗？')) return;
+      
+      try {
+        const { error } = await window.sb.storage
+          .from('media')
+          .remove([fileName]);
+        
+        if (error) throw error;
+        
+        showMsg('msg-media', 'success', '文件已删除！');
+        loadMediaLibrary();
+      } catch (error) {
+        showMsg('msg-media', 'error', '删除失败: ' + error.message);
+      }
     }
   </script>
 </body>

@@ -93,6 +93,98 @@
   }
 
   /**
+   * 判断是否是视频文件 URL（直接视频文件）
+   */
+  function isDirectVideoUrl(str) {
+    if (!str) return false;
+    return /\.(mp4|webm|ogg)(\?.*)?$/i.test(str);
+  }
+
+  /**
+   * 判断是否是 Bilibili 链接
+   */
+  function isBilibiliUrl(str) {
+    if (!str) return false;
+    return str.includes('bilibili.com') || str.includes('b23.tv') || str.includes('player.bilibili.com');
+  }
+
+  /**
+   * 判断是否是 YouTube 链接
+   */
+  function isYouTubeUrl(str) {
+    if (!str) return false;
+    return str.includes('youtube.com') || str.includes('youtu.be');
+  }
+
+  /**
+   * 判断是否是 iframe 嵌入代码
+   */
+  function isIframeEmbed(str) {
+    if (!str) return false;
+    return str.includes('<iframe') || str.includes('player.bilibili.com') || str.includes('youtube.com/embed');
+  }
+
+  /**
+   * 获取视频嵌入 HTML
+   */
+  function getVideoEmbedHtml(url, title) {
+    if (!url) return '';
+    url = url.trim();
+
+    // 如果已经是 iframe 代码，直接返回
+    if (url.startsWith('<iframe')) {
+      return url.replace(/width="[^"]*"/, 'width="100%"').replace(/height="[^"]*"/, 'height="400"');
+    }
+
+    // Bilibili 检测
+    if (isBilibiliUrl(url)) {
+      let bvid = '';
+      const bilibiliMatch = url.match(/bilibili\.com\/video\/([A-Za-z0-9]+)/i) ||
+                           url.match(/b23\.tv\/([A-Za-z0-9]+)/i) ||
+                           url.match(/bvid=([A-Za-z0-9]+)/i);
+      if (bilibiliMatch) bvid = bilibiliMatch[1];
+      if (bvid) {
+        return `<iframe src="//player.bilibili.com/player.html?bvid=${bvid}" width="100%" height="400" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>`;
+      }
+      // 如果是 player.bilibili.com 链接
+      if (url.includes('player.bilibili.com')) {
+        return `<iframe src="${url}" width="100%" height="400" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>`;
+      }
+    }
+
+    // YouTube 检测
+    if (isYouTubeUrl(url)) {
+      let videoId = '';
+      const youtubeMatch = url.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]+)/i) ||
+                          url.match(/youtu\.be\/([A-Za-z0-9_-]+)/i) ||
+                          url.match(/youtube\.com\/embed\/([A-Za-z0-9_-]+)/i);
+      if (youtubeMatch) videoId = youtubeMatch[1];
+      if (videoId) {
+        return `<iframe src="https://www.youtube.com/embed/${videoId}" width="100%" height="400" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>`;
+      }
+      // 如果是 youtube.com/embed 链接
+      if (url.includes('youtube.com/embed')) {
+        return `<iframe src="${url}" width="100%" height="400" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>`;
+      }
+    }
+
+    // 直接视频文件
+    if (isDirectVideoUrl(url)) {
+      return `<video controls width="100%" style="border-radius:8px;max-height:500px;">
+        <source src="${escapeHtml(url)}" type="video/${url.endsWith('.webm') ? 'webm' : 'mp4'}">
+        您的浏览器不支持视频播放
+      </video>`;
+    }
+
+    // 如果是外部链接，显示按钮
+    if (isExternalLink(url)) {
+      return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;margin-bottom:20px;">▶ 前往观看</a>`;
+    }
+
+    return '';
+  }
+
+  /**
    * 判断是否是外部链接
    */
   function isExternalLink(str) {
@@ -148,9 +240,61 @@
         </div>`;
     }
 
-    // 视频创作：emoji + 视频信息 + 观看按钮
+    // 视频创作：支持嵌入 iframe 或本地视频文件
     if (type === '视频') {
       const mediaUrl = img || content;
+      const isEmbed = isBilibiliUrl(mediaUrl) || isYouTubeUrl(mediaUrl) || isIframeEmbed(mediaUrl);
+      const isDirectVideo = isDirectVideoUrl(mediaUrl);
+
+      // 如果是嵌入链接或本地视频，显示缩略图+播放图标
+      if (isEmbed || isDirectVideo) {
+        // 获取视频预览缩略图
+        let thumbnailHtml = '';
+        let thumbnailClass = '';
+        
+        if (isBilibiliUrl(mediaUrl)) {
+          let bvid = '';
+          const bilibiliMatch = mediaUrl.match(/bilibili\.com\/video\/([A-Za-z0-9]+)/i) ||
+                               mediaUrl.match(/b23\.tv\/([A-Za-z0-9]+)/i);
+          if (bilibiliMatch) bvid = bilibiliMatch[1];
+          if (bvid) {
+            thumbnailClass = ' has-thumbnail';
+            thumbnailHtml = `<img src="https://i0.hdslb.com/bfs/archive/${bvid}.jpg" alt="Bilibili thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.style.display='none'">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>`;
+          }
+        } else if (isYouTubeUrl(mediaUrl)) {
+          let videoId = '';
+          const youtubeMatch = mediaUrl.match(/youtube\.com\/watch\?v=([A-Za-z0-9_-]+)/i) ||
+                              mediaUrl.match(/youtu\.be\/([A-Za-z0-9_-]+)/i);
+          if (youtubeMatch) videoId = youtubeMatch[1];
+          if (videoId) {
+            thumbnailClass = ' has-thumbnail';
+            thumbnailHtml = `<img src="https://img.youtube.com/vi/${videoId}/mqdefault.jpg" alt="YouTube thumbnail" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>`;
+          }
+        } else if (isDirectVideo) {
+          thumbnailClass = ' has-thumbnail';
+          thumbnailHtml = `<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.6);border-radius:50%;width:50px;height:50px;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          </div>`;
+        }
+
+        return `
+          <div class="work-card-body work-card-body-video${thumbnailClass}" style="position:relative;overflow:hidden;">
+            ${!thumbnailClass ? '<span class="video-emoji">🎬</span>' : ''}
+            ${thumbnailHtml}
+            <div class="video-info">
+              <span class="video-title">${escapeHtml(item.title)}</span>
+              <span class="video-author">${escapeHtml(item.author || '')}</span>
+            </div>
+          </div>`;
+      }
+
+      // 普通视频链接
       const hasLink = isExternalLink(mediaUrl);
       return `
         <div class="work-card-body work-card-body-video">
@@ -869,11 +1013,44 @@
     const parts = [];
     const img = work.image_url || '';
     const content = (work.content || '').trim();
+    const type = work.type;
 
-    if (img && isImageUrl(img)) {
-      parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
+    // 图片创作：有 image_url 直接显示图片
+    if (type === '图片') {
+      if (img && isImageUrl(img)) {
+        parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
+      }
+      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
     }
 
+    // 视频创作：显示嵌入播放器
+    if (type === '视频') {
+      const mediaUrl = img || content;
+      const videoEmbed = getVideoEmbedHtml(mediaUrl, work.title);
+      if (videoEmbed) {
+        parts.push(videoEmbed);
+        return parts.join('');
+      }
+    }
+
+    // 音乐创作
+    if (type === '音乐') {
+      const mediaUrl = img || content;
+      if (mediaUrl && isExternalLink(mediaUrl)) {
+        parts.push(`<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;margin-bottom:20px;">🎵 点击收听</a>`);
+      }
+      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    }
+
+    // 玩偶/游戏：有图片显示图片
+    if (type === '玩偶' || type === '游戏') {
+      if (img && isImageUrl(img)) {
+        parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
+      }
+      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    }
+
+    // 文字创作
     if (content !== '') {
       if (isImageUrl(content)) {
         parts.push(`<img src="${escapeHtml(content)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
