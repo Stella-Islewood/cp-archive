@@ -738,6 +738,7 @@
     currentImmersiveWorkId = workId;
     const overlay = document.getElementById('immersiveOverlay');
     const contentWrap = document.getElementById('immersiveContentWrap');
+    const toolbar = document.getElementById('immersiveToolbar');
 
     // 填充内容
     document.getElementById('immersiveTag').textContent = work.type || '';
@@ -752,12 +753,12 @@
     // 显示
     overlay.classList.add('show', 'bg-light');
     overlay.classList.remove('bg-cream', 'bg-dark');
-    document.getElementById('immersiveToolbar').className = 'immersive-toolbar light';
+    toolbar.className = 'immersive-toolbar light';
     document.getElementById('immersiveText').className = 'immersive-text size-medium';
     document.getElementById('immersiveProgress').style.width = '0%';
 
-    // 隐藏工具栏
-    document.getElementById('immersiveToolbar').classList.add('hidden');
+    // 默认隐藏工具栏（按需显示）
+    toolbar.classList.remove('visible');
 
     // 隐藏悬浮按钮
     const floatBtn = document.getElementById('immersiveFloatBtn');
@@ -782,9 +783,14 @@
    */
   function resetImmersiveState() {
     document.querySelectorAll('.immersive-size-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.immersive-size-btn[data-size="medium"]').classList.add('active');
+    const mediumBtn = document.querySelector('.immersive-size-btn[data-size="medium"]');
+    if (mediumBtn) mediumBtn.classList.add('active');
     document.querySelectorAll('.immersive-bg-btn').forEach(b => b.classList.remove('active'));
-    document.querySelector('.immersive-bg-btn[data-bg="light"]').classList.add('active');
+    const lightBtn = document.querySelector('.immersive-bg-btn[data-bg="light"]');
+    if (lightBtn) lightBtn.classList.add('active');
+    // 重置时隐藏工具栏
+    const toolbar = document.getElementById('immersiveToolbar');
+    if (toolbar) toolbar.classList.remove('visible');
   }
 
   /**
@@ -848,7 +854,7 @@
       if (e.target === overlay) closeImmersiveMode();
     });
 
-    // 滚动 → 进度条 + 自动隐藏工具栏
+    // 滚动 → 进度条 + 按需显示工具栏
     if (immersiveScrollHandler) {
       contentWrap.removeEventListener('scroll', immersiveScrollHandler);
     }
@@ -862,31 +868,24 @@
       const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 100;
       document.getElementById('immersiveProgress').style.width = Math.min(progress, 100) + '%';
 
-      // 显示工具栏
-      toolbar.classList.remove('hidden');
-      if (immersiveToolbarTimer) clearTimeout(immersiveToolbarTimer);
-      immersiveToolbarTimer = setTimeout(() => {
-        toolbar.classList.add('hidden');
-      }, 2000);
+      // 滚动时显示工具栏
+      showToolbar();
     };
-    contentWrap.addEventListener('scroll', immersiveScrollHandler);
+    contentWrap.addEventListener('scroll', immersiveScrollHandler, { passive: true });
 
     // 鼠标移动 → 显示工具栏
     if (immersiveMouseHandler) {
       overlay.removeEventListener('mousemove', immersiveMouseHandler);
     }
     immersiveMouseHandler = function() {
-      toolbar.classList.remove('hidden');
-      if (immersiveToolbarTimer) clearTimeout(immersiveToolbarTimer);
-      immersiveToolbarTimer = setTimeout(() => {
-        toolbar.classList.add('hidden');
-      }, 2000);
+      showToolbar();
     };
     overlay.addEventListener('mousemove', immersiveMouseHandler, { passive: true });
 
     // 字号切换
     document.querySelectorAll('.immersive-size-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        showToolbar();
         const size = this.dataset.size;
         document.querySelectorAll('.immersive-size-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
@@ -899,6 +898,7 @@
     // 背景色切换
     document.querySelectorAll('.immersive-bg-btn').forEach(btn => {
       btn.addEventListener('click', function() {
+        showToolbar();
         const bg = this.dataset.bg;
         document.querySelectorAll('.immersive-bg-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
@@ -908,6 +908,19 @@
         toolbar.classList.add(bg === 'dark' ? 'dark' : bg === 'cream' ? 'cream' : 'light');
       });
     });
+  }
+
+  /**
+   * 显示工具栏（按需显示，2秒后自动隐藏）
+   */
+  function showToolbar() {
+    const toolbar = document.getElementById('immersiveToolbar');
+    if (!toolbar) return;
+    toolbar.classList.add('visible');
+    if (immersiveToolbarTimer) clearTimeout(immersiveToolbarTimer);
+    immersiveToolbarTimer = setTimeout(() => {
+      toolbar.classList.remove('visible');
+    }, 2000);
   }
 
   // ========== 筛选功能 ==========

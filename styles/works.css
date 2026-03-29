@@ -351,13 +351,12 @@
 }
 
 /* ========================================
-   详情视图
+   详情视图 - 居中卡片布局
    ======================================== */
 .works-detail-view {
   padding-top: 2rem;
   animation: fadeIn 0.3s ease;
-  max-width: 900px;
-  margin: 0 auto;
+  max-width: 100%;
 }
 
 @keyframes fadeIn {
@@ -377,7 +376,7 @@
   color: var(--text-secondary);
   font-size: 0.9rem;
   cursor: pointer;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   transition: all 0.2s ease;
 }
 
@@ -386,72 +385,121 @@
   color: var(--accent);
 }
 
-/* 作品详情 */
-.work-detail {
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  overflow: hidden;
-  margin-bottom: 4rem;
+/* 文章阅读卡片 - 核心样式 */
+.article-body {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  padding: 40px 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  line-height: 1.9;
+  font-size: 16px;
+  letter-spacing: 0.03em;
 }
 
-/* 作品大图 */
-.detail-cover {
-  width: 100%;
-  aspect-ratio: 16/9;
-  background: var(--bg-secondary);
+/* LucasMia 主题阅读卡片背景 */
+[data-theme="lucasmia"] .article-body {
+  background: #2D1F2D;
 }
 
-.detail-cover-placeholder {
-  width: 100%;
-  height: 100%;
+[data-theme="lucasmia"] .article-body .article-text,
+[data-theme="lucasmia"] .article-body .article-title,
+[data-theme="lucasmia"] .article-body .article-meta {
+  color: #F0E0E0;
 }
 
-.detail-cover-placeholder svg {
-  opacity: 0.5;
+[data-theme="lucasmia"] .article-body .article-divider {
+  background: #4A3545;
 }
 
-/* 作品信息 */
-.detail-info {
-  padding: 2rem 2rem 1rem;
-}
-
-.detail-title {
+/* 文章标题 */
+.article-title {
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
   font-size: 1.8rem;
+  line-height: 1.4;
+  margin-bottom: 12px;
   color: var(--text-title);
-  margin-bottom: 1rem;
-  transition: color var(--transition-duration) var(--transition-easing);
+  font-weight: 600;
 }
 
-.detail-meta {
+/* 文章元信息 */
+.article-meta {
+  max-width: 720px;
+  margin: 0 auto 32px;
+  color: #888;
+  font-size: 14px;
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
 }
 
-.detail-author {
-  font-size: 0.95rem;
-  color: var(--text-secondary);
+/* 分隔线 */
+.article-divider {
+  height: 1px;
+  background: #EAF4FF;
+  margin-bottom: 32px;
+  transition: background 0.3s ease;
 }
 
-.detail-tag {
-  display: inline-block;
-  padding: 0.3em 0.8em;
-  background: rgba(123, 167, 196, 0.15);
-  color: var(--accent);
-  border-radius: 4px;
-  font-size: 0.8rem;
+/* 封面图 */
+.detail-cover {
+  width: 100%;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.detail-date {
-  font-size: 0.85rem;
-  color: var(--text-muted);
+.detail-cover img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+}
+
+.detail-cover-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+.detail-cover-placeholder svg {
+  opacity: 0.5;
+}
+
+/* 正文内容 */
+.article-text {
+  color: #2F2F2F;
+  line-height: 1.9;
+}
+
+.article-text p {
+  margin-bottom: 1.5em;
+  color: #2F2F2F;
+}
+
+.article-text p:last-child {
+  margin-bottom: 0;
+}
+
+[data-theme="lucasmia"] .article-text {
+  color: #F0E0E0;
+}
+
+[data-theme="lucasmia"] .article-text p {
+  color: #F0E0E0;
 }
 
 /* 收藏按钮 */
-.detail-actions {
-  padding: 0 2rem 1.5rem;
+.article-actions {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn-detail-favorite {
@@ -489,16 +537,40 @@
   font-weight: 500;
 }
 
-/* 分割线 */
-.detail-divider {
-  height: 1px;
-  background: #EAF4FF;
-  margin: 60px 2rem 0;
-  transition: background 0.3s ease;
+/* 评论区卡片 */
+.comments-article-card {
+  margin-top: 0;
 }
 
-[data-theme="lucasmia"] .detail-divider {
-  background: #3D2535;
+.comments-title {
+  font-size: 1.1rem;
+  color: var(--text-title);
+  margin-bottom: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color var(--transition-duration) var(--transition-easing);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.comments-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: normal;
+}
+
+.comment-form-section {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.comment-form-title {
+  font-size: 1rem;
+  color: var(--text-title);
+  font-family: "Noto Serif SC", serif;
+  margin-bottom: 1rem;
 }
 
 /* ========================================
@@ -974,6 +1046,293 @@
 }
 
 /* ========================================
+   沉浸阅读模式 - 按需显示工具条
+   ======================================== */
+.immersive-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.immersive-overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* 进度条 */
+.immersive-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  width: 0%;
+  z-index: 2002;
+  transition: width 0.1s linear;
+  opacity: 0.8;
+}
+
+/* 沉浸模式工具栏 - 默认隐藏，点击后才显示 */
+.immersive-toolbar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  z-index: 2001;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-100%);
+  transition: transform 0.3s ease, opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* 工具栏显示状态 */
+.immersive-toolbar.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* 工具栏背景 - 白色 */
+.immersive-toolbar.light {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: #333;
+}
+
+/* 工具栏背景 - 米色 */
+.immersive-toolbar.cream {
+  background: rgba(248, 244, 232, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: #4A3F35;
+}
+
+/* 工具栏背景 - 深色 */
+.immersive-toolbar.dark {
+  background: rgba(26, 26, 26, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ccc;
+}
+
+/* 退出按钮 */
+.immersive-btn-close {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(128, 128, 128, 0.15);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.immersive-btn-close:hover {
+  background: rgba(128, 128, 128, 0.3);
+}
+
+/* 工具栏中央标题 */
+.immersive-toolbar-center {
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+}
+
+.immersive-title-preview {
+  font-size: 0.85rem;
+  color: inherit;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-family: "Noto Serif SC", serif;
+}
+
+/* 工具栏右侧按钮组 */
+.immersive-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* 字号按钮组 */
+.immersive-font-size {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(128, 128, 128, 0.1);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.immersive-size-btn {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: "Noto Serif SC", serif;
+  color: inherit;
+  opacity: 0.6;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.immersive-size-btn[data-size="small"] { font-size: 0.7rem; }
+.immersive-size-btn[data-size="medium"] { font-size: 0.85rem; }
+.immersive-size-btn[data-size="large"] { font-size: 1rem; }
+
+.immersive-size-btn:hover { opacity: 1; }
+
+.immersive-size-btn.active {
+  background: var(--accent);
+  color: white;
+  opacity: 1;
+}
+
+/* 背景色按钮组 */
+.immersive-bg-switch {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(128, 128, 128, 0.1);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.immersive-bg-btn {
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  color: inherit;
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.immersive-bg-btn:hover { opacity: 1; }
+
+.immersive-bg-btn.active { opacity: 1; }
+
+.immersive-bg-btn[data-bg="light"].active {
+  background: #fff;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.immersive-bg-btn[data-bg="cream"].active {
+  background: #F8F4E8;
+  color: #4A3F35;
+  border: 1px solid #ccc8b8;
+}
+
+.immersive-bg-btn[data-bg="dark"].active {
+  background: #1a1a1a;
+  color: #ccc;
+  border: 1px solid #444;
+}
+
+/* 沉浸阅读内容区 */
+.immersive-content-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 0;
+}
+
+.immersive-content {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 2rem 6rem;
+  transition: color 0.3s ease;
+}
+
+/* 背景色变体 */
+.immersive-overlay.bg-light { background: #fff; color: #222; }
+.immersive-overlay.bg-cream { background: #F8F4E8; color: #4A3F35; }
+.immersive-overlay.bg-dark { background: #1a1a1a; color: #ccc; }
+
+.immersive-header {
+  margin-bottom: 2rem;
+}
+
+.immersive-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 0.2em 0.7em;
+  border-radius: 12px;
+  margin-bottom: 0.8rem;
+  font-family: "Noto Serif SC", serif;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  border: 1px solid currentColor;
+}
+
+.immersive-title {
+  font-family: "Noto Serif SC", "SimSun", serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.6rem;
+  color: inherit;
+}
+
+.immersive-author {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin-bottom: 1.5rem;
+  font-family: "Noto Serif SC", serif;
+}
+
+.immersive-divider {
+  width: 60px;
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.4;
+  margin: 0 0 2rem;
+}
+
+/* 字号变体 */
+.immersive-text {
+  font-family: "Noto Serif SC", "SimSun", serif;
+  font-size: 18px;
+  line-height: 2.2;
+  color: inherit;
+}
+
+.immersive-text.size-small { font-size: 15px; }
+.immersive-text.size-medium { font-size: 18px; }
+.immersive-text.size-large { font-size: 21px; }
+
+.immersive-text p {
+  margin-bottom: 1.5em;
+  letter-spacing: 0.03em;
+}
+
+.immersive-text p:last-child { margin-bottom: 0; }
+
+.immersive-overlay.bg-dark .immersive-text a { color: #9ac8f0; }
+
+/* ========================================
    响应式布局
    ======================================== */
 
@@ -1071,19 +1430,30 @@
     height: 180px;
   }
 
-  .detail-meta {
+  /* 详情页响应式 */
+  .article-body {
+    padding: 24px 16px;
+    margin-bottom: 1.5rem;
+  }
+
+  .article-title {
+    font-size: 1.4rem;
+  }
+
+  .article-meta {
+    font-size: 13px;
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
   }
 
   .immersive-content {
-    padding: 2rem 1.5rem 4rem;
+    padding: 2rem 1rem 4rem;
   }
 
   .immersive-toolbar {
-    padding: 0 1rem;
-    gap: 0.6rem;
+    padding: 0 0.5rem;
+    gap: 0.3rem;
   }
 
   .immersive-toolbar-center { display: none; }

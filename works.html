@@ -134,10 +134,23 @@
           <span>返回作品列表</span>
         </button>
 
-        <!-- 作品内容区 -->
-        <article class="work-detail" id="workDetail">
-          <!-- 作品大图 -->
-          <div class="detail-cover">
+        <!-- 居中阅读卡片（最大宽度720px） -->
+        <div class="article-body">
+          <!-- 文章标题 -->
+          <h1 class="article-title" id="detailTitle">作品标题</h1>
+
+          <!-- 文章元信息 -->
+          <div class="article-meta">
+            <span class="detail-author" id="detailAuthor">作者：-</span>
+            <span class="detail-tag" id="detailTag">分类</span>
+            <span class="detail-date" id="detailDate">-</span>
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="article-divider"></div>
+
+          <!-- 作品内容（封面图/视频等） -->
+          <div class="detail-cover" id="detailCover">
             <div class="cover-placeholder detail-cover-placeholder" id="detailCoverPlaceholder">
               <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -147,58 +160,41 @@
             </div>
           </div>
 
-          <!-- 作品信息 -->
-          <div class="detail-info">
-            <h1 class="detail-title" id="detailTitle">作品标题</h1>
-            <div class="detail-meta">
-              <span class="detail-author" id="detailAuthor">作者：-</span>
-              <span class="detail-tag" id="detailTag">分类</span>
-              <span class="detail-date" id="detailDate">-</span>
-            </div>
+          <!-- 正文内容 -->
+          <div class="article-text" id="detailContent">
           </div>
 
           <!-- 收藏按钮 -->
-          <div class="detail-actions">
+          <div class="article-actions">
             <button class="btn-detail-favorite" id="btnDetailFavorite">
               <span class="favorite-icon-large">♡</span>
               <span class="favorite-text">收藏</span>
             </button>
           </div>
+        </div>
 
-          <!-- 作品内容 -->
-          <div class="detail-content" id="detailContent">
+        <!-- 评论区卡片（同样最大宽度720px，居中） -->
+        <div class="article-body comments-article-card">
+          <h2 class="comments-title" id="commentsTitle">
+            全部评论 <span class="comments-count" id="commentsCount">(0)</span>
+          </h2>
+
+          <!-- 留言列表 -->
+          <div class="comments-list" id="commentsList">
           </div>
 
-          <!-- 分割线 -->
-          <div class="detail-divider" id="detailDivider"></div>
-
-          <!-- 评论区 -->
-          <section class="detail-comments" id="detailComments">
-            <!-- 评论区卡片 -->
-            <div class="comments-card">
-              <h2 class="comments-title" id="commentsTitle">
-                全部评论 <span class="comments-count" id="commentsCount">(0)</span>
-              </h2>
-
-              <!-- 留言列表 -->
-              <div class="comments-list" id="commentsList">
-                <!-- 留言将由 JS 动态生成 -->
+          <!-- 发表评论 -->
+          <div class="comment-form-section">
+            <h3 class="comment-form-title">发表评论</h3>
+            <form class="comments-form" id="commentsForm">
+              <div class="comments-form-row">
+                <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
               </div>
-            </div>
-
-            <!-- 发表评论卡片 -->
-            <div class="comment-form-card">
-              <h3 class="comment-form-title">发表评论</h3>
-              <form class="comments-form" id="commentsForm">
-                <div class="comments-form-row">
-                  <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
-                </div>
-                <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
-                <button type="submit" class="btn btn-submit-comment">发布留言</button>
-              </form>
-            </div>
-          </section>
-        </article>
+              <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
+              <button type="submit" class="btn btn-submit-comment">发布留言</button>
+            </form>
+          </div>
+        </div>
       </div>
 
       <!-- ========== 文字阅读器弹窗 ========== -->
