@@ -81,12 +81,9 @@
         <!-- 签筒 -->
         <div class="fortune-shaker-wrap" id="fortuneShakerWrap">
           <div class="fortune-tube">
-            <div class="fortune-tube-top"></div>
-            <!-- 竹节凸起线 -->
-            <div class="fortune-tube-node"></div>
-            <div class="fortune-tube-node"></div>
-            <div class="fortune-tube-node"></div>
-            <!-- 签条 -->
+            <!-- 顶部 -->
+            <div class="fortune-tube-cap"></div>
+            <!-- 签条容器 -->
             <div class="fortune-sticks-wrap" id="fortuneSticks">
               <div class="fortune-stick"></div>
               <div class="fortune-stick"></div>
@@ -98,27 +95,35 @@
               <div class="fortune-stick"></div>
               <div class="fortune-stick"></div>
               <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
+              <div class="fortune-stick"></div>
             </div>
+            <!-- 底部竹节线 -->
+            <div class="fortune-tube-line"></div>
+            <div class="fortune-tube-line"></div>
+            <div class="fortune-tube-line"></div>
           </div>
         </div>
 
         <!-- 抽签按钮 -->
-        <button class="btn-draw" id="drawBtn">摇签</button>
+        <button class="btn-draw" id="drawBtn">摇 签</button>
 
         <!-- 已抽取提示 -->
         <p class="already-drawn" id="alreadyDrawn" style="display: none;">
-          今日已提取，明日再来
+          今日已抽取，明日再来
         </p>
 
         <!-- 签纸展示 -->
         <div class="fortune-result" id="fortuneResult">
-          <div class="fortune-paper" id="fortunePaper">
-            <div class="fortune-paper-frame"></div>
-            <div class="fortune-paper-top-deco"></div>
-            <div class="fortune-rank" id="fortuneRank"></div>
-            <div class="fortune-rank-line"></div>
+          <div class="fortune-slip" id="fortunePaper">
+            <!-- 今日之签标签 -->
+            <span class="fortune-label">今日之签</span>
+            <!-- 运势等级 -->
+            <div class="fortune-level" id="fortuneRank"></div>
+            <!-- 签文竖排 -->
             <div class="fortune-text" id="fortuneText"></div>
-            <div class="fortune-paper-bottom-deco"></div>
+            <!-- 日期 -->
+            <span class="fortune-date" id="fortuneDate"></span>
           </div>
         </div>
 

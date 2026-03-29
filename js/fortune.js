@@ -108,7 +108,7 @@
 
     const selected = fortunes[Math.floor(Math.random() * fortunes.length)];
     const fortune  = {
-      rank: selected.rank,
+      level: selected.level,
       text: selected.text,
       theme: theme
     };
@@ -126,8 +126,10 @@
   function displayFortune(fortune) {
     const rankEl = document.getElementById('fortuneRank');
     const textEl = document.getElementById('fortuneText');
-    if (rankEl) rankEl.textContent = fortune.rank;
+    const dateEl = document.getElementById('fortuneDate');
+    if (rankEl) rankEl.textContent = fortune.level;
     if (textEl) textEl.textContent = fortune.text;
+    if (dateEl) dateEl.textContent = new Date().toLocaleDateString('zh-CN');
   }
 
   /**

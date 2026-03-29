@@ -1,6 +1,6 @@
 /* ========================================
    CP同人档案馆 - 运势签页面样式
-   东方美学 · 日式御守风格
+   日式御签 · 高级简洁风格
    ======================================== */
 
 /* 页面基础 */
@@ -43,101 +43,72 @@
    ======================================== */
 .fortune-shaker-wrap {
   position: relative;
-  width: 140px;
+  width: 100px;
   margin-bottom: 3rem;
 }
 
 /* 签筒主体 */
 .fortune-tube {
   position: relative;
-  width: 120px;
-  height: 180px;
+  width: 80px;
+  height: 160px;
   margin: 0 auto;
-  background: linear-gradient(
-    90deg,
-    #3D2B1F 0%,
-    #5C4033 20%,
-    #6B4C35 35%,
-    #7A5640 50%,
-    #6B4C35 65%,
-    #5C4033 80%,
-    #3D2B1F 100%
-  );
-  border-radius: 8px 8px 4px 4px;
+  background: linear-gradient(135deg, #5C3D2E, #8B5E3C, #5C3D2E);
+  border-radius: 8px;
   box-shadow:
-    inset -4px 0 8px rgba(0, 0, 0, 0.3),
-    inset 4px 0 8px rgba(255, 255, 255, 0.05),
+    inset -3px 0 6px rgba(0, 0, 0, 0.3),
+    inset 3px 0 6px rgba(255, 255, 255, 0.05),
     0 8px 24px rgba(0, 0, 0, 0.4);
   overflow: hidden;
 }
 
-/* 竹节纹理线 */
-.fortune-tube::before {
-  content: '';
+/* 签筒顶部 */
+.fortune-tube-cap {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent 0px,
-    transparent 28px,
-    rgba(0, 0, 0, 0.2) 28px,
-    rgba(0, 0, 0, 0.2) 30px
-  );
-  pointer-events: none;
-}
-
-/* 竹节凸起线 */
-.fortune-tube-node {
-  position: absolute;
-  left: -4px;
-  right: -4px;
-  height: 4px;
-  background: linear-gradient(180deg, #4A3525, #3D2B1F);
-  border-radius: 2px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.fortune-tube-node:nth-child(1) { top: 28px; }
-.fortune-tube-node:nth-child(2) { top: 86px; }
-.fortune-tube-node:nth-child(3) { top: 144px; }
-
-/* 签筒顶部收口 */
-.fortune-tube-top {
-  position: absolute;
-  top: -6px;
-  left: -2px;
-  right: -2px;
-  height: 14px;
+  height: 12px;
   background: linear-gradient(180deg, #6B4C35, #4A3525);
-  border-radius: 6px 6px 2px 2px;
-  box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 8px 8px 0 0;
 }
 
 /* 签条容器 */
 .fortune-sticks-wrap {
   position: absolute;
-  top: 8px;
+  top: 12px;
   left: 50%;
   transform: translateX(-50%);
-  width: 20px;
-  height: 160px;
+  width: 16px;
+  height: 130px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 /* 单根签条 */
 .fortune-stick {
-  width: 8px;
-  height: 28px;
+  width: 6px;
+  height: 22px;
   background: linear-gradient(180deg, #D4B896, #C4A882, #D4B896);
   border-radius: 1px;
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
+
+/* 竹节线 */
+.fortune-tube-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(180deg, #4A3525, #3D2B1F);
+  border-radius: 1px;
+}
+
+.fortune-tube-line:nth-of-type(1) { top: 50px; }
+.fortune-tube-line:nth-of-type(2) { top: 100px; }
+.fortune-tube-line:nth-of-type(3) { top: 150px; }
 
 /* 签条摇晃动画 */
 .fortune-sticks-wrap.shaking {
@@ -167,8 +138,8 @@
   border-radius: 2px;
   color: var(--text-secondary);
   font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 0.95rem;
-  letter-spacing: 0.4em;
+  font-size: 1rem;
+  letter-spacing: 0.3em;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -177,7 +148,6 @@
 .btn-draw:hover {
   border-color: var(--accent);
   color: var(--accent);
-  background: rgba(var(--accent-rgb), 0.05);
 }
 
 .btn-draw:active {
@@ -209,141 +179,157 @@
   pointer-events: auto;
 }
 
-/* 签纸 — 竖长条御守风格 */
-.fortune-paper {
-  position: relative;
-  width: 120px;
-  min-height: 320px;
+/* ========================================
+   签纸 — 日式御签风格
+   ======================================== */
+.fortune-slip {
+  width: 140px;
+  min-height: 360px;
   background: #F8F4E8;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.15),
-    0 1px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #C8B89A;
+  border-radius: 4px;
+  padding: 24px 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 20px 12px 24px;
-  overflow: hidden;
-}
-
-/* 签纸纸张纹理 */
-.fortune-paper::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    repeating-linear-gradient(
-      0deg,
-      transparent 0px,
-      transparent 3px,
-      rgba(0, 0, 0, 0.015) 3px,
-      rgba(0, 0, 0, 0.015) 4px
-    );
-  pointer-events: none;
-}
-
-/* 签纸边框 */
-.fortune-paper-frame {
-  position: absolute;
-  inset: 8px;
-  border: 1px solid rgba(123, 167, 196, 0.4);
-  pointer-events: none;
+  gap: 16px;
+  box-shadow: 2px 4px 16px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 /* 顶部装饰线 */
-.fortune-paper-top-deco {
-  width: 80%;
+.fortune-slip::before {
+  content: '';
+  display: block;
+  width: 60%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  margin-bottom: 16px;
-  flex-shrink: 0;
+  background: #C8B89A;
+  position: absolute;
+  top: 20px;
+  left: 20%;
 }
 
 /* 底部装饰线 */
-.fortune-paper-bottom-deco {
-  width: 80%;
+.fortune-slip::after {
+  content: '';
+  display: block;
+  width: 60%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  margin-top: 16px;
-  flex-shrink: 0;
+  background: #C8B89A;
+  position: absolute;
+  bottom: 24px;
+  left: 20%;
+}
+
+/* 今日之签标签 */
+.fortune-label {
+  font-size: 0.7rem;
+  color: #8B7355;
+  letter-spacing: 0.1em;
+  margin-top: 8px;
 }
 
 /* 运势等级 */
-.fortune-rank {
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: var(--accent);
-  letter-spacing: 0.3em;
-  padding: 0.2em 0.5em;
-  border: 1px solid rgba(123, 167, 196, 0.5);
-  margin-bottom: 12px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-/* 运势等级分隔线 */
-.fortune-rank-line {
-  width: 60%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0,0,0,0.15), transparent);
-  margin-bottom: 8px;
-  flex-shrink: 0;
+.fortune-level {
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  color: #2A2A2A;
+  border: 1px solid #C8B89A;
+  padding: 4px 12px;
+  font-weight: 500;
 }
 
 /* 签文 — 竖排文字 */
 .fortune-text {
-  font-family: "Noto Serif SC", "SimSun", serif;
-  font-size: 0.8rem;
-  color: #4A3F35;
-  line-height: 2;
-  letter-spacing: 0.1em;
-  text-align: center;
   writing-mode: vertical-rl;
-  text-orientation: upright;
-  height: 200px;
+  font-family: "Noto Serif SC", "Source Han Serif SC", serif;
+  font-size: 0.95rem;
+  line-height: 2;
+  letter-spacing: 0.15em;
+  color: #3A3028;
+  text-align: center;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex: 1;
+  min-height: 200px;
 }
 
-/* LucasMia 主题 — 淡玫瑰色边框 */
-[data-theme="lucasmia"] .fortune-paper-frame {
-  border-color: rgba(228, 144, 176, 0.4);
+/* 日期 */
+.fortune-date {
+  font-size: 0.65rem;
+  color: #8B7355;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
 }
 
-[data-theme="lucasmia"] .fortune-paper-top-deco,
-[data-theme="lucasmia"] .fortune-paper-bottom-deco {
-  background: linear-gradient(90deg, transparent, #E490B0, transparent);
-}
-
-[data-theme="lucasmia"] .fortune-rank {
-  border-color: rgba(228, 144, 176, 0.5);
-}
-
-[data-theme="lucasmia"] .fortune-rank {
-  color: #E490B0;
-}
-
-/* 签纸入场动画 — 从下方抽出 */
-.fortune-paper {
+/* ========================================
+   签纸入场动画
+   ======================================== */
+.fortune-slip {
   transform: translateY(60px);
   opacity: 0;
-  transition:
-    transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1),
-    opacity 0.4s ease;
+  transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1), opacity 0.4s ease;
 }
 
-.fortune-result.show .fortune-paper {
+.fortune-result.show .fortune-slip {
   transform: translateY(0);
   opacity: 1;
 }
 
-/* 签纸再摇不再显示时重置 */
-.fortune-paper.reset {
+.fortune-slip.reset {
   transition-duration: 0s !important;
   transform: translateY(60px);
   opacity: 0;
+}
+
+/* ========================================
+   主题适配 - LionMio
+   ======================================== */
+.fortune-slip {
+  border-color: #A8C4D8;
+}
+
+.fortune-slip::before,
+.fortune-slip::after {
+  background: #A8C4D8;
+}
+
+.fortune-level {
+  border-color: #A8C4D8;
+}
+
+.fortune-label,
+.fortune-date {
+  color: #7A9AAF;
+}
+
+/* ========================================
+   主题适配 - LucasMia
+   ======================================== */
+[data-theme="lucasmia"] .fortune-slip {
+  border-color: #C4728A;
+  background: #FDF5F8;
+}
+
+[data-theme="lucasmia"] .fortune-slip::before,
+[data-theme="lucasmia"] .fortune-slip::after {
+  background: #C4728A;
+}
+
+[data-theme="lucasmia"] .fortune-level {
+  border-color: #C4728A;
+  color: #8B4055;
+}
+
+[data-theme="lucasmia"] .fortune-text {
+  color: #5A3A42;
+}
+
+[data-theme="lucasmia"] .fortune-label,
+[data-theme="lucasmia"] .fortune-date {
+  color: #A07080;
 }
 
 /* ========================================
@@ -424,43 +410,70 @@
   }
 
   .fortune-tube {
-    width: 100px;
-    height: 150px;
+    width: 70px;
+    height: 140px;
   }
 
   .fortune-sticks-wrap {
-    top: 6px;
-    height: 134px;
+    top: 10px;
+    height: 115px;
   }
 
   .fortune-stick {
-    height: 24px;
+    height: 18px;
   }
 
-  .fortune-paper {
-    width: 110px;
-    min-height: 300px;
+  .fortune-tube-line:nth-of-type(1) { top: 42px; }
+  .fortune-tube-line:nth-of-type(2) { top: 85px; }
+  .fortune-tube-line:nth-of-type(3) { top: 128px; }
+
+  .fortune-slip {
+    width: 130px;
+    min-height: 340px;
+    padding: 20px 14px;
+    gap: 14px;
   }
 
   .fortune-text {
-    height: 180px;
-    font-size: 0.75rem;
+    min-height: 180px;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 480px) {
   .fortune-tube {
-    width: 90px;
-    height: 130px;
+    width: 64px;
+    height: 120px;
   }
 
-  .fortune-paper {
-    width: 100px;
-    min-height: 280px;
+  .fortune-sticks-wrap {
+    top: 10px;
+    height: 95px;
+  }
+
+  .fortune-stick {
+    height: 16px;
+    width: 5px;
+  }
+
+  .fortune-tube-line:nth-of-type(1) { top: 35px; }
+  .fortune-tube-line:nth-of-type(2) { top: 72px; }
+  .fortune-tube-line:nth-of-type(3) { top: 109px; }
+
+  .fortune-slip {
+    width: 120px;
+    min-height: 320px;
+    padding: 18px 12px;
+    gap: 12px;
+  }
+
+  .fortune-level {
+    font-size: 1.2rem;
+    padding: 3px 10px;
   }
 
   .fortune-text {
-    height: 160px;
-    font-size: 0.72rem;
+    min-height: 160px;
+    font-size: 0.85rem;
   }
 }
