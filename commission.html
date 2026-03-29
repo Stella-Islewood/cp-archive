@@ -69,61 +69,75 @@
   <main class="main-content commission-page">
     <div class="container">
       
-      <!-- 页面标题 -->
-      <section class="page-header">
-        <h1 class="page-title">约稿展示</h1>
-        <p class="page-subtitle">每一张都是独一无二的回忆</p>
-      </section>
+      <!-- ========== 列表视图 ========== -->
+      <div class="commission-list-view" id="commissionListView">
+        <!-- 页面标题 -->
+        <section class="page-header">
+          <h1 class="page-title">约稿展示</h1>
+          <p class="page-subtitle">每一张都是独一无二的回忆</p>
+        </section>
 
-      <!-- 搜索框 -->
-      <div class="search-container">
-        <input type="text" class="search-input" id="commissionSearch" placeholder="搜索标题、画师名..." autocomplete="off">
-        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
+        <!-- 搜索框 -->
+        <div class="search-container">
+          <input type="text" class="search-input" id="commissionSearch" placeholder="搜索标题、画师名..." autocomplete="off">
+          <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </div>
+
+        <!-- Masonry 瀑布流网格 -->
+        <div class="commission-grid" id="commissionGrid">
+          <!-- 由 JS 动态生成 -->
+        </div>
       </div>
 
-      <!-- Masonry 瀑布流网格 -->
-      <div class="commission-grid" id="commissionGrid">
-        <!-- 由 JS 动态生成 -->
+      <!-- ========== 详情视图 ========== -->
+      <div class="commission-detail-view hidden" id="commissionDetailView">
+        <!-- 返回按钮 -->
+        <button class="btn-back" id="btnBack">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span>返回列表</span>
+        </button>
+
+        <!-- 约稿详情内容 -->
+        <article class="commission-detail" id="commissionDetail">
+          <!-- 封面图/媒体区 -->
+          <div class="detail-cover">
+            <div class="detail-cover-placeholder" id="detailCoverPlaceholder">
+              <!-- 默认占位图 -->
+            </div>
+          </div>
+
+          <!-- 约稿信息 -->
+          <div class="detail-info">
+            <h1 class="detail-title" id="detailTitle">约稿标题</h1>
+            <div class="detail-meta">
+              <span class="detail-artist" id="detailArtist">画师：-</span>
+              <span class="detail-tag" id="detailTag">类型</span>
+              <span class="detail-date" id="detailDate">-</span>
+            </div>
+          </div>
+
+          <!-- 创始人笔记折叠栏 -->
+          <div class="detail-notes" id="detailNotes">
+            <button class="notes-toggle" id="notesToggle">
+              <span class="notes-icon">✎</span>
+              <span class="notes-text">创始人笔记</span>
+              <svg class="toggle-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="notes-content" id="notesContent">
+              <p id="notesText"></p>
+            </div>
+          </div>
+        </article>
       </div>
     </div>
   </main>
-
-  <!-- Lightbox 大图查看 -->
-  <div class="lightbox" id="lightbox">
-    <button class="lightbox-close" aria-label="关闭">
-      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    </button>
-    <div class="lightbox-content">
-      <div class="lightbox-image-container">
-        <div class="lightbox-image" id="lightboxImage">
-          <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" stroke-width="0.5">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <path d="M21 15l-5-5L5 21"/>
-          </svg>
-        </div>
-      </div>
-      <div class="lightbox-notes" id="lightboxNotes">
-        <button class="notes-toggle" id="notesToggle">
-          <span class="notes-icon">✎</span>
-          <span class="notes-text">创始人笔记</span>
-          <svg class="toggle-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
-        <div class="notes-content" id="notesContent">
-          <p>这幅作品创作于一个特别的夜晚。画面中，两位角色在星光下相遇，仿佛整个宇宙都在为这一刻屏息。每一笔都承载着对他们故事的理解与热爱。</p>
-          <p>感谢每一位支持约稿的朋友，是你们让这些画面得以诞生。</p>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- 回到顶部按钮 -->
   <button class="back-to-top" id="backToTop" aria-label="回到顶部">

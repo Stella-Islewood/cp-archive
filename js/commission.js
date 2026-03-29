@@ -1,7 +1,7 @@
 /**
  * ========================================
  * CP同人档案馆 - 约稿展示页面脚本
- * 支持多类型内容（图片/文字/音乐/视频）+ 搜索过滤
+ * 支持多类型内容（图片/文字/音乐/视频）+ 搜索过滤 + 详情页
  * ========================================
  */
 
@@ -15,6 +15,7 @@
   // 缓存的约稿数据
   let cachedCommissions = [];
   let displayedCommissions = [];
+  let currentCommissionId = null;
 
   /**
    * 初始化约稿页面功能
@@ -22,7 +23,7 @@
   function init() {
     loadCommissionsFromSupabase();
     bindSearchEvents();
-    bindLightboxEvents();
+    bindDetailEvents();
     bindBackToTop();
   }
 
@@ -71,6 +72,33 @@
   }
 
   /**
+   * 绑定详情页事件
+   */
+  function bindDetailEvents() {
+    const backBtn = document.getElementById('btnBack');
+    const notesToggle = document.getElementById('notesToggle');
+    const notesContent = document.getElementById('notesContent');
+
+    if (backBtn) {
+      backBtn.addEventListener('click', closeDetail);
+    }
+
+    if (notesToggle && notesContent) {
+      notesToggle.addEventListener('click', function() {
+        this.classList.toggle('expanded');
+        notesContent.classList.toggle('expanded');
+      });
+    }
+
+    // ESC 关闭详情
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeDetail();
+      }
+    });
+  }
+
+  /**
    * 过滤约稿
    */
   function filterCommissions(query) {
@@ -109,6 +137,19 @@
   }
 
   /**
+   * 获取类型对应的渐变色类
+   */
+  function getTypeGradientClass(type) {
+    const gradients = {
+      '图片': 'gradient-image',
+      '文字': 'gradient-text',
+      '音乐': 'gradient-music',
+      '视频': 'gradient-video'
+    };
+    return gradients[type] || 'gradient-image';
+  }
+
+  /**
    * 构建卡片内容（按类型）
    */
   function buildCardBody(item) {
@@ -124,7 +165,7 @@
         </div>`;
       }
       return `<div class="card-image">
-        <div class="image-placeholder">
+        <div class="image-placeholder ${getTypeGradientClass(type)}">
           <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -172,7 +213,7 @@
 
     // 默认图片
     return `<div class="card-image">
-      <div class="image-placeholder">
+      <div class="image-placeholder ${getTypeGradientClass(type)}">
         <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
           <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -210,7 +251,10 @@
           <div class="card-info">
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
             <p class="card-artist">画师：${escapeHtml(item.artist || '')}</p>
-            <p class="card-date">${formatDate(item.created_at)}</p>
+            <div class="card-meta">
+              <span class="card-type-tag">${escapeHtml(type)}</span>
+              <span class="card-date">${formatDate(item.created_at)}</span>
+            </div>
           </div>
         </article>
       `;
@@ -259,86 +303,99 @@
     cards.forEach((card) => {
       card.addEventListener('click', function() {
         const index = parseInt(this.dataset.index);
-        openLightbox(this, index);
+        openDetail(this, index);
       });
     });
   }
 
   /**
-   * 打开 Lightbox
+   * 打开详情页
    */
-  function openLightbox(card, index) {
-    const lightbox = document.getElementById('lightbox');
+  function openDetail(card, index) {
     const item = displayedCommissions[index];
     if (!item) return;
 
-    const imageContainer = lightbox.querySelector('.lightbox-image');
-    const notesContent = lightbox.querySelector('.notes-content');
-    const lightboxNotes = document.getElementById('lightboxNotes');
+    currentCommissionId = item.id;
 
-    // 清空之前的内容
-    imageContainer.innerHTML = '';
+    const coverPlaceholder = document.getElementById('detailCoverPlaceholder');
+    const notesToggle = document.getElementById('notesToggle');
+    const notesContent = document.getElementById('notesContent');
+    const notesText = document.getElementById('notesText');
+    const detailNotes = document.getElementById('detailNotes');
 
-    // 根据类型构建大图区内容
+    // 根据类型构建封面区内容
     const type = item.type || '图片';
     const img = item.image_url;
     const content = item.text_content || '';
 
     if (type === '图片') {
       if (img && isImageUrl(img)) {
-        imageContainer.innerHTML = `<img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:4px;">`;
+        coverPlaceholder.innerHTML = `<img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:contain;">`;
       } else {
-        imageContainer.innerHTML = `
-          <svg viewBox="0 0 24 24" width="120" height="120" fill="none" stroke="currentColor" stroke-width="0.5">
+        coverPlaceholder.innerHTML = `<div class="detail-cover-default ${getTypeGradientClass(type)}">
+          <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <path d="M21 15l-5-5L5 21"/>
-          </svg>`;
+          </svg>
+        </div>`;
       }
-      lightboxNotes.style.display = '';
     } else if (type === '文字') {
-      imageContainer.innerHTML = `<div class="lightbox-text-content">
-        <div class="text-reader-content">${formatTextContent(content)}</div>
+      coverPlaceholder.innerHTML = `<div class="detail-cover-text">
+        <p class="detail-text-preview">${escapeHtml(content.substring(0, 200))}${content.length > 200 ? '…' : ''}</p>
       </div>`;
-      lightboxNotes.style.display = 'none';
     } else if (type === '音乐') {
       const mediaUrl = img || content;
       const hasLink = isExternalLink(mediaUrl);
-      imageContainer.innerHTML = `<div class="lightbox-media-content">
-        <span style="font-size:4rem;">🎵</span>
-        <h3 style="margin:1rem 0 0.5rem;color:var(--text-title);font-family:Noto Serif SC,serif;">${escapeHtml(item.title)}</h3>
-        <p style="color:var(--text-muted);margin-bottom:1rem;">${escapeHtml(item.artist || '')}</p>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="lightbox-media-btn">🎵 点击收听</a>` : ''}
+      coverPlaceholder.innerHTML = `<div class="detail-cover-media">
+        <span class="detail-media-icon">🎵</span>
+        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
+        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听</a>` : ''}
       </div>`;
-      lightboxNotes.style.display = '';
     } else if (type === '视频') {
       const mediaUrl = img || content;
       const hasLink = isExternalLink(mediaUrl);
-      imageContainer.innerHTML = `<div class="lightbox-media-content">
-        <span style="font-size:4rem;">🎬</span>
-        <h3 style="margin:1rem 0 0.5rem;color:var(--text-title);font-family:Noto Serif SC,serif;">${escapeHtml(item.title)}</h3>
-        <p style="color:var(--text-muted);margin-bottom:1rem;">${escapeHtml(item.artist || '')}</p>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="lightbox-media-btn">▶ 点击观看</a>` : ''}
+      coverPlaceholder.innerHTML = `<div class="detail-cover-media">
+        <span class="detail-media-icon">🎬</span>
+        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
+        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看</a>` : ''}
       </div>`;
-      lightboxNotes.style.display = '';
     }
+
+    // 更新基本信息
+    document.getElementById('detailTitle').textContent = item.title || '无标题';
+    document.getElementById('detailArtist').textContent = '画师：' + (item.artist || '未知');
+    document.getElementById('detailTag').textContent = type;
+    document.getElementById('detailDate').textContent = formatDate(item.created_at);
 
     // 更新笔记内容
     if (item.founder_notes && item.founder_notes.trim() !== '') {
-      notesContent.textContent = item.founder_notes;
+      notesText.textContent = item.founder_notes;
+      detailNotes.style.display = '';
     } else {
-      notesContent.textContent = '暂无笔记';
+      notesText.textContent = '暂无笔记';
+      detailNotes.style.display = '';
     }
 
     // 重置笔记折叠状态
-    const notesToggle = document.getElementById('notesToggle');
-    const notesContentEl = document.getElementById('notesContent');
     if (notesToggle) notesToggle.classList.remove('expanded');
-    if (notesContentEl) notesContentEl.classList.remove('expanded');
+    if (notesContent) notesContent.classList.remove('expanded');
 
-    // 显示 Lightbox
-    lightbox.classList.add('active');
+    // 显示详情页
+    document.getElementById('commissionListView').classList.add('hidden');
+    document.getElementById('commissionDetailView').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /**
+   * 关闭详情页
+   */
+  function closeDetail() {
+    currentCommissionId = null;
+    document.getElementById('commissionDetailView').classList.add('hidden');
+    document.getElementById('commissionListView').classList.remove('hidden');
+    document.body.style.overflow = '';
   }
 
   /**
@@ -349,51 +406,6 @@
     const escaped = escapeHtml(text);
     const paragraphs = escaped.split(/\n{2,}/);
     return paragraphs.map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
-  }
-
-  /**
-   * 绑定 Lightbox 事件
-   */
-  function bindLightboxEvents() {
-    const lightbox = document.getElementById('lightbox');
-    if (!lightbox) return;
-
-    const closeBtn = lightbox.querySelector('.lightbox-close');
-    const notesToggle = document.getElementById('notesToggle');
-    const notesContent = document.getElementById('notesContent');
-
-    if (closeBtn) {
-      closeBtn.addEventListener('click', closeLightbox);
-    }
-
-    lightbox.addEventListener('click', function(e) {
-      if (e.target === lightbox) {
-        closeLightbox();
-      }
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && lightbox.classList.contains('active')) {
-        closeLightbox();
-      }
-    });
-
-    if (notesToggle && notesContent) {
-      notesToggle.addEventListener('click', function() {
-        this.classList.toggle('expanded');
-        notesContent.classList.toggle('expanded');
-      });
-    }
-  }
-
-  /**
-   * 关闭 Lightbox
-   */
-  function closeLightbox() {
-    const lightbox = document.getElementById('lightbox');
-    if (!lightbox) return;
-    lightbox.classList.remove('active');
-    document.body.style.overflow = '';
   }
 
   /**

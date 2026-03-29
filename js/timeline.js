@@ -302,6 +302,7 @@
             <span class="empathize-icon">❤</span>
             <span class="empathize-count">${comment.empathize}</span>
           </button>
+          <button class="btn-delete-comment" title="删除评论">×</button>
         </div>
         <p class="comment-text">${escapeHtml(comment.content)}</p>
       </div>
@@ -323,6 +324,15 @@
       
       countEl.textContent = count;
       saveComments();
+    });
+    
+    // 绑定删除评论
+    const deleteBtn = commentEl.querySelector('.btn-delete-comment');
+    deleteBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (!confirm('确定删除这条评论吗？')) return;
+      const commentId = commentEl.dataset.id;
+      deleteComment(timelineIndex, commentId);
     });
     
     list.appendChild(commentEl);
@@ -443,6 +453,22 @@
       }
     });
     localStorage.setItem(COMMENTS_KEY, JSON.stringify(comments));
+  }
+
+  /**
+   * 删除评论
+   * @param {number} timelineIndex - 时间线索引
+   * @param {string} commentId - 评论ID
+   */
+  function deleteComment(timelineIndex, commentId) {
+    const list = document.getElementById(`comments-list-${timelineIndex}`);
+    if (!list) return;
+    
+    const commentEl = list.querySelector(`.comment-item[data-id="${commentId}"]`);
+    if (!commentEl) return;
+    
+    commentEl.remove();
+    saveComments();
   }
 
   /**

@@ -542,6 +542,27 @@
   word-break: break-word;
 }
 
+/* 删除评论按钮 */
+.btn-delete-comment {
+  padding: 0.15rem 0.4rem;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  margin-left: 0.3rem;
+  opacity: 0;
+}
+
+.comment-item:hover .btn-delete-comment {
+  opacity: 1;
+}
+
+.btn-delete-comment:hover {
+  color: #d93025;
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .timeline::before {

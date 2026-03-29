@@ -1187,17 +1187,31 @@
     }
 
     list.innerHTML = comments.map(c => `
-      <div class="comment-item">
+      <div class="comment-item" data-comment-id="${c.id}">
         <div class="comment-avatar">${(c.nickname || '?').charAt(0).toUpperCase()}</div>
         <div class="comment-body">
           <div class="comment-header">
             <span class="comment-nickname">${escapeHtml(c.nickname)}</span>
             <span class="comment-time">${c.time || ''}</span>
+            <button class="btn-delete-comment" onclick="deleteWorkComment('${c.id}')">× 删除</button>
           </div>
           <p class="comment-text">${escapeHtml(c.content)}</p>
         </div>
       </div>
     `).join('');
+  }
+
+  /**
+   * 删除作品评论
+   */
+  function deleteWorkComment(commentId) {
+    if (!confirm('确定删除这条评论吗？')) return;
+    if (!currentWorkId) return;
+    const comments = getComments(currentWorkId);
+    const filteredComments = comments.filter(c => c.id !== commentId);
+    saveComments(currentWorkId, filteredComments);
+    renderCommentsList();
+    updateCommentsCount();
   }
 
   /**
