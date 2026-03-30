@@ -18,6 +18,17 @@
   <link rel="stylesheet" href="styles/theme-lucasmia.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/archive.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.addEventListener('load', function() {
+      window.archiveClient = supabase.createClient(
+        'https://vbvfrmqwlyitarmnhmyw.supabase.co',
+        'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH'
+      );
+    });
+  </script>
 </head>
 <body>
   <!-- Header -->
@@ -75,215 +86,11 @@
         <p class="page-subtitle">每一段故事，都从这里开始</p>
       </section>
 
-      <!-- 角色卡片区域 -->
+      <!-- 角色卡片区域（动态加载） -->
       <section class="archive-section" id="archiveSection">
-        <!-- Lion 卡片 - LionMio 主题 -->
-        <article class="character-profile" data-character="lion" data-theme="lionmio">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar" id="avatar-lion">
-              <img src="images/characters/lion.jpg" alt="Lion" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-              <span class="profile-avatar-placeholder" style="display:none;">L</span>
-            </div>
-            <h3 class="profile-name">Lion</h3>
-            <p class="profile-tagline">严于律己，也严于他人的完美主义者</p>
-          </div>
-          <div class="profile-info">
-            <div class="profile-info-row">
-              <div class="profile-info-item">
-                <span class="profile-info-label">生日</span>
-                <span class="profile-info-value">09-19</span>
-              </div>
-              <div class="profile-info-item">
-                <span class="profile-info-label">身高</span>
-                <span class="profile-info-value">186cm</span>
-              </div>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-traits">
-              <span class="profile-trait">严谨</span>
-              <span class="profile-trait">冷静</span>
-              <span class="profile-trait">高标准</span>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-section">
-              <span class="profile-section-title">个人简介</span>
-              <p class="profile-section-content">世界知名 Snow Tiger Agency 社长的儿子，曾在海外演艺学院学习。对自己和他人都要求极高，因此有时会被误解为过于严格。其实只是习惯以最认真的态度面对舞台与责任。</p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">经典台词</span>
-              <p class="profile-quote"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">与 Mio 的关系</span>
-              <p class="profile-relationship"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-gallery">
-              <h4 class="gallery-title">图集</h4>
-              <div class="gallery-grid">
-                <img src="images/gallery/lion-1.jpg" alt="Lion 图集 1" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/lion-2.jpg" alt="Lion 图集 2" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/lion-3.jpg" alt="Lion 图集 3" class="gallery-image" onerror="this.style.display='none'">
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Mio 卡片 - LionMio 主题 -->
-        <article class="character-profile" data-character="mio" data-theme="lionmio">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar" id="avatar-mio">
-              <img src="images/characters/mio.jpg" alt="Mio" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-              <span class="profile-avatar-placeholder" style="display:none;">M</span>
-            </div>
-            <h3 class="profile-name">Mio</h3>
-            <p class="profile-tagline">不擅表达，内心却很热闹</p>
-          </div>
-          <div class="profile-info">
-            <div class="profile-info-row">
-              <div class="profile-info-item">
-                <span class="profile-info-label">生日</span>
-                <span class="profile-info-value">03-10</span>
-              </div>
-              <div class="profile-info-item">
-                <span class="profile-info-label">身高</span>
-                <span class="profile-info-value">175cm</span>
-              </div>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-traits">
-              <span class="profile-trait">内向</span>
-              <span class="profile-trait">细腻</span>
-              <span class="profile-trait">温柔</span>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-section">
-              <span class="profile-section-title">个人简介</span>
-              <p class="profile-section-content">不太擅长表达自己，但内心常常默默吐槽各种事情。最近开始慢慢把心里的想法说出来。看起来安静，其实偶尔也会展现出像哥哥一样可靠的一面。</p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">经典台词</span>
-              <p class="profile-quote"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">与 Lion 的关系</span>
-              <p class="profile-relationship"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-gallery">
-              <h4 class="gallery-title">图集</h4>
-              <div class="gallery-grid">
-                <img src="images/gallery/mio-1.jpg" alt="Mio 图集 1" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/mio-2.jpg" alt="Mio 图集 2" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/mio-3.jpg" alt="Mio 图集 3" class="gallery-image" onerror="this.style.display='none'">
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Lucas 卡片 - LucasMia 主题 -->
-        <article class="character-profile" data-character="lucas" data-theme="lucasmia" style="display:none;">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar" id="avatar-lucas">
-              <img src="images/characters/lucas.jpg" alt="Lucas" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-              <span class="profile-avatar-placeholder" style="display:none;">L</span>
-            </div>
-            <h3 class="profile-name">Lucas</h3>
-            <p class="profile-tagline">神秘而克制的吸血鬼</p>
-          </div>
-          <div class="profile-info">
-            <div class="profile-info-row">
-              <div class="profile-info-item">
-                <span class="profile-info-label">生日</span>
-                <span class="profile-info-value"><span class="pending-text">待补充</span></span>
-              </div>
-              <div class="profile-info-item">
-                <span class="profile-info-label">身高</span>
-                <span class="profile-info-value"><span class="pending-text">待补充</span></span>
-              </div>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-traits">
-              <span class="profile-trait">冷静</span>
-              <span class="profile-trait">克制</span>
-              <span class="profile-trait">孤独</span>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-section">
-              <span class="profile-section-title">个人简介</span>
-              <p class="profile-section-content">在漫长黑夜中存在的吸血鬼。性格冷静沉默，总是与他人保持距离。直到某次相遇，让他原本平静的世界开始发生变化。</p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">经典台词</span>
-              <p class="profile-quote"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">与 Mia 的关系</span>
-              <p class="profile-relationship"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-gallery">
-              <h4 class="gallery-title">图集</h4>
-              <div class="gallery-grid">
-                <img src="images/gallery/lucas-1.jpg" alt="Lucas 图集 1" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/lucas-2.jpg" alt="Lucas 图集 2" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/lucas-3.jpg" alt="Lucas 图集 3" class="gallery-image" onerror="this.style.display='none'">
-              </div>
-            </div>
-          </div>
-        </article>
-
-        <!-- Mia 卡片 - LucasMia 主题 -->
-        <article class="character-profile" data-character="mia" data-theme="lucasmia" style="display:none;">
-          <div class="profile-avatar-section">
-            <div class="profile-avatar" id="avatar-mia">
-              <img src="images/characters/mia.jpg" alt="Mia" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-              <span class="profile-avatar-placeholder" style="display:none;">M</span>
-            </div>
-            <h3 class="profile-name">Mia</h3>
-            <p class="profile-tagline">直率勇敢的眼盲少女</p>
-          </div>
-          <div class="profile-info">
-            <div class="profile-info-row">
-              <div class="profile-info-item">
-                <span class="profile-info-label">生日</span>
-                <span class="profile-info-value"><span class="pending-text">待补充</span></span>
-              </div>
-              <div class="profile-info-item">
-                <span class="profile-info-label">身高</span>
-                <span class="profile-info-value"><span class="pending-text">待补充</span></span>
-              </div>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-traits">
-              <span class="profile-trait">勇敢</span>
-              <span class="profile-trait">温柔</span>
-              <span class="profile-trait">纯真</span>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-section">
-              <span class="profile-section-title">个人简介</span>
-              <p class="profile-section-content">普通的人类少女，对世界充满好奇。性格坦率，即使面对未知也不会轻易退缩。她的存在像清晨的光，悄悄改变着身边的人。</p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">经典台词</span>
-              <p class="profile-quote"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-section">
-              <span class="profile-section-title">与 Lucas 的关系</span>
-              <p class="profile-relationship"><span class="pending-text">待补充</span></p>
-            </div>
-            <div class="profile-divider"></div>
-            <div class="profile-gallery">
-              <h4 class="gallery-title">图集</h4>
-              <div class="gallery-grid">
-                <img src="images/gallery/mia-1.jpg" alt="Mia 图集 1" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/mia-2.jpg" alt="Mia 图集 2" class="gallery-image" onerror="this.style.display='none'">
-                <img src="images/gallery/mia-3.jpg" alt="Mia 图集 3" class="gallery-image" onerror="this.style.display='none'">
-              </div>
-            </div>
-          </div>
-        </article>
+        <div id="characterCardsContainer">
+          <div class="loading-text">加载角色数据中...</div>
+        </div>
       </section>
 
     </div>
@@ -320,26 +127,276 @@
   <script src="js/archive.js"></script>
   <script src="js/mobile-nav.js"></script>
   <script>
-    // 档案页角色卡片主题切换
+    // 角色数据管理
     (function() {
-      function updateProfiles() {
+      // 相册状态
+      var charGalleryState = {
+        images: [],
+        currentIndex: 0
+      };
+
+      // HTML转义
+      function h(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+      }
+
+      // 获取性格标签数组
+      function getCharacterTraits(traits) {
+        if (!traits) return [];
+        if (Array.isArray(traits)) return traits;
+        try {
+          return JSON.parse(traits);
+        } catch (e) {
+          return [];
+        }
+      }
+
+      // 获取图片数组
+      function getCharacterImages(char) {
+        if (!char) return [];
+        if (char.images) {
+          if (Array.isArray(char.images)) return char.images;
+          try {
+            return JSON.parse(char.images);
+          } catch (e) {
+            return [];
+          }
+        }
+        return [];
+      }
+
+      // 获取伴侣名称
+      function getPartnerName(name) {
+        var partners = {
+          'lion': 'Mio',
+          'mio': 'Lion',
+          'lucas': 'Mia',
+          'mia': 'Lucas'
+        };
+        return partners[name.toLowerCase()] || '另一方';
+      }
+
+      // 加载角色数据
+      async function loadCharacters() {
+        var container = document.getElementById('characterCardsContainer');
         var theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
-        var profiles = document.querySelectorAll('.character-profile');
-        profiles.forEach(function(profile) {
-          var profileTheme = profile.getAttribute('data-theme');
-          if (profileTheme === theme) {
-            profile.style.display = '';
-          } else {
-            profile.style.display = 'none';
+
+        container.innerHTML = '<div class="loading-text">加载角色数据中...</div>';
+
+        try {
+          // 等待 archiveClient 初始化
+          if (!window.archiveClient) {
+            await new Promise(function(resolve) {
+              var checkInterval = setInterval(function() {
+                if (window.archiveClient) {
+                  clearInterval(checkInterval);
+                  resolve();
+                }
+              }, 100);
+              setTimeout(function() {
+                clearInterval(checkInterval);
+                resolve();
+              }, 3000);
+            });
+          }
+
+          var { data, error } = await window.archiveClient
+            .from('characters')
+            .select('*')
+            .order('name', { ascending: true });
+
+          if (error) throw error;
+
+          if (!data || data.length === 0) {
+            container.innerHTML = '<div class="empty-text" style="text-align:center;padding:40px;color:#999;">暂无角色数据</div>';
+            return;
+          }
+
+          // 根据主题过滤角色
+          var filteredChars = data.filter(function(char) {
+            var charTheme = char.archive_id || 'lionmio';
+            return charTheme === theme;
+          });
+
+          if (filteredChars.length === 0) {
+            container.innerHTML = '<div class="empty-text" style="text-align:center;padding:40px;color:#999;">当前主题暂无角色数据</div>';
+            return;
+          }
+
+          // 渲染角色卡片
+          container.innerHTML = filteredChars.map(function(char) {
+            var traits = getCharacterTraits(char.traits);
+            var images = getCharacterImages(char);
+            var partnerName = getPartnerName(char.name);
+            var hasImages = images.length > 0;
+            var hasAvatar = char.avatar_url && char.avatar_url.trim() !== '';
+
+            // 构建图集HTML
+            var galleryHtml = '';
+            if (hasImages) {
+              galleryHtml = '<div class="profile-gallery">' +
+                '<h4 class="gallery-title">图集</h4>' +
+                '<div class="gallery-grid">' +
+                images.map(function(img, idx) {
+                  return '<img src="' + h(img) + '" alt="' + h(char.name) + ' 图集 ' + (idx + 1) + '" class="gallery-image" data-index="' + idx + '" onclick="openCharLightbox(\'' + h(char.name) + '\', ' + idx + ')">';
+                }).join('') +
+                '</div>' +
+                '</div>';
+            }
+
+            return '<article class="character-profile" data-character="' + h(char.name.toLowerCase()) + '" data-theme="' + h(char.archive_id || 'lionmio') + '">' +
+              '<div class="profile-avatar-section">' +
+              '<div class="profile-avatar" id="avatar-' + h(char.name.toLowerCase()) + '">' +
+              (hasAvatar ?
+                '<img src="' + h(char.avatar_url) + '" alt="' + h(char.name) + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';">' :
+                '') +
+              '<span class="profile-avatar-placeholder" ' + (hasAvatar ? 'style="display:none;"' : '') + '>' + h(char.name.charAt(0).toUpperCase()) + '</span>' +
+              '</div>' +
+              '<h3 class="profile-name">' + h(char.name) + '</h3>' +
+              '<p class="profile-tagline">' + h(char.tagline || '') + '</p>' +
+              '</div>' +
+              '<div class="profile-info">' +
+              '<div class="profile-info-row">' +
+              '<div class="profile-info-item">' +
+              '<span class="profile-info-label">生日</span>' +
+              '<span class="profile-info-value">' + (char.birthday ? h(char.birthday) : '<span class="pending-text">待补充</span>') + '</span>' +
+              '</div>' +
+              '<div class="profile-info-item">' +
+              '<span class="profile-info-label">身高</span>' +
+              '<span class="profile-info-value">' + (char.height ? h(char.height) : '<span class="pending-text">待补充</span>') + '</span>' +
+              '</div>' +
+              '</div>' +
+              '<div class="profile-divider"></div>' +
+              '<div class="profile-traits">' +
+              (traits.length > 0 ? traits.map(function(t) {
+                return '<span class="profile-trait">' + h(t) + '</span>';
+              }).join('') : '<span class="pending-text">待补充</span>') +
+              '</div>' +
+              '<div class="profile-divider"></div>' +
+              '<div class="profile-section">' +
+              '<span class="profile-section-title">个人简介</span>' +
+              '<p class="profile-section-content">' + (char.description ? h(char.description) : '<span class="pending-text">待补充</span>') + '</p>' +
+              '</div>' +
+              '<div class="profile-section">' +
+              '<span class="profile-section-title">经典台词</span>' +
+              '<p class="profile-quote">' + (char.quote ? h(char.quote) : '<span class="pending-text">待补充</span>') + '</p>' +
+              '</div>' +
+              '<div class="profile-section">' +
+              '<span class="profile-section-title">与 ' + h(partnerName) + ' 的关系</span>' +
+              '<p class="profile-relationship">' + (char.relationship ? h(char.relationship) : '<span class="pending-text">待补充</span>') + '</p>' +
+              '</div>' +
+              '<div class="profile-divider"></div>' +
+              galleryHtml +
+              '</div>' +
+              '</article>';
+          }).join('');
+
+        } catch (err) {
+          console.error('加载角色失败:', err);
+          container.innerHTML = '<div class="error-text" style="text-align:center;padding:40px;color:#d93025;">加载失败: ' + h(err.message) + '</div>';
+        }
+      }
+
+      // 打开角色相册 Lightbox
+      function openCharLightbox(charName, imageIndex) {
+        var theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
+
+        // 找到当前角色的图片
+        var profile = document.querySelector('.character-profile[data-character="' + charName.toLowerCase() + '"]');
+        if (!profile) return;
+
+        var images = [];
+        profile.querySelectorAll('.gallery-image').forEach(function(img) {
+          images.push(img.src);
+        });
+
+        if (images.length === 0) return;
+
+        charGalleryState.images = images;
+        charGalleryState.currentIndex = imageIndex || 0;
+
+        updateCharLightboxImage();
+        document.getElementById('lightbox').style.display = 'flex';
+      }
+
+      // 更新 Lightbox 图片
+      function updateCharLightboxImage() {
+        var img = document.getElementById('lightboxImage');
+        img.src = charGalleryState.images[charGalleryState.currentIndex];
+
+        // 更新导航按钮
+        var prevBtn = document.getElementById('lightboxPrev');
+        var nextBtn = document.getElementById('lightboxNext');
+
+        if (charGalleryState.images.length <= 1) {
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+        } else {
+          prevBtn.style.display = 'flex';
+          nextBtn.style.display = 'flex';
+        }
+      }
+
+      // Lightbox 导航
+      function charLightboxNav(direction) {
+        var len = charGalleryState.images.length;
+        if (len <= 1) return;
+
+        if (direction === 'prev') {
+          charGalleryState.currentIndex = (charGalleryState.currentIndex - 1 + len) % len;
+        } else {
+          charGalleryState.currentIndex = (charGalleryState.currentIndex + 1) % len;
+        }
+        updateCharLightboxImage();
+      }
+
+      // 初始化
+      function init() {
+        // 绑定 Lightbox 事件
+        document.getElementById('lightboxClose').addEventListener('click', function() {
+          document.getElementById('lightbox').style.display = 'none';
+        });
+
+        document.getElementById('lightboxPrev').addEventListener('click', function() {
+          charLightboxNav('prev');
+        });
+
+        document.getElementById('lightboxNext').addEventListener('click', function() {
+          charLightboxNav('next');
+        });
+
+        // 点击背景关闭
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+          if (e.target === this) {
+            this.style.display = 'none';
           }
         });
+
+        // 键盘导航
+        document.addEventListener('keydown', function(e) {
+          if (document.getElementById('lightbox').style.display === 'flex') {
+            if (e.key === 'ArrowLeft') charLightboxNav('prev');
+            if (e.key === 'ArrowRight') charLightboxNav('next');
+            if (e.key === 'Escape') document.getElementById('lightbox').style.display = 'none';
+          }
+        });
+
+        // 加载角色数据
+        loadCharacters();
+
+        // 监听主题切换
+        window.addEventListener('themechange', function() {
+          loadCharacters();
+        });
       }
-      
-      // 初始化
-      updateProfiles();
-      
-      // 监听主题切换
-      window.addEventListener('themechange', updateProfiles);
+
+      // 页面加载完成后初始化
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
     })();
   </script>
 </body>
