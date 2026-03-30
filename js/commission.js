@@ -78,6 +78,8 @@
     const backBtn = document.getElementById('btnBack');
     const notesToggle = document.getElementById('notesToggle');
     const notesContent = document.getElementById('notesContent');
+    const listView = document.getElementById('commissionListView');
+    const detailView = document.getElementById('commissionDetailView');
 
     if (backBtn) {
       backBtn.addEventListener('click', closeDetail);
@@ -87,6 +89,17 @@
       notesToggle.addEventListener('click', function() {
         this.classList.toggle('expanded');
         notesContent.classList.toggle('expanded');
+      });
+    }
+
+    // 使用事件委托绑定卡片点击事件
+    if (listView) {
+      listView.addEventListener('click', function(e) {
+        const card = e.target.closest('.commission-card');
+        if (card) {
+          const index = parseInt(card.dataset.index);
+          openDetail(card, index);
+        }
       });
     }
 
@@ -259,8 +272,6 @@
         </article>
       `;
     }).join('');
-
-    bindCardEvents();
   }
 
   /**
@@ -295,20 +306,6 @@
   }
 
   /**
-   * 绑定卡片点击事件
-   */
-  function bindCardEvents() {
-    const cards = document.querySelectorAll('.commission-card');
-
-    cards.forEach((card) => {
-      card.addEventListener('click', function() {
-        const index = parseInt(this.dataset.index);
-        openDetail(this, index);
-      });
-    });
-  }
-
-  /**
    * 打开详情页
    */
   function openDetail(card, index) {
@@ -322,6 +319,9 @@
     const notesContent = document.getElementById('notesContent');
     const notesText = document.getElementById('notesText');
     const detailNotes = document.getElementById('detailNotes');
+    const detailContent = document.getElementById('detailContent');
+    const listView = document.getElementById('commissionListView');
+    const detailView = document.getElementById('commissionDetailView');
 
     // 根据类型构建封面区内容
     const type = item.type || '图片';
@@ -368,6 +368,39 @@
     document.getElementById('detailTag').textContent = type;
     document.getElementById('detailDate').textContent = formatDate(item.created_at);
 
+    // 构建主体内容
+    if (type === '图片') {
+      if (img && isImageUrl(img)) {
+        detailContent.innerHTML = `<div class="detail-content-image">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}">
+        </div>`;
+      } else {
+        detailContent.innerHTML = `<div class="detail-content-empty">暂无图片内容</div>`;
+      }
+    } else if (type === '文字') {
+      detailContent.innerHTML = `<div class="detail-content-text">
+        ${formatTextContent(content)}
+      </div>`;
+    } else if (type === '音乐') {
+      const mediaUrl = img || content;
+      const hasLink = isExternalLink(mediaUrl);
+      detailContent.innerHTML = `<div class="detail-content-media">
+        <span class="detail-media-icon">🎵</span>
+        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
+        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听完整内容</a>` : '<p style="color:var(--text-muted);">暂无链接</p>'}
+      </div>`;
+    } else if (type === '视频') {
+      const mediaUrl = img || content;
+      const hasLink = isExternalLink(mediaUrl);
+      detailContent.innerHTML = `<div class="detail-content-media">
+        <span class="detail-media-icon">🎬</span>
+        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
+        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看完整内容</a>` : '<p style="color:var(--text-muted);">暂无链接</p>'}
+      </div>`;
+    } else {
+      detailContent.innerHTML = `<div class="detail-content-empty">暂无内容</div>`;
+    }
+
     // 更新笔记内容
     if (item.founder_notes && item.founder_notes.trim() !== '') {
       notesText.textContent = item.founder_notes;
@@ -381,21 +414,53 @@
     if (notesToggle) notesToggle.classList.remove('expanded');
     if (notesContent) notesContent.classList.remove('expanded');
 
-    // 显示详情页
-    document.getElementById('commissionListView').classList.add('hidden');
-    document.getElementById('commissionDetailView').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 300ms fade 过渡效果
+    listView.style.opacity = '0';
+    listView.style.transition = 'opacity 0.3s ease';
+
+    detailView.style.opacity = '0';
+    detailView.style.transition = 'opacity 0.3s ease';
+    detailView.classList.remove('hidden');
+
+    setTimeout(() => {
+      listView.classList.add('hidden');
+      listView.style.opacity = '1';
+
+      detailView.style.opacity = '1';
+
+      // 滚动到页面顶部
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // 启用详情页滚动
+      detailView.style.overflowY = 'auto';
+    }, 300);
   }
 
   /**
    * 关闭详情页
    */
   function closeDetail() {
+    const listView = document.getElementById('commissionListView');
+    const detailView = document.getElementById('commissionDetailView');
+
     currentCommissionId = null;
-    document.getElementById('commissionDetailView').classList.add('hidden');
-    document.getElementById('commissionListView').classList.remove('hidden');
-    document.body.style.overflow = '';
+
+    // 300ms fade 过渡效果
+    detailView.style.opacity = '0';
+    listView.style.transition = 'opacity 0.3s ease';
+    listView.style.opacity = '0';
+
+    setTimeout(() => {
+      detailView.classList.add('hidden');
+      detailView.style.opacity = '1';
+      detailView.style.overflowY = '';
+
+      listView.classList.remove('hidden');
+      listView.style.opacity = '1';
+
+      // 滚动回原来位置
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 300);
   }
 
   /**

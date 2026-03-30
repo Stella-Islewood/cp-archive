@@ -99,7 +99,7 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
-          <span>返回列表</span>
+          <span>返回约稿列表</span>
         </button>
 
         <!-- 约稿详情内容 -->
@@ -121,6 +121,17 @@
             </div>
           </div>
 
+          <!-- 分隔线 -->
+          <div class="detail-divider"></div>
+
+          <!-- 主体内容区域 -->
+          <div class="detail-content" id="detailContent">
+            <!-- 动态填充 -->
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="detail-divider"></div>
+
           <!-- 创始人笔记折叠栏 -->
           <div class="detail-notes" id="detailNotes">
             <button class="notes-toggle" id="notesToggle">
@@ -132,6 +143,17 @@
             </button>
             <div class="notes-content" id="notesContent">
               <p id="notesText">暂无笔记</p>
+            </div>
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="detail-divider"></div>
+
+          <!-- 评论区 -->
+          <div class="detail-comments" id="detailComments">
+            <h3 class="comments-title">评论区</h3>
+            <div class="comments-list" id="commentsList">
+              <p class="comments-empty">暂无评论</p>
             </div>
           </div>
         </article>
