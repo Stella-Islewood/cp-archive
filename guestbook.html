@@ -19,6 +19,15 @@
   <link rel="stylesheet" href="styles/theme-lucasmia.css">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/guestbook.css">
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const guestbookClient = supabase.createClient(
+      'https://vbvfrmqwlyitarmnhmyw.supabase.co',
+      'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH'
+    );
+  </script>
 </head>
 <body>
   <!-- Header -->
