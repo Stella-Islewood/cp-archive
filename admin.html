@@ -77,6 +77,31 @@
     .upload-status.uploading { color: #1a73e8; }
     .upload-status.success { color: #28a745; }
     .upload-status.error { color: #d93025; }
+
+    /* 多图上传组件 */
+    .multi-upload-container { margin-bottom: 16px; }
+    .multi-upload-box { border: 2px dashed #ddd; border-radius: 8px; padding: 20px; text-align: center; background: #fafafa; cursor: pointer; transition: all 0.2s; }
+    .multi-upload-box:hover { border-color: #1a73e8; background: #f0f7ff; }
+    .multi-upload-box.dragover { border-color: #1a73e8; background: #e8f0fe; }
+    .multi-upload-hint { font-size: 13px; color: #666; margin-top: 8px; }
+    .multi-upload-input { display: none; }
+    .multi-upload-status { font-size: 12px; color: #666; margin-top: 8px; }
+    .multi-upload-status.uploading { color: #1a73e8; }
+    .multi-upload-status.success { color: #28a745; }
+    .multi-upload-status.error { color: #d93025; }
+    .multi-preview-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+    .multi-preview-item { position: relative; width: 80px; height: 80px; border-radius: 6px; overflow: hidden; border: 1px solid #eee; background: #f5f5f5; }
+    .multi-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .multi-preview-item.error-img { border-color: #d93025; }
+    .multi-preview-item .delete-btn { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; background: rgba(217, 48, 37, 0.9); color: white; border: none; border-radius: 50%; font-size: 14px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .multi-preview-item:hover .delete-btn { opacity: 1; }
+    .multi-preview-item .upload-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #e8eaed; }
+    .multi-preview-item .upload-progress-bar { height: 100%; background: #1a73e8; transition: width 0.3s; }
+    .multi-preview-item .upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; }
+    .multi-preview-item .img-index { position: absolute; bottom: 4px; left: 4px; background: rgba(0,0,0,0.6); color: white; font-size: 10px; padding: 1px 5px; border-radius: 3px; }
+    .multi-urls-display { margin-top: 12px; }
+    .multi-urls-display label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: 500; }
+    .multi-urls-textarea { width: 100%; min-height: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; font-family: monospace; resize: vertical; background: #fafafa; }
     
     /* 视频上传组件 */
     .video-upload-section { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -233,18 +258,25 @@
           <!-- 图片类型字段 -->
           <div id="cm-field-image">
             <div class="form-group full">
-              <label>图片上传</label>
-              <div class="upload-box" id="cm-upload-box">
-                <input type="file" id="cm-file-input" accept="image/*" style="display:none;" onchange="handleCommissionFileSelect(event)">
-                <button type="button" class="btn btn-sm" onclick="document.getElementById('cm-file-input').click()">选择图片</button>
-                <img id="cm-preview" class="upload-preview" style="display:none;" alt="预览">
-                <div class="upload-status" id="cm-upload-status"></div>
+              <label>图片上传（支持多张）</label>
+              <div class="multi-upload-container">
+                <div class="multi-upload-box" id="cm-multi-upload-box">
+                  <input type="file" id="cm-multi-file-input" class="multi-upload-input" accept="image/*" multiple onchange="handleCommissionMultiFileSelect(event)">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#666" stroke-width="1.5" style="margin-bottom:8px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                  </svg>
+                  <div style="font-size:14px;color:#333;margin-bottom:4px;">点击或拖拽图片到此处上传</div>
+                  <div class="multi-upload-hint">支持 jpg、png、gif、webp，可上传多张图片</div>
+                </div>
+                <div class="multi-preview-list" id="cm-multi-preview-list"></div>
+                <div class="multi-upload-status" id="cm-multi-upload-status"></div>
+                <div class="multi-urls-display">
+                  <label>已上传的图片URL（自动更新）：</label>
+                  <textarea class="multi-urls-textarea" id="cm-images" placeholder="上传图片后自动填入，可手动编辑"></textarea>
+                </div>
               </div>
-              <div class="upload-url-row">
-                <input type="text" id="cm-image" placeholder="图片URL（上传后自动填入，也可手动输入）">
-                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('cm-image')">确认URL</button>
-              </div>
-              <p style="font-size:12px;color:#888;margin-top:8px;">支持 jpg、png、gif、webp 图片格式</p>
             </div>
           </div>
 
@@ -343,16 +375,24 @@
           <!-- 图片/玩偶/游戏类型字段 -->
           <div id="wk-field-image">
             <div class="form-group full">
-              <label>图片上传</label>
-              <div class="upload-box" id="wk-upload-box">
-                <input type="file" id="wk-file-input" accept="image/*" style="display:none;" onchange="handleWorksFileSelect(event)">
-                <button type="button" class="btn btn-sm" onclick="document.getElementById('wk-file-input').click()">选择图片</button>
-                <img id="wk-preview" class="upload-preview" style="display:none;" alt="预览">
-                <div class="upload-status" id="wk-upload-status"></div>
-              </div>
-              <div class="upload-url-row">
-                <input type="text" id="wk-image" placeholder="图片URL（上传后自动填入，也可手动输入）">
-                <button type="button" class="btn btn-sm btn-success" onclick="manualFillUrl('wk-image')">确认URL</button>
+              <label>图片上传（支持多张）</label>
+              <div class="multi-upload-container">
+                <div class="multi-upload-box" id="wk-multi-upload-box">
+                  <input type="file" id="wk-multi-file-input" class="multi-upload-input" accept="image/*" multiple onchange="handleWorksMultiFileSelect(event)">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#666" stroke-width="1.5" style="margin-bottom:8px;">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="M21 15l-5-5L5 21"/>
+                  </svg>
+                  <div style="font-size:14px;color:#333;margin-bottom:4px;">点击或拖拽图片到此处上传</div>
+                  <div class="multi-upload-hint">支持 jpg、png、gif、webp，可上传多张图片</div>
+                </div>
+                <div class="multi-preview-list" id="wk-multi-preview-list"></div>
+                <div class="multi-upload-status" id="wk-multi-upload-status"></div>
+                <div class="multi-urls-display">
+                  <label>已上传的图片URL（自动更新）：</label>
+                  <textarea class="multi-urls-textarea" id="wk-images" placeholder="上传图片后自动填入，可手动编辑"></textarea>
+                </div>
               </div>
             </div>
           </div>
@@ -537,36 +577,168 @@
       }
     }
     
-    // ========== 约稿图片上传处理 ==========
-    
-    function handleCommissionFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      // 显示预览
-      const preview = document.getElementById('cm-preview');
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-      
-      // 上传
-      const status = document.getElementById('cm-upload-status');
-      status.textContent = '正在上传...';
-      status.className = 'upload-status uploading';
-      
-      uploadImage(file).then(url => {
-        document.getElementById('cm-image').value = url;
-        status.textContent = '上传成功！';
-        status.className = 'upload-status success';
-      }).catch(err => {
-        status.textContent = '上传失败: ' + err.message;
-        status.className = 'upload-status error';
+    // ========== 约稿多图上传处理 ==========
+
+    // 约稿多图上传状态管理
+    const cmMultiUploadState = {
+      files: [], // 存储待上传的文件
+      urls: [], // 存储已上传的URL
+      uploading: false
+    };
+
+    // 约稿多图拖拽上传
+    function setupCommissionMultiUpload() {
+      const uploadBox = document.getElementById('cm-multi-upload-box');
+      const fileInput = document.getElementById('cm-multi-file-input');
+
+      if (!uploadBox || !fileInput) return;
+
+      // 点击上传
+      uploadBox.addEventListener('click', function() {
+        if (!cmMultiUploadState.uploading) {
+          fileInput.click();
+        }
+      });
+
+      // 拖拽上传
+      uploadBox.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.add('dragover');
+      });
+
+      uploadBox.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.remove('dragover');
+      });
+
+      uploadBox.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) {
+          handleCommissionMultiFiles(files);
+        }
       });
     }
-    
+
+    // 处理约稿多文件选择
+    function handleCommissionMultiFileSelect(event) {
+      const files = Array.from(event.target.files);
+      if (files.length > 0) {
+        handleCommissionMultiFiles(files);
+      }
+      // 清空input以允许重新选择相同文件
+      event.target.value = '';
+    }
+
+    // 处理约稿多文件上传
+    async function handleCommissionMultiFiles(files) {
+      cmMultiUploadState.files = cmMultiUploadState.files.concat(files);
+
+      // 显示预览
+      renderCommissionMultiPreviews();
+
+      // 上传所有未上传的文件
+      await uploadCommissionPendingFiles();
+    }
+
+    // 渲染约稿多图预览
+    function renderCommissionMultiPreviews() {
+      const list = document.getElementById('cm-multi-preview-list');
+      if (!list) return;
+
+      list.innerHTML = cmMultiUploadState.files.map((file, index) => {
+        const isUploaded = cmMultiUploadState.urls[index] !== undefined;
+        const url = cmMultiUploadState.urls[index] || '';
+        const previewUrl = url || URL.createObjectURL(file);
+
+        return `
+          <div class="multi-preview-item ${isUploaded ? '' : 'error-img'}" data-index="${index}">
+            <img src="${previewUrl}" alt="预览">
+            ${!isUploaded ? '<div class="upload-overlay">等待上传</div>' : ''}
+            <span class="img-index">${index + 1}</span>
+            <button type="button" class="delete-btn" onclick="removeCommissionImage(${index})" title="删除">×</button>
+            <div class="upload-progress"><div class="upload-progress-bar" style="width:${isUploaded ? '100' : '0'}%"></div></div>
+          </div>
+        `;
+      }).join('');
+
+      // 更新URL显示
+      updateCommissionImagesUrl();
+    }
+
+    // 更新约稿图片URL文本框
+    function updateCommissionImagesUrl() {
+      const textarea = document.getElementById('cm-images');
+      if (textarea) {
+        textarea.value = JSON.stringify(cmMultiUploadState.urls.filter(u => u));
+      }
+    }
+
+    // 上传约稿待上传的文件
+    async function uploadCommissionPendingFiles() {
+      if (cmMultiUploadState.uploading) return;
+      cmMultiUploadState.uploading = true;
+
+      const status = document.getElementById('cm-multi-upload-status');
+      status.textContent = '正在上传...';
+      status.className = 'multi-upload-status uploading';
+
+      try {
+        for (let i = 0; i < cmMultiUploadState.files.length; i++) {
+          if (cmMultiUploadState.urls[i] === undefined) {
+            const file = cmMultiUploadState.files[i];
+            const url = await uploadImage(file);
+            cmMultiUploadState.urls[i] = url;
+            renderCommissionMultiPreviews();
+          }
+        }
+
+        status.textContent = '上传完成！';
+        status.className = 'multi-upload-status success';
+        updateCommissionImagesUrl();
+
+        // 3秒后清除状态消息
+        setTimeout(() => {
+          if (status.textContent === '上传完成！') {
+            status.textContent = '';
+            status.className = 'multi-upload-status';
+          }
+        }, 3000);
+      } catch (err) {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'multi-upload-status error';
+      }
+
+      cmMultiUploadState.uploading = false;
+    }
+
+    // 删除约稿图片
+    function removeCommissionImage(index) {
+      if (index < 0 || index >= cmMultiUploadState.files.length) return;
+
+      cmMultiUploadState.files.splice(index, 1);
+      cmMultiUploadState.urls.splice(index, 1);
+      renderCommissionMultiPreviews();
+      updateCommissionImagesUrl();
+    }
+
+    // 重置约稿多图上传状态
+    function resetCommissionMultiUpload() {
+      cmMultiUploadState.files = [];
+      cmMultiUploadState.urls = [];
+      cmMultiUploadState.uploading = false;
+      renderCommissionMultiPreviews();
+      updateCommissionImagesUrl();
+      document.getElementById('cm-multi-upload-status').textContent = '';
+    }
+
+    // 初始化约稿多图上传
+    setupCommissionMultiUpload();
+
     // ========== 约稿视频上传处理 ==========
     
     function handleCommissionVideoSelect(event) {
@@ -587,36 +759,168 @@
       });
     }
     
-    // ========== 创作图片上传处理 ==========
-    
-    function handleWorksFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      // 显示预览
-      const preview = document.getElementById('wk-preview');
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-      
-      // 上传
-      const status = document.getElementById('wk-upload-status');
-      status.textContent = '正在上传...';
-      status.className = 'upload-status uploading';
-      
-      uploadImage(file).then(url => {
-        document.getElementById('wk-image').value = url;
-        status.textContent = '上传成功！';
-        status.className = 'upload-status success';
-      }).catch(err => {
-        status.textContent = '上传失败: ' + err.message;
-        status.className = 'upload-status error';
+    // ========== 创作多图上传处理 ==========
+
+    // 创作多图上传状态管理
+    const wkMultiUploadState = {
+      files: [], // 存储待上传的文件
+      urls: [], // 存储已上传的URL
+      uploading: false
+    };
+
+    // 创作多图拖拽上传
+    function setupWorksMultiUpload() {
+      const uploadBox = document.getElementById('wk-multi-upload-box');
+      const fileInput = document.getElementById('wk-multi-file-input');
+
+      if (!uploadBox || !fileInput) return;
+
+      // 点击上传
+      uploadBox.addEventListener('click', function() {
+        if (!wkMultiUploadState.uploading) {
+          fileInput.click();
+        }
+      });
+
+      // 拖拽上传
+      uploadBox.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.add('dragover');
+      });
+
+      uploadBox.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.remove('dragover');
+      });
+
+      uploadBox.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        uploadBox.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) {
+          handleWorksMultiFiles(files);
+        }
       });
     }
-    
+
+    // 处理创作多文件选择
+    function handleWorksMultiFileSelect(event) {
+      const files = Array.from(event.target.files);
+      if (files.length > 0) {
+        handleWorksMultiFiles(files);
+      }
+      // 清空input以允许重新选择相同文件
+      event.target.value = '';
+    }
+
+    // 处理创作多文件上传
+    async function handleWorksMultiFiles(files) {
+      wkMultiUploadState.files = wkMultiUploadState.files.concat(files);
+
+      // 显示预览
+      renderWorksMultiPreviews();
+
+      // 上传所有未上传的文件
+      await uploadWorksPendingFiles();
+    }
+
+    // 渲染创作多图预览
+    function renderWorksMultiPreviews() {
+      const list = document.getElementById('wk-multi-preview-list');
+      if (!list) return;
+
+      list.innerHTML = wkMultiUploadState.files.map((file, index) => {
+        const isUploaded = wkMultiUploadState.urls[index] !== undefined;
+        const url = wkMultiUploadState.urls[index] || '';
+        const previewUrl = url || URL.createObjectURL(file);
+
+        return `
+          <div class="multi-preview-item ${isUploaded ? '' : 'error-img'}" data-index="${index}">
+            <img src="${previewUrl}" alt="预览">
+            ${!isUploaded ? '<div class="upload-overlay">等待上传</div>' : ''}
+            <span class="img-index">${index + 1}</span>
+            <button type="button" class="delete-btn" onclick="removeWorksImage(${index})" title="删除">×</button>
+            <div class="upload-progress"><div class="upload-progress-bar" style="width:${isUploaded ? '100' : '0'}%"></div></div>
+          </div>
+        `;
+      }).join('');
+
+      // 更新URL显示
+      updateWorksImagesUrl();
+    }
+
+    // 更新创作图片URL文本框
+    function updateWorksImagesUrl() {
+      const textarea = document.getElementById('wk-images');
+      if (textarea) {
+        textarea.value = JSON.stringify(wkMultiUploadState.urls.filter(u => u));
+      }
+    }
+
+    // 上传创作待上传的文件
+    async function uploadWorksPendingFiles() {
+      if (wkMultiUploadState.uploading) return;
+      wkMultiUploadState.uploading = true;
+
+      const status = document.getElementById('wk-multi-upload-status');
+      status.textContent = '正在上传...';
+      status.className = 'multi-upload-status uploading';
+
+      try {
+        for (let i = 0; i < wkMultiUploadState.files.length; i++) {
+          if (wkMultiUploadState.urls[i] === undefined) {
+            const file = wkMultiUploadState.files[i];
+            const url = await uploadImage(file);
+            wkMultiUploadState.urls[i] = url;
+            renderWorksMultiPreviews();
+          }
+        }
+
+        status.textContent = '上传完成！';
+        status.className = 'multi-upload-status success';
+        updateWorksImagesUrl();
+
+        // 3秒后清除状态消息
+        setTimeout(() => {
+          if (status.textContent === '上传完成！') {
+            status.textContent = '';
+            status.className = 'multi-upload-status';
+          }
+        }, 3000);
+      } catch (err) {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'multi-upload-status error';
+      }
+
+      wkMultiUploadState.uploading = false;
+    }
+
+    // 删除创作图片
+    function removeWorksImage(index) {
+      if (index < 0 || index >= wkMultiUploadState.files.length) return;
+
+      wkMultiUploadState.files.splice(index, 1);
+      wkMultiUploadState.urls.splice(index, 1);
+      renderWorksMultiPreviews();
+      updateWorksImagesUrl();
+    }
+
+    // 重置创作多图上传状态
+    function resetWorksMultiUpload() {
+      wkMultiUploadState.files = [];
+      wkMultiUploadState.urls = [];
+      wkMultiUploadState.uploading = false;
+      renderWorksMultiPreviews();
+      updateWorksImagesUrl();
+      document.getElementById('wk-multi-upload-status').textContent = '';
+    }
+
+    // 初始化创作多图上传
+    setupWorksMultiUpload();
+
     // ========== 创作视频上传处理 ==========
     
     function handleWorksVideoSelect(event) {
@@ -862,7 +1166,7 @@
       const editingId = document.getElementById('cm-editing-id').value;
       const isEditing = editingId !== '';
       const type = document.getElementById('cm-type').value;
-      
+
       const data = {
         archive_id: document.getElementById('cm-site').value,
         type: type,
@@ -870,22 +1174,38 @@
         artist: document.getElementById('cm-artist').value,
         founder_notes: document.getElementById('cm-notes').value
       };
-      
+
       // 根据类型设置内容字段
       if (type === '图片') {
-        data.image_url = document.getElementById('cm-image').value;
+        // 支持多图：images 数组
+        const imagesJson = document.getElementById('cm-images').value.trim();
+        if (imagesJson) {
+          try {
+            data.images = JSON.parse(imagesJson);
+          } catch (e) {
+            data.images = [];
+          }
+        } else {
+          data.images = [];
+        }
+        // 兼容旧字段：第一张图作为 image_url
+        const urls = data.images;
+        data.image_url = urls.length > 0 ? urls[0] : null;
         data.text_content = null;
       } else if (type === '文字') {
         data.text_content = document.getElementById('cm-text').value;
         data.image_url = null;
+        data.images = null;
       } else if (type === '音乐') {
         data.image_url = document.getElementById('cm-music').value;
         data.text_content = null;
+        data.images = null;
       } else if (type === '视频') {
         data.image_url = document.getElementById('cm-video').value;
         data.text_content = null;
+        data.images = null;
       }
-      
+
       let error;
       if (isEditing) {
         // 更新模式
@@ -903,11 +1223,12 @@
           showMsg('msg-commission', 'success', '✅ 保存成功！');
         }
       }
-      
+
       if (error) {
         showMsg('msg-commission', 'error', '保存失败: ' + error.message);
       } else {
         document.getElementById('form-commission').reset();
+        resetCommissionMultiUpload();
         cancelEditCommission();
         loadCommission();
       }
@@ -919,12 +1240,24 @@
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
       const currentEditingId = document.getElementById('cm-editing-id').value;
-      el.innerHTML = data.map(item => `
+      el.innerHTML = data.map(item => {
+        // 检查是否为多图
+        let images = [];
+        try {
+          images = item.images ? (typeof item.images === 'string' ? JSON.parse(item.images) : item.images) : [];
+        } catch (e) {
+          images = [];
+        }
+        const hasMultipleImages = images.length > 1;
+        const imageCount = images.length > 0 ? images.length : (item.image_url ? 1 : 0);
+        const imageInfo = imageCount > 0 ? `<p>图片: ${imageCount}张${hasMultipleImages ? ' (多图)' : ''}</p>` : '';
+
+        return `
         <div class="data-item ${currentEditingId === item.id ? 'editing' : ''}" data-id="${item.id}">
           <div class="data-info">
-            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type || '图片')}</span></h4>
+            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type || '图片')}</span>${hasMultipleImages ? '<span style="font-size:11px;padding:1px 5px;background:#1a73e8;color:white;border-radius:3px;margin-left:4px;">多图</span>' : ''}</h4>
             <p>画师: ${h(item.artist)}</p>
-            ${item.image_url ? `<p>链接: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
+            ${imageInfo}
             ${item.text_content ? `<p>内容: ${h(item.text_content.substring(0, 60))}...</p>` : ''}
             ${item.founder_notes ? `<p>笔记: ${h(item.founder_notes.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
@@ -937,7 +1270,7 @@
             <button class="btn btn-danger btn-sm" onclick="deleteCommission('${item.id}')">删除</button>
           </div>
         </div>
-      `).join('');
+      `}).join('');
     }
     
     function editCommission(id) {
@@ -953,28 +1286,43 @@
         document.getElementById('cm-title').value = item.title || '';
         document.getElementById('cm-artist').value = item.artist || '';
         document.getElementById('cm-notes').value = item.founder_notes || '';
-        
+
         // 根据类型填充内容字段
         toggleCommissionFields();
-        if (item.type === '图片' || item.type === '音乐' || item.type === '视频') {
-          const fieldMap = { '图片': 'cm-image', '音乐': 'cm-music', '视频': 'cm-video' };
-          if (fieldMap[item.type]) {
-            document.getElementById(fieldMap[item.type]).value = item.image_url || '';
+        if (item.type === '图片') {
+          // 加载多图
+          let images = [];
+          try {
+            images = item.images ? (typeof item.images === 'string' ? JSON.parse(item.images) : item.images) : [];
+          } catch (e) {
+            images = [];
           }
+          // 如果没有 images 但有 image_url，也作为一个图片
+          if (images.length === 0 && item.image_url) {
+            images = [item.image_url];
+          }
+          cmMultiUploadState.urls = [...images];
+          cmMultiUploadState.files = [];
+          renderCommissionMultiPreviews();
+          updateCommissionImagesUrl();
+        } else if (item.type === '音乐') {
+          document.getElementById('cm-music').value = item.image_url || '';
+        } else if (item.type === '视频') {
+          document.getElementById('cm-video').value = item.image_url || '';
         } else if (item.type === '文字') {
           document.getElementById('cm-text').value = item.text_content || '';
         }
-        
+
         // 切换到编辑模式
         document.getElementById('cm-form-title').classList.add('editing-mode');
         document.getElementById('cm-submit-btn').textContent = '保存更新';
         document.getElementById('cm-cancel-btn').style.display = '';
-        
+
         // 更新列表高亮
         document.querySelectorAll('#list-commission .data-item').forEach(el => el.classList.remove('editing'));
         const currentItem = document.querySelector(`#list-commission .data-item[data-id="${id}"]`);
         if (currentItem) currentItem.classList.add('editing');
-        
+
         // 滚动到表单
         document.getElementById('form-commission').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -986,9 +1334,8 @@
       document.getElementById('cm-submit-btn').textContent = '添加约稿';
       document.getElementById('cm-cancel-btn').style.display = 'none';
       document.querySelectorAll('#list-commission .data-item').forEach(el => el.classList.remove('editing'));
-      // 重置预览
-      document.getElementById('cm-preview').style.display = 'none';
-      document.getElementById('cm-upload-status').textContent = '';
+      // 重置多图上传
+      resetCommissionMultiUpload();
       toggleCommissionFields();
     }
     
@@ -1008,36 +1355,52 @@
     }
     
     // ========== 创作 ==========
-    
+
     async function submitWorks(e) {
       e.preventDefault();
       const editingId = document.getElementById('wk-editing-id').value;
       const isEditing = editingId !== '';
       const type = document.getElementById('wk-type').value;
       const isImage = type === '图片' || type === '玩偶' || type === '游戏';
-      
+
       const data = {
         archive_id: document.getElementById('wk-site').value,
         type: type,
         title: document.getElementById('wk-title').value,
         author: document.getElementById('wk-author').value
       };
-      
+
       // 根据类型设置内容字段
       if (isImage) {
+        // 支持多图：images 数组
+        const imagesJson = document.getElementById('wk-images').value.trim();
+        if (imagesJson) {
+          try {
+            data.images = JSON.parse(imagesJson);
+          } catch (e) {
+            data.images = [];
+          }
+        } else {
+          data.images = [];
+        }
+        // 兼容旧字段：第一张图作为 image_url
+        const urls = data.images;
         data.content = null;
-        data.image_url = document.getElementById('wk-image').value;
+        data.image_url = urls.length > 0 ? urls[0] : null;
       } else if (type === '文字') {
         data.image_url = null;
+        data.images = null;
         data.content = document.getElementById('wk-text').value;
       } else if (type === '音乐') {
         data.image_url = null;
+        data.images = null;
         data.content = document.getElementById('wk-music').value;
       } else if (type === '视频') {
         data.image_url = null;
+        data.images = null;
         data.content = document.getElementById('wk-video').value;
       }
-      
+
       let error;
       if (isEditing) {
         // 更新模式
@@ -1055,11 +1418,12 @@
           showMsg('msg-works', 'success', '✅ 保存成功！');
         }
       }
-      
+
       if (error) {
         showMsg('msg-works', 'error', '保存失败: ' + error.message);
       } else {
         document.getElementById('form-works').reset();
+        resetWorksMultiUpload();
         cancelEditWorks();
         loadWorks();
       }
@@ -1071,12 +1435,24 @@
       if (error) { el.innerHTML = '<p class="empty">加载失败: ' + error.message + '</p>'; return; }
       if (!data || data.length === 0) { el.innerHTML = '<p class="empty">暂无数据</p>'; return; }
       const currentEditingId = document.getElementById('wk-editing-id').value;
-      el.innerHTML = data.map(item => `
+      el.innerHTML = data.map(item => {
+        // 检查是否为多图
+        let images = [];
+        try {
+          images = item.images ? (typeof item.images === 'string' ? JSON.parse(item.images) : item.images) : [];
+        } catch (e) {
+          images = [];
+        }
+        const hasMultipleImages = images.length > 1;
+        const imageCount = images.length > 0 ? images.length : (item.image_url ? 1 : 0);
+        const imageInfo = imageCount > 0 && (item.type === '图片' || item.type === '玩偶' || item.type === '游戏') ? `<p>图片: ${imageCount}张${hasMultipleImages ? ' (多图)' : ''}</p>` : '';
+
+        return `
         <div class="data-item ${currentEditingId === item.id ? 'editing' : ''}" data-id="${item.id}">
           <div class="data-info">
-            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type)}</span></h4>
+            <h4>${h(item.title)} <span style="font-size:12px;padding:2px 6px;background:#e8eaed;border-radius:4px;color:#666;">${h(item.type)}</span>${hasMultipleImages ? '<span style="font-size:11px;padding:1px 5px;background:#1a73e8;color:white;border-radius:3px;margin-left:4px;">多图</span>' : ''}</h4>
             <p>作者: ${h(item.author || '未知')}</p>
-            ${item.image_url ? `<p>图片: <a href="${h(item.image_url)}" target="_blank">查看</a></p>` : ''}
+            ${imageInfo}
             ${item.content ? `<p>内容: ${h(item.content.substring(0, 60))}...</p>` : ''}
             <div class="data-meta">
               <span>${h(item.archive_id)}</span>
@@ -1088,7 +1464,7 @@
             <button class="btn btn-danger btn-sm" onclick="deleteWorks('${item.id}')">删除</button>
           </div>
         </div>
-      `).join('');
+      `}).join('');
     }
     
     function editWorks(id) {
@@ -1103,17 +1479,26 @@
         document.getElementById('wk-type').value = item.type || '文字';
         document.getElementById('wk-title').value = item.title || '';
         document.getElementById('wk-author').value = item.author || '';
-        
+
         // 根据类型填充内容字段
         toggleWorksFields();
         const type = item.type || '文字';
         if (type === '图片' || type === '玩偶' || type === '游戏') {
-          document.getElementById('wk-image').value = item.image_url || '';
-          if (item.image_url) {
-            const preview = document.getElementById('wk-preview');
-            preview.src = item.image_url;
-            preview.style.display = 'block';
+          // 加载多图
+          let images = [];
+          try {
+            images = item.images ? (typeof item.images === 'string' ? JSON.parse(item.images) : item.images) : [];
+          } catch (e) {
+            images = [];
           }
+          // 如果没有 images 但有 image_url，也作为一个图片
+          if (images.length === 0 && item.image_url) {
+            images = [item.image_url];
+          }
+          wkMultiUploadState.urls = [...images];
+          wkMultiUploadState.files = [];
+          renderWorksMultiPreviews();
+          updateWorksImagesUrl();
         } else if (type === '文字') {
           document.getElementById('wk-text').value = item.content || '';
         } else if (type === '音乐') {
@@ -1121,17 +1506,17 @@
         } else if (type === '视频') {
           document.getElementById('wk-video').value = item.content || '';
         }
-        
+
         // 切换到编辑模式
         document.getElementById('wk-form-title').classList.add('editing-mode');
         document.getElementById('wk-submit-btn').textContent = '保存更新';
         document.getElementById('wk-cancel-btn').style.display = '';
-        
+
         // 更新列表高亮
         document.querySelectorAll('#list-works .data-item').forEach(el => el.classList.remove('editing'));
         const currentItem = document.querySelector(`#list-works .data-item[data-id="${id}"]`);
         if (currentItem) currentItem.classList.add('editing');
-        
+
         // 滚动到表单
         document.getElementById('form-works').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
@@ -1143,9 +1528,8 @@
       document.getElementById('wk-submit-btn').textContent = '添加创作';
       document.getElementById('wk-cancel-btn').style.display = 'none';
       document.querySelectorAll('#list-works .data-item').forEach(el => el.classList.remove('editing'));
-      // 重置预览
-      document.getElementById('wk-preview').style.display = 'none';
-      document.getElementById('wk-upload-status').textContent = '';
+      // 重置多图上传
+      resetWorksMultiUpload();
       document.getElementById('wk-video-upload-status').textContent = '';
       document.getElementById('wk-video-embed-preview').style.display = 'none';
       toggleWorksFields();

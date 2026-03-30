@@ -198,18 +198,44 @@
   }
 
   /**
+   * 获取作品的图片数组（兼容旧数据）
+   */
+  function getWorkImages(work) {
+    let images = [];
+    try {
+      if (work.images) {
+        if (typeof work.images === 'string') {
+          images = JSON.parse(work.images);
+        } else if (Array.isArray(work.images)) {
+          images = work.images;
+        }
+      }
+    } catch (e) {
+      images = [];
+    }
+    // 兼容旧数据：如果没有 images 但有 image_url
+    if (images.length === 0 && work.image_url) {
+      images = [work.image_url];
+    }
+    return images;
+  }
+
+  /**
    * 构建卡片主体（按类型）
    */
   function buildCardBody(item) {
     const type = item.type;
     const img = item.image_url;
+    const images = getWorkImages(item);
     const content = (item.content || '').trim();
+    const hasMultipleImages = images.length > 1;
 
     // 图片创作：有 image_url 直接显示图片
     if (type === '图片') {
-      if (img && isImageUrl(img)) {
+      if (images.length > 0 && isImageUrl(images[0])) {
         return `<div class="work-card-cover">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" loading="lazy">
+          <img src="${escapeHtml(images[0])}" alt="${escapeHtml(item.title)}" loading="lazy">
+          ${hasMultipleImages ? `<span class="work-card-multi-badge">${images.length}张</span>` : ''}
         </div>`;
       }
       return buildCardBodyDefault(item);
@@ -217,9 +243,10 @@
 
     // 玩偶 / 游戏：有图片显示图片，没有显示图标
     if (type === '玩偶' || type === '游戏') {
-      if (img && isImageUrl(img)) {
+      if (images.length > 0 && isImageUrl(images[0])) {
         return `<div class="work-card-cover">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" loading="lazy">
+          <img src="${escapeHtml(images[0])}" alt="${escapeHtml(item.title)}" loading="lazy">
+          ${hasMultipleImages ? `<span class="work-card-multi-badge">${images.length}张</span>` : ''}
         </div>`;
       }
       return buildCardBodyDefault(item);
@@ -976,11 +1003,33 @@
     document.getElementById('worksListView').classList.add('hidden');
     document.getElementById('worksDetailView').classList.remove('hidden');
 
-    // 更新封面
+    // 获取图片数组
+    const images = getWorkImages(work);
+    const hasMultipleImages = images.length > 1;
+
+    // 更新封面和相册
     const coverPlaceholder = document.getElementById('detailCoverPlaceholder');
-    if (coverPlaceholder) {
-      coverPlaceholder.innerHTML = getCoverSVG(work.type);
-      coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${getTypeClass(work.type)}-cover`;
+    const galleryContainer = document.getElementById('galleryContainer');
+
+    if (hasMultipleImages) {
+      // 多图模式：显示相册
+      if (coverPlaceholder) coverPlaceholder.style.display = 'none';
+      if (galleryContainer) {
+        galleryContainer.style.display = '';
+        initGallery(images);
+      }
+    } else {
+      // 单图模式：显示单张图片
+      if (coverPlaceholder) {
+        coverPlaceholder.style.display = '';
+        if (images.length > 0 && isImageUrl(images[0])) {
+          coverPlaceholder.innerHTML = `<img src="${escapeHtml(images[0])}" alt="${escapeHtml(work.title)}" style="width:100%;height:100%;object-fit:contain;border-radius:8px;">`;
+        } else {
+          coverPlaceholder.innerHTML = getCoverSVG(work.type);
+        }
+        coverPlaceholder.className = `cover-placeholder detail-cover-placeholder ${getTypeClass(work.type)}-cover`;
+      }
+      if (galleryContainer) galleryContainer.style.display = 'none';
     }
 
     // 更新基本信息
@@ -997,18 +1046,152 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  // ========== 相册功能 ==========
+
+  let galleryState = {
+    images: [],
+    currentIndex: 0
+  };
+
+  /**
+   * 初始化相册
+   */
+  function initGallery(images) {
+    galleryState.images = images;
+    galleryState.currentIndex = 0;
+
+    const mainImg = document.getElementById('galleryMainImg');
+    const counter = document.getElementById('galleryCounter');
+    const thumbsContainer = document.getElementById('galleryThumbs');
+
+    if (!mainImg || !counter || !thumbsContainer) return;
+
+    // 设置主图
+    updateGalleryMainImage(0);
+
+    // 生成缩略图
+    thumbsContainer.innerHTML = images.map((img, index) => `
+      <img src="${escapeHtml(img)}" alt="缩略图${index + 1}" class="gallery-thumb ${index === 0 ? 'active' : ''}" data-index="${index}">
+    `).join('');
+
+    // 绑定缩略图点击事件
+    thumbsContainer.querySelectorAll('.gallery-thumb').forEach(thumb => {
+      thumb.addEventListener('click', function() {
+        const index = parseInt(this.dataset.index);
+        setGalleryIndex(index);
+      });
+    });
+
+    // 绑定左右切换按钮
+    const prevBtn = document.querySelector('.gallery-prev');
+    const nextBtn = document.querySelector('.gallery-next');
+
+    if (prevBtn) {
+      prevBtn.onclick = function() { galleryPrev(); };
+    }
+    if (nextBtn) {
+      nextBtn.onclick = function() { galleryNext(); };
+    }
+
+    // 绑定触摸滑动事件
+    bindGalleryTouchEvents();
+  }
+
+  /**
+   * 更新相册主图
+   */
+  function updateGalleryMainImage(index) {
+    const mainImg = document.getElementById('galleryMainImg');
+    const counter = document.getElementById('galleryCounter');
+    const thumbsContainer = document.getElementById('galleryThumbs');
+
+    if (!mainImg) return;
+
+    galleryState.currentIndex = index;
+    mainImg.src = galleryState.images[index];
+
+    // 更新计数器
+    if (counter) {
+      counter.textContent = `${index + 1} / ${galleryState.images.length}`;
+    }
+
+    // 更新缩略图高亮
+    if (thumbsContainer) {
+      thumbsContainer.querySelectorAll('.gallery-thumb').forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+        // 确保激活的缩略图在可视区域内
+        if (i === index) {
+          thumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+      });
+    }
+  }
+
+  /**
+   * 设置相册当前索引
+   */
+  function setGalleryIndex(index) {
+    if (index < 0) index = galleryState.images.length - 1;
+    if (index >= galleryState.images.length) index = 0;
+    updateGalleryMainImage(index);
+  }
+
+  /**
+   * 上一张
+   */
+  function galleryPrev() {
+    setGalleryIndex(galleryState.currentIndex - 1);
+  }
+
+  /**
+   * 下一张
+   */
+  function galleryNext() {
+    setGalleryIndex(galleryState.currentIndex + 1);
+  }
+
+  /**
+   * 绑定相册触摸滑动事件
+   */
+  function bindGalleryTouchEvents() {
+    const galleryMain = document.querySelector('.gallery-main');
+    if (!galleryMain) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    galleryMain.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+
+    galleryMain.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      const diff = touchStartX - touchEndX;
+      // 滑动超过50px才触发
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          galleryNext();
+        } else {
+          galleryPrev();
+        }
+      }
+    }, { passive: true });
+  }
+
   /**
    * 构建详情页内容 HTML
    */
   function buildDetailContent(work) {
     const parts = [];
+    const images = getWorkImages(work);
     const img = work.image_url || '';
     const content = (work.content || '').trim();
     const type = work.type;
 
-    // 图片创作：有 image_url 直接显示图片
+    // 图片创作：多图不显示在detailContent中（已在相册中显示）
     if (type === '图片') {
-      if (img && isImageUrl(img)) {
+      // 如果没有多图，则显示单张图片
+      if (images.length === 0 && img && isImageUrl(img)) {
         parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
       }
       return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
@@ -1035,7 +1218,7 @@
 
     // 玩偶/游戏：有图片显示图片
     if (type === '玩偶' || type === '游戏') {
-      if (img && isImageUrl(img)) {
+      if (images.length === 0 && img && isImageUrl(img)) {
         parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
       }
       return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';

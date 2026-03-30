@@ -109,6 +109,18 @@
             <div class="detail-cover-placeholder" id="detailCoverPlaceholder">
               <!-- 默认占位图 -->
             </div>
+            <!-- 相册容器（多图时显示） -->
+            <div class="gallery-container" id="galleryContainer" style="display:none;">
+              <div class="gallery-main">
+                <img id="galleryMainImg" src="" alt="">
+                <button class="gallery-prev" aria-label="上一张">‹</button>
+                <button class="gallery-next" aria-label="下一张">›</button>
+                <span class="gallery-counter" id="galleryCounter">1 / 1</span>
+              </div>
+              <div class="gallery-thumbs" id="galleryThumbs">
+                <!-- 动态生成缩略图 -->
+              </div>
+            </div>
           </div>
 
           <!-- 约稿信息 -->

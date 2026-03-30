@@ -129,6 +129,29 @@
   }
 
   /**
+   * 获取约稿的图片数组（兼容旧数据）
+   */
+  function getCommissionImages(item) {
+    let images = [];
+    try {
+      if (item.images) {
+        if (typeof item.images === 'string') {
+          images = JSON.parse(item.images);
+        } else if (Array.isArray(item.images)) {
+          images = item.images;
+        }
+      }
+    } catch (e) {
+      images = [];
+    }
+    // 兼容旧数据：如果没有 images 但有 image_url
+    if (images.length === 0 && item.image_url) {
+      images = [item.image_url];
+    }
+    return images;
+  }
+
+  /**
    * 判断是否图片 URL
    */
   function isImageUrl(str) {
@@ -168,13 +191,16 @@
   function buildCardBody(item) {
     const type = item.type || '图片';
     const img = item.image_url;
+    const images = getCommissionImages(item);
     const content = item.text_content || '';
+    const hasMultipleImages = images.length > 1;
 
     // 图片类型
     if (type === '图片') {
-      if (img && isImageUrl(img)) {
+      if (images.length > 0 && isImageUrl(images[0])) {
         return `<div class="card-image">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" class="card-img" loading="lazy">
+          <img src="${escapeHtml(images[0])}" alt="${escapeHtml(item.title)}" class="card-img" loading="lazy">
+          ${hasMultipleImages ? `<span class="card-multi-badge">${images.length}张</span>` : ''}
         </div>`;
       }
       return `<div class="card-image">
@@ -257,9 +283,12 @@
       const cardBody = buildCardBody(item);
       const type = item.type || '图片';
       const isText = type === '文字';
+      const images = getCommissionImages(item);
+      const hasMultipleImages = images.length > 1;
 
       return `
         <article class="commission-card ${isText ? 'commission-card-text' : ''}" data-index="${index}" data-id="${item.id}">
+          ${!isText && hasMultipleImages ? `<span class="card-multi-badge-top">${images.length}张图集</span>` : ''}
           ${cardBody}
           <div class="card-info">
             <h3 class="card-title">${escapeHtml(item.title)}</h3>
@@ -309,57 +338,75 @@
    * 打开详情页
    */
   function openDetail(card, index) {
-    const item = displayedCommissions[index];
+    var item = displayedCommissions[index];
     if (!item) return;
 
     currentCommissionId = item.id;
 
-    const coverPlaceholder = document.getElementById('detailCoverPlaceholder');
-    const notesToggle = document.getElementById('notesToggle');
-    const notesContent = document.getElementById('notesContent');
-    const notesText = document.getElementById('notesText');
-    const detailNotes = document.getElementById('detailNotes');
-    const detailContent = document.getElementById('detailContent');
-    const listView = document.getElementById('commissionListView');
-    const detailView = document.getElementById('commissionDetailView');
+    var coverPlaceholder = document.getElementById('detailCoverPlaceholder');
+    var notesToggle = document.getElementById('notesToggle');
+    var notesContent = document.getElementById('notesContent');
+    var notesText = document.getElementById('notesText');
+    var detailNotes = document.getElementById('detailNotes');
+    var detailContent = document.getElementById('detailContent');
+    var galleryContainer = document.getElementById('galleryContainer');
+    var listView = document.getElementById('commissionListView');
+    var detailView = document.getElementById('commissionDetailView');
 
     // 根据类型构建封面区内容
-    const type = item.type || '图片';
-    const img = item.image_url;
-    const content = item.text_content || '';
+    var type = item.type || '图片';
+    var img = item.image_url;
+    var content = item.text_content || '';
+    var images = getCommissionImages(item);
+    var hasMultipleImages = images.length > 1;
 
     if (type === '图片') {
-      if (img && isImageUrl(img)) {
-        coverPlaceholder.innerHTML = `<img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:contain;">`;
+      if (hasMultipleImages) {
+        // 多图模式：显示相册
+        if (coverPlaceholder) coverPlaceholder.style.display = 'none';
+        if (galleryContainer) {
+          galleryContainer.style.display = '';
+          initGallery(images);
+        }
+      } else if (images.length > 0 && isImageUrl(images[0])) {
+        // 单图模式
+        if (coverPlaceholder) {
+          coverPlaceholder.style.display = '';
+          coverPlaceholder.innerHTML = '<img src="' + escapeHtml(images[0]) + '" alt="' + escapeHtml(item.title) + '" style="width:100%;height:100%;object-fit:contain;">';
+        }
+        if (galleryContainer) galleryContainer.style.display = 'none';
       } else {
-        coverPlaceholder.innerHTML = `<div class="detail-cover-default ${getTypeGradientClass(type)}">
-          <svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <path d="M21 15l-5-5L5 21"/>
-          </svg>
-        </div>`;
+        // 无图模式
+        if (coverPlaceholder) {
+          coverPlaceholder.style.display = '';
+          coverPlaceholder.innerHTML = '<div class="detail-cover-default ' + getTypeGradientClass(type) + '">' +
+            '<svg viewBox="0 0 24 24" width="80" height="80" fill="none" stroke="currentColor" stroke-width="1">' +
+            '<rect x="3" y="3" width="18" height="18" rx="2"/>' +
+            '<circle cx="8.5" cy="8.5" r="1.5"/>' +
+            '<path d="M21 15l-5-5L5 21"/>' +
+            '</svg></div>';
+        }
+        if (galleryContainer) galleryContainer.style.display = 'none';
       }
     } else if (type === '文字') {
-      coverPlaceholder.innerHTML = `<div class="detail-cover-text">
-        <p class="detail-text-preview">${escapeHtml(content.substring(0, 200))}${content.length > 200 ? '…' : ''}</p>
-      </div>`;
+      if (coverPlaceholder) coverPlaceholder.style.display = '';
+      var textPreview = content.substring(0, 200) + (content.length > 200 ? '...' : '');
+      coverPlaceholder.innerHTML = '<div class="detail-cover-text"><p class="detail-text-preview">' + escapeHtml(textPreview) + '</p></div>';
+      if (galleryContainer) galleryContainer.style.display = 'none';
     } else if (type === '音乐') {
-      const mediaUrl = img || content;
-      const hasLink = isExternalLink(mediaUrl);
-      coverPlaceholder.innerHTML = `<div class="detail-cover-media">
-        <span class="detail-media-icon">🎵</span>
-        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听</a>` : ''}
-      </div>`;
+      if (coverPlaceholder) coverPlaceholder.style.display = '';
+      var mediaUrl = img || content;
+      var hasLink = isExternalLink(mediaUrl);
+      coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听</a>' : '') + '</div>';
+      if (galleryContainer) galleryContainer.style.display = 'none';
     } else if (type === '视频') {
-      const mediaUrl = img || content;
-      const hasLink = isExternalLink(mediaUrl);
-      coverPlaceholder.innerHTML = `<div class="detail-cover-media">
-        <span class="detail-media-icon">🎬</span>
-        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看</a>` : ''}
-      </div>`;
+      if (coverPlaceholder) coverPlaceholder.style.display = '';
+      var mediaUrl = img || content;
+      var hasLink = isExternalLink(mediaUrl);
+      coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看</a>' : '') + '</div>';
+      if (galleryContainer) galleryContainer.style.display = 'none';
     }
 
     // 更新基本信息
@@ -368,37 +415,27 @@
     document.getElementById('detailTag').textContent = type;
     document.getElementById('detailDate').textContent = formatDate(item.created_at);
 
-    // 构建主体内容
+    // 构建主体内容（多图不在这里显示，在相册中）
     if (type === '图片') {
-      if (img && isImageUrl(img)) {
-        detailContent.innerHTML = `<div class="detail-content-image">
-          <img src="${escapeHtml(img)}" alt="${escapeHtml(item.title)}">
-        </div>`;
+      if (images.length === 0 && img && isImageUrl(img)) {
+        detailContent.innerHTML = '<div class="detail-content-image"><img src="' + escapeHtml(img) + '" alt="' + escapeHtml(item.title) + '"></div>';
       } else {
-        detailContent.innerHTML = `<div class="detail-content-empty">暂无图片内容</div>`;
+        detailContent.innerHTML = '<div class="detail-content-empty">暂无图片内容</div>';
       }
     } else if (type === '文字') {
-      detailContent.innerHTML = `<div class="detail-content-text">
-        ${formatTextContent(content)}
-      </div>`;
+      detailContent.innerHTML = '<div class="detail-content-text">' + formatTextContent(content) + '</div>';
     } else if (type === '音乐') {
-      const mediaUrl = img || content;
-      const hasLink = isExternalLink(mediaUrl);
-      detailContent.innerHTML = `<div class="detail-content-media">
-        <span class="detail-media-icon">🎵</span>
-        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听完整内容</a>` : '<p style="color:var(--text-muted);">暂无链接</p>'}
-      </div>`;
+      var mediaUrl = img || content;
+      var hasLink = isExternalLink(mediaUrl);
+      detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
     } else if (type === '视频') {
-      const mediaUrl = img || content;
-      const hasLink = isExternalLink(mediaUrl);
-      detailContent.innerHTML = `<div class="detail-content-media">
-        <span class="detail-media-icon">🎬</span>
-        <h3 class="detail-media-title">${escapeHtml(item.title)}</h3>
-        ${hasLink ? `<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看完整内容</a>` : '<p style="color:var(--text-muted);">暂无链接</p>'}
-      </div>`;
+      var mediaUrl = img || content;
+      var hasLink = isExternalLink(mediaUrl);
+      detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
     } else {
-      detailContent.innerHTML = `<div class="detail-content-empty">暂无内容</div>`;
+      detailContent.innerHTML = '<div class="detail-content-empty">暂无内容</div>';
     }
 
     // 更新笔记内容
@@ -422,7 +459,7 @@
     detailView.style.transition = 'opacity 0.3s ease';
     detailView.classList.remove('hidden');
 
-    setTimeout(() => {
+    setTimeout(function() {
       listView.classList.add('hidden');
       listView.style.opacity = '1';
 
@@ -434,6 +471,143 @@
       // 启用详情页滚动
       detailView.style.overflowY = 'auto';
     }, 300);
+  }
+
+  // ========== 相册功能 ==========
+
+  var galleryState = {
+    images: [],
+    currentIndex: 0
+  };
+
+  /**
+   * 初始化相册
+   */
+  function initGallery(images) {
+    galleryState.images = images;
+    galleryState.currentIndex = 0;
+
+    var mainImg = document.getElementById('galleryMainImg');
+    var counter = document.getElementById('galleryCounter');
+    var thumbsContainer = document.getElementById('galleryThumbs');
+
+    if (!mainImg || !counter || !thumbsContainer) return;
+
+    // 设置主图
+    updateGalleryMainImage(0);
+
+    // 生成缩略图
+    var thumbsHtml = '';
+    for (var i = 0; i < images.length; i++) {
+      thumbsHtml += '<img src="' + escapeHtml(images[i]) + '" alt="缩略图' + (i + 1) + '" class="gallery-thumb' + (i === 0 ? ' active' : '') + '" data-index="' + i + '">';
+    }
+    thumbsContainer.innerHTML = thumbsHtml;
+
+    // 绑定缩略图点击事件
+    var thumbs = thumbsContainer.querySelectorAll('.gallery-thumb');
+    for (var j = 0; j < thumbs.length; j++) {
+      thumbs[j].addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-index'));
+        setGalleryIndex(idx);
+      });
+    }
+
+    // 绑定左右切换按钮
+    var prevBtn = document.querySelector('.gallery-prev');
+    var nextBtn = document.querySelector('.gallery-next');
+
+    if (prevBtn) {
+      prevBtn.onclick = function() { galleryPrev(); };
+    }
+    if (nextBtn) {
+      nextBtn.onclick = function() { galleryNext(); };
+    }
+
+    // 绑定触摸滑动事件
+    bindGalleryTouchEvents();
+  }
+
+  /**
+   * 更新相册主图
+   */
+  function updateGalleryMainImage(index) {
+    var mainImg = document.getElementById('galleryMainImg');
+    var counter = document.getElementById('galleryCounter');
+    var thumbsContainer = document.getElementById('galleryThumbs');
+
+    if (!mainImg) return;
+
+    galleryState.currentIndex = index;
+    mainImg.src = galleryState.images[index];
+
+    // 更新计数器
+    if (counter) {
+      counter.textContent = (index + 1) + ' / ' + galleryState.images.length;
+    }
+
+    // 更新缩略图高亮
+    if (thumbsContainer) {
+      var thumbs = thumbsContainer.querySelectorAll('.gallery-thumb');
+      for (var i = 0; i < thumbs.length; i++) {
+        if (i === index) {
+          thumbs[i].classList.add('active');
+          thumbs[i].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        } else {
+          thumbs[i].classList.remove('active');
+        }
+      }
+    }
+  }
+
+  /**
+   * 设置相册当前索引
+   */
+  function setGalleryIndex(index) {
+    if (index < 0) index = galleryState.images.length - 1;
+    if (index >= galleryState.images.length) index = 0;
+    updateGalleryMainImage(index);
+  }
+
+  /**
+   * 上一张
+   */
+  function galleryPrev() {
+    setGalleryIndex(galleryState.currentIndex - 1);
+  }
+
+  /**
+   * 下一张
+   */
+  function galleryNext() {
+    setGalleryIndex(galleryState.currentIndex + 1);
+  }
+
+  /**
+   * 绑定相册触摸滑动事件
+   */
+  function bindGalleryTouchEvents() {
+    var galleryMain = document.querySelector('.gallery-main');
+    if (!galleryMain) return;
+
+    var touchStartX = 0;
+    var touchEndX = 0;
+
+    galleryMain.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].clientX;
+    }, { passive: true });
+
+    galleryMain.addEventListener('touchend', function(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      var diff = touchStartX - touchEndX;
+      // 滑动超过50px才触发
+      if (Math.abs(diff) > 50) {
+        if (diff > 0) {
+          galleryNext();
+        } else {
+          galleryPrev();
+        }
+      }
+    }, { passive: true });
   }
 
   /**
