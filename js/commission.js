@@ -77,21 +77,11 @@
    */
   function bindDetailEvents() {
     const backBtn = document.getElementById('btnBack');
-    const notesToggle = document.getElementById('notesToggle');
-    const notesContent = document.getElementById('notesContent');
     const listView = document.getElementById('commissionListView');
-    const detailView = document.getElementById('commissionDetailView');
     const commentsForm = document.getElementById('commentsForm');
 
     if (backBtn) {
       backBtn.addEventListener('click', closeDetail);
-    }
-
-    if (notesToggle && notesContent) {
-      notesToggle.addEventListener('click', function() {
-        this.classList.toggle('expanded');
-        notesContent.classList.toggle('expanded');
-      });
     }
 
     // 绑定评论表单提交
@@ -106,6 +96,9 @@
         if (card) {
           const index = parseInt(card.dataset.index);
           openDetail(card, index);
+        }
+      });
+    }
         }
       });
     }
@@ -453,10 +446,6 @@
     window.currentCommissionId = item.id;
 
     var coverPlaceholder = document.getElementById('detailCoverPlaceholder');
-    var notesToggle = document.getElementById('notesToggle');
-    var notesContent = document.getElementById('notesContent');
-    var notesText = document.getElementById('notesText');
-    var detailNotes = document.getElementById('detailNotes');
     var detailContent = document.getElementById('detailContent');
     var galleryContainer = document.getElementById('galleryContainer');
     var listView = document.getElementById('commissionListView');
@@ -498,94 +487,99 @@
         if (galleryContainer) galleryContainer.style.display = 'none';
       }
     } else if (type === '文字') {
-      if (coverPlaceholder) coverPlaceholder.style.display = '';
-      var textPreview = content.substring(0, 200) + (content.length > 200 ? '...' : '');
-      coverPlaceholder.innerHTML = '<div class="detail-cover-text"><p class="detail-text-preview">' + escapeHtml(textPreview) + '</p></div>';
+      if (coverPlaceholder) {
+        coverPlaceholder.style.display = '';
+        var textPreview = content.substring(0, 200) + (content.length > 200 ? '...' : '');
+        coverPlaceholder.innerHTML = '<div class="detail-cover-text"><p class="detail-text-preview">' + escapeHtml(textPreview) + '</p></div>';
+      }
       if (galleryContainer) galleryContainer.style.display = 'none';
     } else if (type === '音乐') {
-      if (coverPlaceholder) coverPlaceholder.style.display = '';
-      var mediaUrl = img || content;
-      var hasLink = isExternalLink(mediaUrl);
-      coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
-        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听</a>' : '') + '</div>';
+      if (coverPlaceholder) {
+        coverPlaceholder.style.display = '';
+        var mediaUrl = img || content;
+        var hasLink = isExternalLink(mediaUrl);
+        coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+          (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听</a>' : '') + '</div>';
+      }
       if (galleryContainer) galleryContainer.style.display = 'none';
     } else if (type === '视频') {
-      if (coverPlaceholder) coverPlaceholder.style.display = '';
-      var mediaUrl = img || content;
-      var hasLink = isExternalLink(mediaUrl);
-      coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
-        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看</a>' : '') + '</div>';
+      if (coverPlaceholder) {
+        coverPlaceholder.style.display = '';
+        var mediaUrl = img || content;
+        var hasLink = isExternalLink(mediaUrl);
+        coverPlaceholder.innerHTML = '<div class="detail-cover-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+          (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看</a>' : '') + '</div>';
+      }
       if (galleryContainer) galleryContainer.style.display = 'none';
     }
 
     // 更新基本信息
-    document.getElementById('detailTitle').textContent = item.title || '无标题';
-    document.getElementById('detailArtist').textContent = '画师：' + (item.artist || '未知');
-    document.getElementById('detailTag').textContent = type;
-    document.getElementById('detailDate').textContent = formatDate(item.created_at);
+    var titleEl = document.getElementById('detailTitle');
+    var artistEl = document.getElementById('detailArtist');
+    var tagEl = document.getElementById('detailTag');
+    var dateEl = document.getElementById('detailDate');
+    if (titleEl) titleEl.textContent = item.title || '无标题';
+    if (artistEl) artistEl.textContent = '画师：' + (item.artist || '未知');
+    if (tagEl) tagEl.textContent = type;
+    if (dateEl) dateEl.textContent = formatDate(item.created_at);
 
     // 构建主体内容（多图不在这里显示，在相册中）
     var hasImages = (images.length > 0) || (img && isImageUrl(img));
-    if (type === '图片') {
-      // 只有当确实没有图片时才显示"暂无图片内容"
-      if (!hasImages) {
-        detailContent.innerHTML = '<div class="detail-content-empty">暂无图片内容</div>';
+    if (detailContent) {
+      if (type === '图片') {
+        // 只有当确实没有图片时才显示"暂无图片内容"
+        if (!hasImages) {
+          detailContent.innerHTML = '<div class="detail-content-empty">暂无图片内容</div>';
+        } else {
+          // 有图片则不显示任何内容（图片在封面区或相册中显示）
+          detailContent.innerHTML = '';
+        }
+      } else if (type === '文字') {
+        detailContent.innerHTML = '<div class="detail-content-text">' + formatTextContent(content) + '</div>';
+      } else if (type === '音乐') {
+        var mediaUrl = img || content;
+        var hasLink = isExternalLink(mediaUrl);
+        detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+          (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
+      } else if (type === '视频') {
+        var mediaUrl = img || content;
+        var hasLink = isExternalLink(mediaUrl);
+        detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
+          (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
       } else {
-        // 有图片则不显示任何内容（图片在封面区或相册中显示）
-        detailContent.innerHTML = '';
+        detailContent.innerHTML = '<div class="detail-content-empty">暂无内容</div>';
       }
-    } else if (type === '文字') {
-      detailContent.innerHTML = '<div class="detail-content-text">' + formatTextContent(content) + '</div>';
-    } else if (type === '音乐') {
-      var mediaUrl = img || content;
-      var hasLink = isExternalLink(mediaUrl);
-      detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎵</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
-        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">🎵 点击收听完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
-    } else if (type === '视频') {
-      var mediaUrl = img || content;
-      var hasLink = isExternalLink(mediaUrl);
-      detailContent.innerHTML = '<div class="detail-content-media"><span class="detail-media-icon">🎬</span><h3 class="detail-media-title">' + escapeHtml(item.title) + '</h3>' +
-        (hasLink ? '<a href="' + escapeHtml(mediaUrl) + '" target="_blank" rel="noopener noreferrer" class="detail-media-btn">▶ 点击观看完整内容</a>' : '<p style="color:var(--text-muted);">暂无链接</p>') + '</div>';
-    } else {
-      detailContent.innerHTML = '<div class="detail-content-empty">暂无内容</div>';
     }
-
-    // 更新笔记内容
-    if (item.founder_notes && item.founder_notes.trim() !== '') {
-      notesText.textContent = item.founder_notes;
-      detailNotes.style.display = '';
-    } else {
-      notesText.textContent = '暂无笔记';
-      detailNotes.style.display = '';
-    }
-
-    // 重置笔记折叠状态
-    if (notesToggle) notesToggle.classList.remove('expanded');
-    if (notesContent) notesContent.classList.remove('expanded');
 
     // 加载评论
     renderCommissionCommentsList();
     updateCommissionCommentsCount();
 
     // 300ms fade 过渡效果
-    listView.style.opacity = '0';
-    listView.style.transition = 'opacity 0.3s ease';
+    if (listView) {
+      listView.style.opacity = '0';
+      listView.style.transition = 'opacity 0.3s ease';
+    }
 
-    detailView.style.opacity = '0';
-    detailView.style.transition = 'opacity 0.3s ease';
-    detailView.classList.remove('hidden');
+    if (detailView) {
+      detailView.style.opacity = '0';
+      detailView.style.transition = 'opacity 0.3s ease';
+      detailView.classList.remove('hidden');
+    }
 
     setTimeout(function() {
-      listView.classList.add('hidden');
-      listView.style.opacity = '1';
+      if (listView) {
+        listView.classList.add('hidden');
+        listView.style.opacity = '1';
+      }
 
-      detailView.style.opacity = '1';
-
-      // 滚动到页面顶部
-      window.scrollTo({ top: 0, behavior: 'instant' });
-
-      // 启用详情页滚动
-      detailView.style.overflowY = 'auto';
+      if (detailView) {
+        detailView.style.opacity = '1';
+        // 滚动到页面顶部
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        // 启用详情页滚动
+        detailView.style.overflowY = 'auto';
+      }
     }, 300);
   }
 
@@ -736,17 +730,23 @@
     window.currentCommissionId = null;
 
     // 300ms fade 过渡效果
-    detailView.style.opacity = '0';
-    listView.style.transition = 'opacity 0.3s ease';
-    listView.style.opacity = '0';
+    if (detailView) detailView.style.opacity = '0';
+    if (listView) {
+      listView.style.transition = 'opacity 0.3s ease';
+      listView.style.opacity = '0';
+    }
 
     setTimeout(() => {
-      detailView.classList.add('hidden');
-      detailView.style.opacity = '1';
-      detailView.style.overflowY = '';
+      if (detailView) {
+        detailView.classList.add('hidden');
+        detailView.style.opacity = '1';
+        detailView.style.overflowY = '';
+      }
 
-      listView.classList.remove('hidden');
-      listView.style.opacity = '1';
+      if (listView) {
+        listView.classList.remove('hidden');
+        listView.style.opacity = '1';
+      }
 
       // 滚动回原来位置
       window.scrollTo({ top: 0, behavior: 'instant' });
