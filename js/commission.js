@@ -99,9 +99,6 @@
         }
       });
     }
-        }
-      });
-    }
 
     // ESC 关闭详情
     document.addEventListener('keydown', function(e) {
