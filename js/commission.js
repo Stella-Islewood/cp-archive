@@ -16,7 +16,7 @@
   // 缓存的约稿数据
   let cachedCommissions = [];
   let displayedCommissions = [];
-  let currentCommissionId = null;
+  window.window.currentCommissionId = null;
 
   /**
    * 初始化约稿页面功能
@@ -139,8 +139,8 @@
    * 更新评论数量
    */
   function updateCommissionCommentsCount() {
-    if (!currentCommissionId) return;
-    const count = getCommissionComments(currentCommissionId).length;
+    if (!window.currentCommissionId) return;
+    const count = getCommissionComments(window.currentCommissionId).length;
     const el = function(id) { return document.getElementById(id); };
     if (el('commentsCount')) el('commentsCount').textContent = '(' + count + ')';
   }
@@ -149,10 +149,10 @@
    * 渲染评论列表
    */
   function renderCommissionCommentsList() {
-    if (!currentCommissionId) return;
+    if (!window.currentCommissionId) return;
     const list = document.getElementById('commentsList');
     if (!list) return;
-    const comments = getCommissionComments(currentCommissionId);
+    const comments = getCommissionComments(window.currentCommissionId);
 
     if (!comments.length) {
       list.innerHTML = '<p class="comments-list-empty">还没有留言，快来抢沙发吧~</p>';
@@ -179,10 +179,10 @@
    */
   function deleteCommissionComment(commentId) {
     if (!confirm('确定删除这条评论吗？')) return;
-    if (!currentCommissionId) return;
-    const comments = getCommissionComments(currentCommissionId);
+    if (!window.currentCommissionId) return;
+    const comments = getCommissionComments(window.currentCommissionId);
     const filteredComments = comments.filter(function(c) { return c.id !== commentId; });
-    saveCommissionComments(currentCommissionId, filteredComments);
+    saveCommissionComments(window.currentCommissionId, filteredComments);
     renderCommissionCommentsList();
     updateCommissionCommentsCount();
   }
@@ -192,7 +192,7 @@
    */
   function submitCommissionComment(e) {
     e.preventDefault();
-    if (!currentCommissionId) return;
+    if (!window.currentCommissionId) return;
     const form = document.getElementById('commentsForm');
     if (!form) return;
     const nicknameInput = form.querySelector('.comment-nickname');
@@ -202,9 +202,9 @@
     const content = contentInput.value.trim();
     if (!nickname || !content) return;
 
-    const comments = getCommissionComments(currentCommissionId);
+    const comments = getCommissionComments(window.currentCommissionId);
     comments.push({ id: 'c-' + Date.now(), nickname: nickname, content: content, time: formatTime(new Date()) });
-    saveCommissionComments(currentCommissionId, comments);
+    saveCommissionComments(window.currentCommissionId, comments);
     updateCommissionCommentsCount();
     renderCommissionCommentsList();
     form.reset();
@@ -450,7 +450,7 @@
     var item = displayedCommissions[index];
     if (!item) return;
 
-    currentCommissionId = item.id;
+    window.currentCommissionId = item.id;
 
     var coverPlaceholder = document.getElementById('detailCoverPlaceholder');
     var notesToggle = document.getElementById('notesToggle');
@@ -733,7 +733,7 @@
     const listView = document.getElementById('commissionListView');
     const detailView = document.getElementById('commissionDetailView');
 
-    currentCommissionId = null;
+    window.currentCommissionId = null;
 
     // 300ms fade 过渡效果
     detailView.style.opacity = '0';
@@ -826,3 +826,18 @@
   }
 
 })();
+
+// 全局删除约稿评论函数（供 onclick 调用）
+window.deleteCommissionComment = function(commentId) {
+  if (!confirm('确定删除这条评论吗？')) return;
+  const commissionId = window.window.currentCommissionId;
+  if (!commissionId) return;
+  const key = 'commission-comments-' + commissionId;
+  const stored = localStorage.getItem(key);
+  let comments = stored ? JSON.parse(stored) : [];
+  comments = comments.filter(c => c.id !== commentId);
+  localStorage.setItem(key, JSON.stringify(comments));
+  // 调用页面内的渲染函数
+  if (typeof renderCommissionCommentsList === 'function') renderCommissionCommentsList();
+  if (typeof updateCommissionCommentsCount === 'function') updateCommissionCommentsCount();
+};

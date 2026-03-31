@@ -19,7 +19,7 @@
   let displayedWorks = [];
 
   // 当前打开的详情作品 ID
-  let currentWorkId = null;
+  window.window.currentWorkId = null;
 
   /**
    * 初始化作品页面
@@ -600,8 +600,8 @@
     const detailFavBtn = document.getElementById('btnDetailFavorite');
     if (detailFavBtn) {
       detailFavBtn.addEventListener('click', function() {
-        if (currentWorkId) {
-          toggleFavorite(currentWorkId);
+        if (window.currentWorkId) {
+          toggleFavorite(window.currentWorkId);
           updateDetailFavoriteButton();
         }
       });
@@ -991,7 +991,7 @@
    * 打开作品详情页
    */
   function openWorkDetail(workId) {
-    currentWorkId = workId;
+    window.currentWorkId = workId;
     const work = cachedWorks.find(w => w.id === workId);
     if (!work) return;
 
@@ -1242,7 +1242,7 @@
    * 关闭作品详情页
    */
   function closeWorkDetail() {
-    currentWorkId = null;
+    window.currentWorkId = null;
     const url = new URL(window.location);
     url.searchParams.delete('work');
     url.searchParams.delete('view');
@@ -1257,10 +1257,10 @@
    * 更新详情页收藏按钮
    */
   function updateDetailFavoriteButton() {
-    if (!currentWorkId) return;
+    if (!window.currentWorkId) return;
     const btn = document.getElementById('btnDetailFavorite');
     if (!btn) return;
-    const fav = getFavorites().includes(currentWorkId);
+    const fav = getFavorites().includes(window.currentWorkId);
     btn.classList.toggle('liked', fav);
     const icon = btn.querySelector('.favorite-icon-large');
     const text = btn.querySelector('.favorite-text');
@@ -1338,11 +1338,11 @@
    * 更新评论数量
    */
   function updateCommentsCount() {
-    if (!currentWorkId) return;
-    const count = getComments(currentWorkId).length;
+    if (!window.currentWorkId) return;
+    const count = getComments(window.currentWorkId).length;
     const el = id => document.getElementById(id);
     if (el('commentsCount')) el('commentsCount').textContent = `(${count})`;
-    const cardCount = document.querySelector(`.work-card[data-work-id="${currentWorkId}"] .comment-count`);
+    const cardCount = document.querySelector(`.work-card[data-work-id="${window.currentWorkId}"] .comment-count`);
     if (cardCount) cardCount.textContent = count;
   }
 
@@ -1350,10 +1350,10 @@
    * 渲染留言列表
    */
   function renderCommentsList() {
-    if (!currentWorkId) return;
+    if (!window.currentWorkId) return;
     const list = document.getElementById('commentsList');
     if (!list) return;
-    const comments = getComments(currentWorkId);
+    const comments = getComments(window.currentWorkId);
 
     if (!comments.length) {
       list.innerHTML = '<p class="comments-list-empty">还没有留言，快来抢沙发吧~</p>';
@@ -1380,10 +1380,10 @@
    */
   function deleteWorkComment(commentId) {
     if (!confirm('确定删除这条评论吗？')) return;
-    if (!currentWorkId) return;
-    const comments = getComments(currentWorkId);
+    if (!window.currentWorkId) return;
+    const comments = getComments(window.currentWorkId);
     const filteredComments = comments.filter(c => c.id !== commentId);
-    saveComments(currentWorkId, filteredComments);
+    saveComments(window.currentWorkId, filteredComments);
     renderCommentsList();
     updateCommentsCount();
   }
@@ -1393,16 +1393,16 @@
    */
   function submitComment(e) {
     e.preventDefault();
-    if (!currentWorkId) return;
+    if (!window.currentWorkId) return;
     const form = document.getElementById('commentsForm');
     if (!form) return;
     const nickname = form.querySelector('.comment-nickname').value.trim();
     const content = form.querySelector('.comment-content').value.trim();
     if (!nickname || !content) return;
 
-    const comments = getComments(currentWorkId);
+    const comments = getComments(window.currentWorkId);
     comments.push({ id: 'c-' + Date.now(), nickname, content, time: formatTime(new Date()) });
-    saveComments(currentWorkId, comments);
+    saveComments(window.currentWorkId, comments);
     updateCommentsCount();
     renderCommentsList();
     form.reset();
@@ -1468,3 +1468,18 @@
   }
 
 })();
+
+// 全局删除作品评论函数（供 onclick 调用）
+window.deleteWorkComment = function(commentId) {
+  if (!confirm('确定删除这条评论吗？')) return;
+  const workId = window.window.currentWorkId;
+  if (!workId) return;
+  const key = 'works-comments-' + workId;
+  const stored = localStorage.getItem(key);
+  let comments = stored ? JSON.parse(stored) : [];
+  comments = comments.filter(c => c.id !== commentId);
+  localStorage.setItem(key, JSON.stringify(comments));
+  // 调用页面内的渲染函数
+  if (typeof renderCommentsList === 'function') renderCommentsList();
+  if (typeof updateCommentsCount === 'function') updateCommentsCount();
+};
