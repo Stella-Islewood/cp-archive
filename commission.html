@@ -99,11 +99,24 @@
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
-          <span>返回约稿列表</span>
+          <span>← 返回列表</span>
         </button>
 
         <!-- 约稿详情内容 -->
         <article class="commission-detail" id="commissionDetail">
+          <!-- 约稿信息 -->
+          <div class="detail-info">
+            <h1 class="detail-title" id="detailTitle">约稿标题</h1>
+            <div class="detail-meta">
+              <span class="detail-artist" id="detailArtist">画师：-</span>
+              <span class="detail-tag" id="detailTag">类型</span>
+              <span class="detail-date" id="detailDate">-</span>
+            </div>
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="detail-divider"></div>
+
           <!-- 封面图/媒体区 -->
           <div class="detail-cover">
             <div class="detail-cover-placeholder" id="detailCoverPlaceholder">
@@ -123,19 +136,6 @@
             </div>
           </div>
 
-          <!-- 约稿信息 -->
-          <div class="detail-info">
-            <h1 class="detail-title" id="detailTitle">约稿标题</h1>
-            <div class="detail-meta">
-              <span class="detail-artist" id="detailArtist">画师：-</span>
-              <span class="detail-tag" id="detailTag">类型</span>
-              <span class="detail-date" id="detailDate">-</span>
-            </div>
-          </div>
-
-          <!-- 分隔线 -->
-          <div class="detail-divider"></div>
-
           <!-- 主体内容区域 -->
           <div class="detail-content" id="detailContent">
             <!-- 动态填充 -->
@@ -144,32 +144,14 @@
           <!-- 分隔线 -->
           <div class="detail-divider"></div>
 
-          <!-- 创始人笔记折叠栏 -->
-          <div class="detail-notes" id="detailNotes">
-            <button class="notes-toggle" id="notesToggle">
-              <span class="notes-icon">✎</span>
-              <span class="notes-text">创始人笔记</span>
-              <svg class="toggle-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-            <div class="notes-content" id="notesContent">
-              <p id="notesText">暂无笔记</p>
-            </div>
-          </div>
-
-          <!-- 分隔线 -->
-          <div class="detail-divider"></div>
-
           <!-- 评论区 -->
           <div class="detail-comments" id="detailComments">
             <h3 class="comments-title" id="commentsTitle">
-              留言 <span class="comments-count" id="commentsCount">(0)</span>
+              💬 留言 <span class="comments-count" id="commentsCount">(0)</span>
             </h3>
             <div class="comments-list" id="commentsList">
             </div>
             <div class="comment-form-section">
-              <h4 class="comment-form-title">发表留言</h4>
               <form class="comments-form" id="commentsForm">
                 <div class="comments-form-row">
                   <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
