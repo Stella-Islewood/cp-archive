@@ -995,6 +995,9 @@
     const work = cachedWorks.find(w => w.id === workId);
     if (!work) return;
 
+    // 记录当前滚动位置
+    sessionStorage.setItem('listScrollPos', window.scrollY);
+
     const url = new URL(window.location);
     url.searchParams.set('work', workId);
     url.searchParams.set('view', 'detail');
@@ -1251,6 +1254,15 @@
 
     document.getElementById('worksDetailView').classList.add('hidden');
     document.getElementById('worksListView').classList.remove('hidden');
+
+    // 恢复滚动位置
+    const savedPos = sessionStorage.getItem('listScrollPos');
+    if (savedPos) {
+      setTimeout(() => {
+        window.scrollTo({ top: parseInt(savedPos), behavior: 'instant' });
+      }, 50);
+      sessionStorage.removeItem('listScrollPos');
+    }
   }
 
   /**

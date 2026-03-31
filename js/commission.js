@@ -16,7 +16,7 @@
   // 缓存的约稿数据
   let cachedCommissions = [];
   let displayedCommissions = [];
-  window.currentCommissionId = null;
+  window.window.currentCommissionId = null;
 
   /**
    * 初始化约稿页面功能
@@ -442,6 +442,9 @@
 
     window.currentCommissionId = item.id;
 
+    // 记录当前滚动位置
+    sessionStorage.setItem('listScrollPos', window.scrollY);
+
     var coverPlaceholder = document.getElementById('detailCoverPlaceholder');
     var detailContent = document.getElementById('detailContent');
     var galleryContainer = document.getElementById('galleryContainer');
@@ -745,8 +748,12 @@
         listView.style.opacity = '1';
       }
 
-      // 滚动回原来位置
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      // 恢复滚动位置
+      const savedPos = sessionStorage.getItem('listScrollPos');
+      if (savedPos) {
+        window.scrollTo({ top: parseInt(savedPos), behavior: 'instant' });
+        sessionStorage.removeItem('listScrollPos');
+      }
     }, 300);
   }
 
@@ -827,7 +834,7 @@
 // 全局删除约稿评论函数（供 onclick 调用）
 window.deleteCommissionComment = function(commentId) {
   if (!confirm('确定删除这条评论吗？')) return;
-  const commissionId = window.currentCommissionId;
+  const commissionId = window.window.currentCommissionId;
   if (!commissionId) return;
   const key = 'commission-comments-' + commissionId;
   const stored = localStorage.getItem(key);

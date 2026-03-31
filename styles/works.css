@@ -374,22 +374,21 @@
 
 /* 返回按钮 */
 .btn-back {
-  position: sticky;
-  top: 70px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(200, 220, 255, 0.5);
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(200,220,255,0.5);
   border-radius: 20px;
   font-size: 0.9rem;
   color: #666;
   cursor: pointer;
-  margin-bottom: 20px;
-  transition: all 0.2s;
   backdrop-filter: blur(8px);
-  z-index: 100;
+  margin: 0 0 20px 0;
+  position: relative;
+  z-index: 10;
+  transition: all 0.2s;
 }
 
 .btn-back:hover {
@@ -1661,10 +1660,14 @@
 
   /* 返回按钮手机端 */
   .btn-back {
-    top: 10px;
-    margin-bottom: 12px;
-    padding: 6px 12px;
+    margin-top: 0;
+    margin-left: 0;
     font-size: 0.85rem;
+    padding: 8px 14px;
+  }
+
+  .works-detail-view {
+    padding-top: 8px;
   }
 
   /* 详情页响应式 */
