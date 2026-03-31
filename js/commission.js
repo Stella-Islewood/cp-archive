@@ -16,7 +16,7 @@
   // 缓存的约稿数据
   let cachedCommissions = [];
   let displayedCommissions = [];
-  window.window.currentCommissionId = null;
+  window.currentCommissionId = null;
 
   /**
    * 初始化约稿页面功能
@@ -827,7 +827,7 @@
 // 全局删除约稿评论函数（供 onclick 调用）
 window.deleteCommissionComment = function(commentId) {
   if (!confirm('确定删除这条评论吗？')) return;
-  const commissionId = window.window.currentCommissionId;
+  const commissionId = window.currentCommissionId;
   if (!commissionId) return;
   const key = 'commission-comments-' + commissionId;
   const stored = localStorage.getItem(key);
