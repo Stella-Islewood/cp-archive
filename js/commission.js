@@ -11,6 +11,7 @@
   // Supabase 配置
   const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+  const COMMENTS_KEY = 'commission-comments';
 
   // 缓存的约稿数据
   let cachedCommissions = [];
@@ -80,6 +81,7 @@
     const notesContent = document.getElementById('notesContent');
     const listView = document.getElementById('commissionListView');
     const detailView = document.getElementById('commissionDetailView');
+    const commentsForm = document.getElementById('commentsForm');
 
     if (backBtn) {
       backBtn.addEventListener('click', closeDetail);
@@ -90,6 +92,11 @@
         this.classList.toggle('expanded');
         notesContent.classList.toggle('expanded');
       });
+    }
+
+    // 绑定评论表单提交
+    if (commentsForm) {
+      commentsForm.addEventListener('submit', submitCommissionComment);
     }
 
     // 使用事件委托绑定卡片点击事件
@@ -109,6 +116,108 @@
         closeDetail();
       }
     });
+  }
+
+  // ========== 评论功能 ==========
+
+  /**
+   * 获取约稿评论列表（按约稿 id 存储）
+   */
+  function getCommissionComments(commissionId) {
+    const s = localStorage.getItem(COMMENTS_KEY + '-' + commissionId);
+    return s ? JSON.parse(s) : [];
+  }
+
+  /**
+   * 保存约稿评论列表
+   */
+  function saveCommissionComments(commissionId, comments) {
+    localStorage.setItem(COMMENTS_KEY + '-' + commissionId, JSON.stringify(comments));
+  }
+
+  /**
+   * 更新评论数量
+   */
+  function updateCommissionCommentsCount() {
+    if (!currentCommissionId) return;
+    const count = getCommissionComments(currentCommissionId).length;
+    const el = function(id) { return document.getElementById(id); };
+    if (el('commentsCount')) el('commentsCount').textContent = '(' + count + ')';
+  }
+
+  /**
+   * 渲染评论列表
+   */
+  function renderCommissionCommentsList() {
+    if (!currentCommissionId) return;
+    const list = document.getElementById('commentsList');
+    if (!list) return;
+    const comments = getCommissionComments(currentCommissionId);
+
+    if (!comments.length) {
+      list.innerHTML = '<p class="comments-list-empty">还没有留言，快来抢沙发吧~</p>';
+      return;
+    }
+
+    list.innerHTML = comments.map(function(c) {
+      return '<div class="comment-item" data-comment-id="' + c.id + '">' +
+        '<div class="comment-avatar">' + (c.nickname || '?').charAt(0).toUpperCase() + '</div>' +
+        '<div class="comment-body">' +
+        '<div class="comment-header">' +
+        '<span class="comment-nickname">' + escapeHtml(c.nickname) + '</span>' +
+        '<span class="comment-time">' + (c.time || '') + '</span>' +
+        '<button class="btn-delete-comment" onclick="deleteCommissionComment(\'' + c.id + '\')">× 删除</button>' +
+        '</div>' +
+        '<p class="comment-text">' + escapeHtml(c.content) + '</p>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  /**
+   * 删除约稿评论
+   */
+  function deleteCommissionComment(commentId) {
+    if (!confirm('确定删除这条评论吗？')) return;
+    if (!currentCommissionId) return;
+    const comments = getCommissionComments(currentCommissionId);
+    const filteredComments = comments.filter(function(c) { return c.id !== commentId; });
+    saveCommissionComments(currentCommissionId, filteredComments);
+    renderCommissionCommentsList();
+    updateCommissionCommentsCount();
+  }
+
+  /**
+   * 提交评论
+   */
+  function submitCommissionComment(e) {
+    e.preventDefault();
+    if (!currentCommissionId) return;
+    const form = document.getElementById('commentsForm');
+    if (!form) return;
+    const nicknameInput = form.querySelector('.comment-nickname');
+    const contentInput = form.querySelector('.comment-content');
+    if (!nicknameInput || !contentInput) return;
+    const nickname = nicknameInput.value.trim();
+    const content = contentInput.value.trim();
+    if (!nickname || !content) return;
+
+    const comments = getCommissionComments(currentCommissionId);
+    comments.push({ id: 'c-' + Date.now(), nickname: nickname, content: content, time: formatTime(new Date()) });
+    saveCommissionComments(currentCommissionId, comments);
+    updateCommissionCommentsCount();
+    renderCommissionCommentsList();
+    form.reset();
+  }
+
+  /**
+   * 格式化时间
+   */
+  function formatTime(date) {
+    var y = date.getFullYear();
+    var m = String(date.getMonth() + 1).padStart(2, '0');
+    var d = String(date.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + d;
   }
 
   /**
@@ -416,11 +525,14 @@
     document.getElementById('detailDate').textContent = formatDate(item.created_at);
 
     // 构建主体内容（多图不在这里显示，在相册中）
+    var hasImages = (images.length > 0) || (img && isImageUrl(img));
     if (type === '图片') {
-      if (images.length === 0 && img && isImageUrl(img)) {
-        detailContent.innerHTML = '<div class="detail-content-image"><img src="' + escapeHtml(img) + '" alt="' + escapeHtml(item.title) + '"></div>';
-      } else {
+      // 只有当确实没有图片时才显示"暂无图片内容"
+      if (!hasImages) {
         detailContent.innerHTML = '<div class="detail-content-empty">暂无图片内容</div>';
+      } else {
+        // 有图片则不显示任何内容（图片在封面区或相册中显示）
+        detailContent.innerHTML = '';
       }
     } else if (type === '文字') {
       detailContent.innerHTML = '<div class="detail-content-text">' + formatTextContent(content) + '</div>';
@@ -450,6 +562,10 @@
     // 重置笔记折叠状态
     if (notesToggle) notesToggle.classList.remove('expanded');
     if (notesContent) notesContent.classList.remove('expanded');
+
+    // 加载评论
+    renderCommissionCommentsList();
+    updateCommissionCommentsCount();
 
     // 300ms fade 过渡效果
     listView.style.opacity = '0';

@@ -697,6 +697,9 @@ html, body {
 /* 评论区 */
 .detail-comments {
   padding: 0 2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .comments-title {
@@ -705,48 +708,208 @@ html, body {
   color: var(--text-title);
   margin-bottom: 1rem;
   font-family: "Noto Serif SC", serif;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.comments-count {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: normal;
 }
 
 .comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
   background: var(--bg-secondary);
   border-radius: 8px;
   padding: 1rem;
   min-height: 100px;
 }
 
-.comments-empty {
+.comments-list-empty {
   text-align: center;
+  padding: 2rem;
   color: var(--text-muted);
   font-size: 0.9rem;
-  padding: 1rem;
+  font-family: "Noto Serif SC", serif;
 }
 
 .comment-item {
-  padding: 0.8rem;
-  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  background: var(--bg-primary);
+  border-radius: 10px;
+  animation: commentSlideUp 0.3s ease;
+  transition: background 0.3s ease;
+}
+
+@keyframes commentSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .comment-item:last-child {
   border-bottom: none;
 }
 
-.comment-author {
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
   font-weight: 600;
+  flex-shrink: 0;
+}
+
+.comment-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.4rem;
+}
+
+.comment-nickname {
+  font-weight: 600;
+  font-size: 0.9rem;
   color: var(--accent);
-  margin-bottom: 0.3rem;
+}
+
+.comment-time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .comment-text {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.7;
+  word-break: break-word;
 }
 
-.comment-date {
+.btn-delete-comment {
+  padding: 0.2rem 0.5rem;
+  background: none;
+  border: none;
+  color: #999;
   font-size: 0.75rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  margin-left: auto;
+  opacity: 0;
+}
+
+.comment-item:hover .btn-delete-comment {
+  opacity: 1;
+}
+
+.btn-delete-comment:hover {
+  color: #d93025;
+}
+
+.comment-form-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.comment-form-title {
+  font-size: 1rem;
+  color: var(--text-title);
+  font-family: "Noto Serif SC", serif;
+  margin-bottom: 1rem;
+}
+
+.comments-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.comments-form-row {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.comments-form .comment-nickname {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.comments-form .comment-nickname:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.comments-form .comment-nickname::placeholder {
   color: var(--text-muted);
-  margin-top: 0.3rem;
+}
+
+.comments-form .comment-content {
+  padding: 0.7rem 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+  transition: border-color 0.2s ease;
+}
+
+.comments-form .comment-content:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.comments-form .comment-content::placeholder {
+  color: var(--text-muted);
+}
+
+.btn-submit-comment {
+  align-self: flex-end;
+  padding: 0.7rem 1.5rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-submit-comment:hover {
+  background: var(--accent-hover);
 }
 
 /* ========================================
@@ -1091,6 +1254,28 @@ html, body {
   }
 
   .comments-list {
+    padding: 0.8rem;
+  }
+
+  .comment-item {
+    padding: 0.8rem;
+  }
+
+  .comment-header {
+    flex-wrap: wrap;
+  }
+
+  .btn-delete-comment {
+    opacity: 1;
+  }
+
+  .comments-form .comment-nickname,
+  .comments-form .comment-content {
+    font-size: 0.9rem;
+  }
+
+  .btn-submit-comment {
+    width: 100%;
     padding: 0.8rem;
   }
 
