@@ -145,21 +145,20 @@
           <div class="detail-divider"></div>
 
           <!-- 评论区 -->
-          <div class="detail-comments" id="detailComments">
-            <h3 class="comments-title" id="commentsTitle">
-              💬 留言 <span class="comments-count" id="commentsCount">(0)</span>
-            </h3>
-            <div class="comments-list" id="commentsList">
-            </div>
-            <div class="comment-form-section">
-              <form class="comments-form" id="commentsForm">
-                <div class="comments-form-row">
-                  <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
-                </div>
-                <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
-                <button type="submit" class="btn btn-submit-comment">发布留言</button>
-              </form>
-            </div>
+          <div class="comments-section">
+            <h3 class="comments-title">💬 留言 <span id="commentsCount">(0)</span></h3>
+
+            <!-- 评论输入框 -->
+            <form class="comments-form" id="commentsForm">
+              <div class="comments-form-row">
+                <input type="text" class="comment-nickname input-field" placeholder="你的昵称" maxlength="20" required>
+              </div>
+              <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
+              <button type="submit" class="btn btn-submit-comment">发布留言</button>
+            </form>
+
+            <!-- 评论列表 -->
+            <div class="comments-list" id="commentsList"></div>
           </div>
         </article>
       </div>
