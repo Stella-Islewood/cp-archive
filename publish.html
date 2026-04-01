@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CP同人档案馆 - 发布作品">
+  <meta name="theme-color" content="#7BA7C4">
+  
+  <title>发布作品 | CP同人档案馆</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles/theme-lionmio.css">
+  <link rel="stylesheet" href="styles/theme-lucasmia.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <style>
+    .publish-page { min-height: 100vh; padding: 100px 20px 60px; }
+    .publish-container { max-width: 700px; margin: 0 auto; }
+    .publish-header { text-align: center; margin-bottom: 2.5rem; }
+    .publish-title { font-size: 2rem; margin-bottom: 0.5rem; color: var(--text-title); }
+    .publish-subtitle { font-size: 1rem; color: var(--text-muted); }
+    .publish-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: var(--card-shadow); }
+    .publish-form-group { margin-bottom: 1.5rem; }
+    .publish-label { display: block; margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-secondary); font-weight: 500; }
+    .publish-label .required { color: #d93025; margin-left: 2px; }
+    .publish-input { width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; color: var(--text-primary); background: var(--bg-primary); transition: border-color 0.3s; box-sizing: border-box; }
+    .publish-input:focus { outline: none; border-color: var(--accent); }
+    .publish-select { width: 100%; padding: 0.85rem 1rem; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; color: var(--text-primary); background: var(--bg-primary); cursor: pointer; }
+    .publish-textarea { min-height: 150px; resize: vertical; line-height: 1.6; }
+    .publish-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 600px) { .publish-row { grid-template-columns: 1fr; } }
+    .publish-type-selector { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .publish-type-option { flex: 1; min-width: 100px; }
+    .publish-type-option input { display: none; }
+    .publish-type-option label { display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.9rem; color: var(--text-secondary); }
+    .publish-type-option input:checked + label { border-color: var(--accent); background: rgba(123, 167, 196, 0.1); color: var(--accent); }
+    .publish-type-option label:hover { border-color: var(--accent); }
+    .publish-site-selector { display: flex; gap: 0.75rem; }
+    .publish-site-option { flex: 1; }
+    .publish-site-option input { display: none; }
+    .publish-site-option label { display: block; text-align: center; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.3s; font-size: 0.9rem; color: var(--text-secondary); }
+    .publish-site-option input:checked + label { border-color: var(--accent); background: rgba(123, 167, 196, 0.1); color: var(--accent); }
+    .publish-site-option label:hover { border-color: var(--accent); }
+    /* 图片上传 */
+    .publish-upload-box { border: 2px dashed var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; background: var(--bg-secondary); cursor: pointer; transition: all 0.3s; }
+    .publish-upload-box:hover { border-color: var(--accent); background: rgba(123, 167, 196, 0.05); }
+    .publish-upload-box.dragover { border-color: var(--accent); background: rgba(123, 167, 196, 0.1); }
+    .publish-upload-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
+    .publish-upload-text { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+    .publish-upload-hint { font-size: 0.8rem; color: var(--text-muted); }
+    .publish-upload-input { display: none; }
+    .publish-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; margin-top: 1rem; }
+    .publish-preview-item { position: relative; aspect-ratio: 1; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); background: var(--bg-secondary); }
+    .publish-preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .publish-preview-item .delete-btn { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(217, 48, 37, 0.9); color: white; border: none; border-radius: 50%; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+    .publish-preview-item:hover .delete-btn { opacity: 1; }
+    .publish-preview-item .upload-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #e8eaed; }
+    .publish-preview-item .upload-progress-bar { height: 100%; background: var(--accent); transition: width 0.3s; }
+    .publish-preview-item.uploading .upload-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
+    .publish-upload-status { font-size: 0.85rem; margin-top: 0.75rem; color: var(--text-muted); }
+    .publish-upload-status.uploading { color: var(--accent); }
+    .publish-upload-status.success { color: #28a745; }
+    .publish-upload-status.error { color: #d93025; }
+    /* 提交按钮 */
+    .publish-submit-row { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+    .publish-btn { padding: 0.9rem 2.5rem; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.3s; border: none; }
+    .publish-btn-primary { background: var(--accent); color: var(--btn-text); }
+    .publish-btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); }
+    .publish-btn-primary:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+    .publish-btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); }
+    .publish-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    /* 提示消息 */
+    .publish-message { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; display: none; }
+    .publish-message.show { display: block; }
+    .publish-message.success { background: rgba(40, 167, 69, 0.15); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); }
+    .publish-message.error { background: rgba(217, 48, 37, 0.15); color: #d93025; border: 1px solid rgba(217, 48, 37, 0.3); }
+    /* 加载状态 */
+    .publish-loading { display: inline-flex; align-items: center; gap: 0.5rem; }
+    .publish-loading-spinner { width: 18px; height: 18px; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* 跳转提示 */
+    .publish-redirect-hint { text-align: center; padding: 4rem 2rem; }
+    .publish-redirect-hint p { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 1rem; }
+  </style>
+</head>
+<body>
+  <canvas id="petals-canvas"></canvas>
+  
+  <main class="publish-page">
+    <div class="publish-container" id="publishContainer">
+      <!-- 跳转提示（未登录时显示） -->
+      <div class="publish-redirect-hint" id="redirectHint" style="display:none;">
+        <p>请先登录后再发布作品</p>
+        <a href="auth.html?redirect=publish.html" class="publish-btn publish-btn-primary">去登录</a>
+      </div>
+
+      <!-- 发布表单 -->
+      <div id="publishFormContainer" style="display:none;">
+        <div class="publish-header">
+          <h1 class="publish-title">发布作品</h1>
+          <p class="publish-subtitle">分享你的创作给更多人</p>
+        </div>
+
+        <div class="publish-card">
+          <div class="publish-message" id="publishMessage"></div>
+
+          <form id="publishForm" onsubmit="handleSubmit(event)">
+            <!-- 发布类型 -->
+            <div class="publish-form-group">
+              <label class="publish-label">发布到</label>
+              <div class="publish-type-selector">
+                <div class="publish-type-option">
+                  <input type="radio" name="publishType" id="typeCommission" value="commission" checked>
+                  <label for="typeCommission">🎨 约稿</label>
+                </div>
+                <div class="publish-type-option">
+                  <input type="radio" name="publishType" id="typeWorks" value="works">
+                  <label for="typeWorks">✍️ 创作</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 选择站点 -->
+            <div class="publish-form-group">
+              <label class="publish-label">选择站点</label>
+              <div class="publish-site-selector">
+                <div class="publish-site-option">
+                  <input type="radio" name="site" id="siteLionmio" value="lionmio" checked>
+                  <label for="siteLionmio">LionMio</label>
+                </div>
+                <div class="publish-site-option">
+                  <input type="radio" name="site" id="siteLucasmia" value="lucasmia">
+                  <label for="siteLucasmia">LucasMia</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 约稿/创作特有字段 -->
+            <div class="publish-row">
+              <div class="publish-form-group">
+                <label class="publish-label" for="inputTitle">标题 <span class="required">*</span></label>
+                <input type="text" class="publish-input" id="inputTitle" placeholder="输入作品标题" required maxlength="100">
+              </div>
+              <div class="publish-form-group" id="groupArtist">
+                <label class="publish-label" for="inputArtist">画师名 <span class="required">*</span></label>
+                <input type="text" class="publish-input" id="inputArtist" placeholder="输入画师昵称" required maxlength="50">
+              </div>
+            </div>
+
+            <div class="publish-form-group" id="groupAuthor" style="display:none;">
+              <label class="publish-label" for="inputAuthor">作者名</label>
+              <input type="text" class="publish-input" id="inputAuthor" placeholder="输入作者昵称（选填）" maxlength="50">
+            </div>
+
+            <!-- 内容类型 -->
+            <div class="publish-form-group" id="groupContentType">
+              <label class="publish-label">内容类型</label>
+              <div class="publish-type-selector">
+                <div class="publish-type-option">
+                  <input type="radio" name="contentType" id="contentImage" value="图片" checked>
+                  <label for="contentImage">🖼️ 图片</label>
+                </div>
+                <div class="publish-type-option">
+                  <input type="radio" name="contentType" id="contentText" value="文字">
+                  <label for="contentText">📝 文字</label>
+                </div>
+                <div class="publish-type-option">
+                  <input type="radio" name="contentType" id="contentMusic" value="音乐">
+                  <label for="contentMusic">🎵 音乐</label>
+                </div>
+                <div class="publish-type-option">
+                  <input type="radio" name="contentType" id="contentVideo" value="视频">
+                  <label for="contentVideo">🎬 视频</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- 图片上传 -->
+            <div class="publish-form-group" id="groupImageUpload">
+              <label class="publish-label">图片上传（支持多张）</label>
+              <div class="publish-upload-box" id="uploadBox" onclick="document.getElementById('uploadInput').click()">
+                <div class="publish-upload-icon">📷</div>
+                <div class="publish-upload-text">点击或拖拽图片到此处上传</div>
+                <div class="publish-upload-hint">支持 jpg、png、gif、webp，可上传多张图片</div>
+              </div>
+              <input type="file" class="publish-upload-input" id="uploadInput" accept="image/*" multiple onchange="handleFileSelect(event)">
+              <div class="publish-preview-grid" id="previewGrid"></div>
+              <div class="publish-upload-status" id="uploadStatus"></div>
+            </div>
+
+            <!-- 文字内容 -->
+            <div class="publish-form-group" id="groupTextContent" style="display:none;">
+              <label class="publish-label" for="inputTextContent">文字内容</label>
+              <textarea class="publish-input publish-textarea" id="inputTextContent" placeholder="输入文字内容..."></textarea>
+            </div>
+
+            <!-- 音乐链接 -->
+            <div class="publish-form-group" id="groupMusicLink" style="display:none;">
+              <label class="publish-label" for="inputMusicLink">音乐链接</label>
+              <input type="text" class="publish-input" id="inputMusicLink" placeholder="如 https://music.163.com/...">
+            </div>
+
+            <!-- 视频链接 -->
+            <div class="publish-form-group" id="groupVideoLink" style="display:none;">
+              <label class="publish-label" for="inputVideoLink">视频链接</label>
+              <input type="text" class="publish-input" id="inputVideoLink" placeholder="支持 Bilibili、YouTube 链接或 mp4/webm 直链">
+            </div>
+
+            <!-- 创始人笔记 -->
+            <div class="publish-form-group">
+              <label class="publish-label" for="inputNotes">备注（选填）</label>
+              <textarea class="publish-input publish-textarea" id="inputNotes" placeholder="关于这张作品的故事或备注..." style="min-height:100px;"></textarea>
+            </div>
+
+            <!-- 提交按钮 -->
+            <div class="publish-submit-row">
+              <button type="button" class="publish-btn publish-btn-secondary" onclick="resetForm()">重置</button>
+              <button type="submit" class="publish-btn publish-btn-primary" id="submitBtn">
+                <span id="submitBtnText">发布作品</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/theme-switcher.js"></script>
+  <script src="js/petals.js"></script>
+  <script src="js/user-auth.js"></script>
+  <script>
+    const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUserId = null;
+    let uploadFiles = [];
+    let uploadUrls = [];
+    let isUploading = false;
+    let isEditMode = false;
+    let editWorkId = null;
+    let editWorkType = null; // 'works' or 'commission'
+
+    async function init() {
+      currentUserId = window.UserAuth.getCurrentUserId();
+
+      if (!currentUserId) {
+        document.getElementById('redirectHint').style.display = '';
+        return;
+      }
+
+      document.getElementById('publishFormContainer').style.display = '';
+      setupEventListeners();
+      setupDragUpload();
+
+      // 检查是否是编辑模式
+      const urlParams = new URLSearchParams(window.location.search);
+      const editId = urlParams.get('edit');
+      if (editId) {
+        await loadWorkForEdit(editId);
+      }
+    }
+
+    async function loadWorkForEdit(workId) {
+      try {
+        // 尝试从 works 表获取
+        let { data, error } = await supabase.from('works').select('*').eq('id', workId).single();
+        if (data) {
+          editWorkType = 'works';
+          populateForm(data, 'works');
+          return;
+        }
+
+        // 尝试从 commissions 表获取
+        ({ data, error } = await supabase.from('commissions').select('*').eq('id', workId).single());
+        if (data) {
+          editWorkType = 'commission';
+          populateForm(data, 'commission');
+          return;
+        }
+
+        showMessage('未找到要编辑的作品', 'error');
+      } catch (err) {
+        showMessage('加载作品失败: ' + err.message, 'error');
+      }
+    }
+
+    function populateForm(data, type) {
+      isEditMode = true;
+      editWorkId = data.id;
+
+      // 更新标题
+      document.querySelector('.publish-title').textContent = '编辑作品';
+      document.querySelector('.publish-subtitle').textContent = '修改你的创作';
+      document.getElementById('submitBtnText').textContent = '保存修改';
+
+      // 设置发布类型
+      if (type === 'commission') {
+        document.getElementById('typeCommission').checked = true;
+      } else {
+        document.getElementById('typeWorks').checked = true;
+      }
+      updateFormFields();
+
+      // 设置站点
+      const siteRadio = data.archive_id === 'lucasmia' ? 'siteLucasmia' : 'siteLionmio';
+      document.getElementById(siteRadio).checked = true;
+
+      // 设置基本信息
+      document.getElementById('inputTitle').value = data.title || '';
+      document.getElementById('inputArtist').value = data.artist || '';
+      document.getElementById('inputAuthor').value = data.author || '';
+      document.getElementById('inputNotes').value = data.founder_notes || '';
+
+      // 设置内容类型
+      const contentType = data.type || '图片';
+      const contentRadio = document.querySelector(`input[name="contentType"][value="${contentType}"]`);
+      if (contentRadio) contentRadio.checked = true;
+      updateContentFields();
+
+      // 填充内容
+      if (contentType === '图片') {
+        if (data.images) {
+          try {
+            const images = JSON.parse(data.images);
+            uploadUrls = images;
+            renderPreviews();
+          } catch (e) {
+            if (data.image_url) {
+              uploadUrls = [data.image_url];
+              renderPreviews();
+            }
+          }
+        } else if (data.image_url) {
+          uploadUrls = [data.image_url];
+          renderPreviews();
+        }
+      } else if (contentType === '文字') {
+        document.getElementById('inputTextContent').value = data.text_content || data.content || '';
+      } else if (contentType === '音乐') {
+        document.getElementById('inputMusicLink').value = data.image_url || data.content || '';
+      } else if (contentType === '视频') {
+        document.getElementById('inputVideoLink').value = data.image_url || data.content || '';
+      }
+    }
+
+    function setupEventListeners() {
+      // 类型切换
+      document.querySelectorAll('input[name="publishType"]').forEach(radio => {
+        radio.addEventListener('change', updateFormFields);
+      });
+
+      // 内容类型切换
+      document.querySelectorAll('input[name="contentType"]').forEach(radio => {
+        radio.addEventListener('change', updateContentFields);
+      });
+    }
+
+    function updateFormFields() {
+      const isCommission = document.getElementById('typeCommission').checked;
+      document.getElementById('groupArtist').style.display = isCommission ? '' : 'none';
+      document.getElementById('groupAuthor').style.display = isCommission ? 'none' : '';
+      document.getElementById('inputArtist').required = isCommission;
+      document.getElementById('inputAuthor').required = false;
+    }
+
+    function updateContentFields() {
+      const contentType = document.querySelector('input[name="contentType"]:checked').value;
+      document.getElementById('groupImageUpload').style.display = contentType === '图片' ? '' : 'none';
+      document.getElementById('groupTextContent').style.display = contentType === '文字' ? '' : 'none';
+      document.getElementById('groupMusicLink').style.display = contentType === '音乐' ? '' : 'none';
+      document.getElementById('groupVideoLink').style.display = contentType === '视频' ? '' : 'none';
+    }
+
+    function setupDragUpload() {
+      const box = document.getElementById('uploadBox');
+      const input = document.getElementById('uploadInput');
+
+      box.addEventListener('dragover', e => { e.preventDefault(); box.classList.add('dragover'); });
+      box.addEventListener('dragleave', e => { e.preventDefault(); box.classList.remove('dragover'); });
+      box.addEventListener('drop', e => {
+        e.preventDefault();
+        box.classList.remove('dragover');
+        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+        if (files.length > 0) processFiles(files);
+      });
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length > 0) processFiles(files);
+      e.target.value = '';
+    }
+
+    async function processFiles(files) {
+      uploadFiles = uploadFiles.concat(files);
+      renderPreviews();
+      await uploadPendingFiles();
+    }
+
+    function renderPreviews() {
+      const grid = document.getElementById('previewGrid');
+      grid.innerHTML = uploadFiles.map((file, i) => {
+        const url = uploadUrls[i];
+        const preview = url || URL.createObjectURL(file);
+        return '<div class="publish-preview-item' + (url ? '' : ' uploading') + '" data-index="' + i + '">' +
+          '<img src="' + preview + '" alt="">' +
+          (url ? '<button type="button" class="delete-btn" onclick="removeFile(' + i + ')">×</button>' : '<div class="upload-overlay">上传中</div>') +
+          '<div class="upload-progress"><div class="upload-progress-bar" style="width:' + (url ? '100' : '0') + '%"></div></div></div>';
+      }).join('');
+    }
+
+    async function uploadPendingFiles() {
+      if (isUploading) return;
+      isUploading = true;
+      const status = document.getElementById('uploadStatus');
+      status.textContent = '正在上传...';
+      status.className = 'publish-upload-status uploading';
+
+      try {
+        for (let i = 0; i < uploadFiles.length; i++) {
+          if (!uploadUrls[i]) {
+            const file = uploadFiles[i];
+            const fileName = 'publish/' + Date.now() + '-' + file.name;
+            const { error } = await supabase.storage.from('media').upload(fileName, file, { upsert: true });
+            if (error) throw error;
+            const { data } = supabase.storage.from('media').getPublicUrl(fileName);
+            uploadUrls[i] = data.publicUrl;
+            renderPreviews();
+          }
+        }
+        status.textContent = '上传完成！';
+        status.className = 'publish-upload-status success';
+        setTimeout(() => { status.textContent = ''; status.className = 'publish-upload-status'; }, 3000);
+      } catch (err) {
+        status.textContent = '上传失败: ' + err.message;
+        status.className = 'publish-upload-status error';
+      }
+      isUploading = false;
+    }
+
+    function removeFile(index) {
+      uploadFiles.splice(index, 1);
+      uploadUrls.splice(index, 1);
+      renderPreviews();
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+
+      const publishType = document.querySelector('input[name="publishType"]:checked').value;
+      const site = document.querySelector('input[name="site"]:checked').value;
+      const title = document.getElementById('inputTitle').value.trim();
+      const artist = document.getElementById('inputArtist').value.trim();
+      const author = document.getElementById('inputAuthor').value.trim();
+      const contentType = document.querySelector('input[name="contentType"]:checked').value;
+      const textContent = document.getElementById('inputTextContent').value.trim();
+      const musicLink = document.getElementById('inputMusicLink').value.trim();
+      const videoLink = document.getElementById('inputVideoLink').value.trim();
+      const notes = document.getElementById('inputNotes').value.trim();
+
+      if (!title) { showMessage('请输入标题', 'error'); return; }
+      if (publishType === 'commission' && !artist) { showMessage('请输入画师名', 'error'); return; }
+      if (contentType === '图片' && uploadUrls.length === 0) { showMessage('请上传至少一张图片', 'error'); return; }
+
+      const btn = document.getElementById('submitBtn');
+      const btnText = document.getElementById('submitBtnText');
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="publish-loading"><span class="publish-loading-spinner"></span>' + (isEditMode ? '保存中...' : '发布中...') + '</span>';
+
+      try {
+        const data = {
+          archive_id: site,
+          type: contentType,
+          title: title
+        };
+
+        if (publishType === 'commission') {
+          data.artist = artist;
+          data.founder_notes = notes;
+          if (contentType === '图片') {
+            data.images = JSON.stringify(uploadUrls);
+            data.image_url = uploadUrls[0];
+          } else if (contentType === '文字') {
+            data.text_content = textContent;
+          } else if (contentType === '音乐') {
+            data.image_url = musicLink;
+          } else if (contentType === '视频') {
+            data.image_url = videoLink;
+          }
+
+          if (isEditMode && editWorkType === 'commission') {
+            await supabase.from('commissions').update(data).eq('id', editWorkId);
+          } else {
+            data.created_at = new Date().toISOString();
+            data.user_id = currentUserId;
+            await supabase.from('commissions').insert([data]);
+          }
+        } else {
+          data.author = author || '匿名';
+          if (contentType === '图片') {
+            data.images = JSON.stringify(uploadUrls);
+            data.image_url = uploadUrls[0];
+          } else if (contentType === '文字') {
+            data.content = textContent;
+          } else if (contentType === '音乐') {
+            data.content = musicLink;
+          } else if (contentType === '视频') {
+            data.content = videoLink;
+          }
+
+          if (isEditMode && editWorkType === 'works') {
+            await supabase.from('works').update(data).eq('id', editWorkId);
+          } else {
+            data.created_at = new Date().toISOString();
+            data.user_id = currentUserId;
+            await supabase.from('works').insert([data]);
+          }
+        }
+
+        showMessage(isEditMode ? '保存成功！' : '发布成功！', 'success');
+        setTimeout(() => {
+          window.location.href = publishType === 'commission' ? 'commission.html' : 'works.html';
+        }, 1500);
+
+      } catch (err) {
+        showMessage((isEditMode ? '保存' : '发布') + '失败: ' + err.message, 'error');
+        btn.disabled = false;
+        btnText.textContent = isEditMode ? '保存修改' : '发布作品';
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('publishForm').reset();
+      uploadFiles = [];
+      uploadUrls = [];
+      renderPreviews();
+      document.getElementById('uploadStatus').textContent = '';
+      updateFormFields();
+      updateContentFields();
+    }
+
+    function showMessage(text, type) {
+      const msg = document.getElementById('publishMessage');
+      msg.textContent = text;
+      msg.className = 'publish-message show ' + type;
+      setTimeout(() => { msg.className = 'publish-message'; }, 5000);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

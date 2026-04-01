@@ -359,6 +359,9 @@
       commentCounts[w.id] = getComments(w.id).length;
     });
 
+    // 获取当前登录用户ID
+    const currentUserId = window.UserAuth?.getCurrentUserId() || null;
+
     if (displayedWorks.length === 0) {
       const query = document.getElementById('worksSearch').value.trim();
       if (query) {
@@ -374,6 +377,8 @@
       const isFav = favorites.includes(item.id);
       const commentCount = commentCounts[item.id] || 0;
       const isText = item.type === '文字';
+      // 检查是否是当前用户的作品
+      const isOwner = currentUserId && item.user_id === currentUserId;
 
       // 卡片主体
       const body = isText
@@ -381,12 +386,22 @@
         : buildCardBody(item);
 
       if (isText) {
-        // 文字卡片：自带所有信息（标签/标题/作者/预览），底部放操作按钮
+        // 文字卡片
         return `
           <article class="work-card" data-category="${typeClass}" data-work-id="${item.id}">
             <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
             ${body}
             <div class="work-card-actions">
+              ${isOwner ? `
+              <button class="btn-card-action btn-edit" data-work-id="${item.id}" onclick="editWork('${item.id}')">
+                <span>✏️</span>
+                <span>编辑</span>
+              </button>
+              <button class="btn-card-action btn-delete" data-work-id="${item.id}" onclick="deleteWork('${item.id}')">
+                <span>🗑️</span>
+                <span>删除</span>
+              </button>
+              ` : ''}
               <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
                 <span>${isFav ? '❤' : '♡'}</span>
                 <span>收藏</span>
@@ -400,7 +415,7 @@
         `;
       }
 
-      // 其他卡片：封面 + 内容区
+      // 其他卡片
       return `
         <article class="work-card" data-category="${typeClass}" data-work-id="${item.id}">
           <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
@@ -413,6 +428,16 @@
             ${!isText && item.content ? `<p class="work-card-excerpt">${escapeHtml(item.content.substring(0, 80))}${item.content.length > 80 ? '…' : ''}</p>` : ''}
           </div>
           <div class="work-card-actions">
+            ${isOwner ? `
+            <button class="btn-card-action btn-edit" data-work-id="${item.id}" onclick="editWork('${item.id}')">
+              <span>✏️</span>
+              <span>编辑</span>
+            </button>
+            <button class="btn-card-action btn-delete" data-work-id="${item.id}" onclick="deleteWork('${item.id}')">
+              <span>🗑️</span>
+              <span>删除</span>
+            </button>
+            ` : ''}
             <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
               <span>${isFav ? '❤' : '♡'}</span>
               <span>收藏</span>
@@ -425,6 +450,26 @@
         </article>
       `;
     }).join('');
+  }
+
+  // 编辑作品
+  function editWork(workId) {
+    window.location.href = 'publish.html?edit=' + workId;
+  }
+
+  // 删除作品
+  async function deleteWork(workId) {
+    if (!confirm('确定要删除这个作品吗？此操作不可恢复。')) return;
+    
+    try {
+      const { error } = await window.dbClient.from('works').delete().eq('id', workId);
+      if (error) throw error;
+      alert('删除成功');
+      loadWorksFromSupabase();
+    } catch (err) {
+      console.error('删除失败:', err);
+      alert('删除失败: ' + err.message);
+    }
   }
 
   /**
