@@ -754,30 +754,49 @@
         return;
       }
 
+      const client = window._authClient;
+      if (!client) {
+        loadingEl.textContent = '加载失败';
+        return;
+      }
+
       try {
-        const { data: likes } = await window._authClient.from('likes').select('work_id, work_type').eq('user_id', currentUserId);
-        if (!likes || likes.length === 0) {
+        // 获取当前用户的点赞记录
+        const { data: likesData, error: likesError } = await client
+          .from('likes')
+          .select('*')
+          .eq('user_id', currentUserId)
+          .order('created_at', { ascending: false });
+
+        console.log('点赞记录查询结果:', likesData, likesError);
+
+        if (!likesData || likesData.length === 0) {
           loadingEl.style.display = 'none';
           emptyEl.style.display = '';
+          emptyEl.querySelector('p').textContent = '还没有点赞过任何作品';
           return;
         }
 
-        let works = [];
-        const workIds = likes.filter(l => l.work_type === 'works').map(l => l.work_id);
-        const commissionIds = likes.filter(l => l.work_type === 'commission').map(l => l.work_id);
+        // 根据 content_type 和 content_id 获取对应的作品信息
+        const works = [];
 
-        if (workIds.length > 0) {
-          const { data } = await window._authClient.from('works').select('id, title, type, image_url, images, created_at').in('id', workIds);
-          if (data) works = works.concat(data.map(w => ({ ...w, work_type: 'works' })));
-        }
-        if (commissionIds.length > 0) {
-          const { data } = await window._authClient.from('commissions').select('id, title, type, image_url, images, created_at, artist').in('id', commissionIds);
-          if (data) works = works.concat(data.map(w => ({ ...w, work_type: 'commission' })));
+        for (const like of likesData) {
+          const table = like.content_type === 'work' ? 'works' : 'commissions';
+          const { data: item } = await client.from(table).select('id, title, type, image_url, images, created_at, author, artist').eq('id', like.content_id).single();
+          if (item) {
+            works.push({
+              ...item,
+              work_type: like.content_type === 'work' ? 'works' : 'commission',
+              liked_at: like.created_at
+            });
+          }
         }
 
         loadingEl.style.display = 'none';
+
         if (works.length === 0) {
           emptyEl.style.display = '';
+          emptyEl.querySelector('p').textContent = '点赞的作品已下架或无法显示';
           return;
         }
         emptyEl.style.display = 'none';
@@ -788,11 +807,15 @@
           try { images = work.images ? (typeof work.images === 'string' ? JSON.parse(work.images) : work.images) : []; } catch(e) {}
           if (images.length > 0 && images[0]) imgUrl = images[0];
           else if (work.image_url) imgUrl = work.image_url;
-          const typeLabel = work.artist ? '约稿' : work.type;
+
+          const typeLabel = work.work_type === 'commission' ? '约稿' : work.type;
+          const meta = work.work_type === 'commission' ? (work.artist ? '画师：' + escapeHtml(work.artist) : '') : formatDate(work.created_at);
+
           return '<div class="profile-work-card" onclick="viewWork(\'' + work.id + '\', \'' + work.work_type + '\')">' +
             (imgUrl ? '<img src="' + escapeHtml(imgUrl) + '" class="profile-work-card-img" alt="' + escapeHtml(work.title) + '">' : '<div class="profile-work-card-placeholder">📄</div>') +
-            '<div class="profile-work-card-body"><h3 class="profile-work-card-title">' + escapeHtml(work.title) + '</h3><p class="profile-work-card-meta">' + typeLabel + ' · ' + formatDate(work.created_at) + '</p></div></div>';
+            '<div class="profile-work-card-body"><h3 class="profile-work-card-title">' + escapeHtml(work.title) + '</h3><p class="profile-work-card-meta">' + typeLabel + (meta ? ' · ' + meta : '') + '</p></div></div>';
         }).join('');
+        console.log('点赞作品渲染完成，数量:', works.length);
       } catch (err) {
         loadingEl.textContent = '加载失败';
         console.error('加载点赞记录失败:', err);

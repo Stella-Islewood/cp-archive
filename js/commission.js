@@ -19,14 +19,36 @@
   let displayedCommissions = [];
   window.window.currentCommissionId = null;
 
+  // 缓存当前用户的点赞数据
+  let cachedLikes = [];
+  let likesLoaded = false;
+
   /**
    * 初始化约稿页面功能
    */
-  function init() {
+  async function initWithLikes() {
     loadCommissionsFromSupabase();
     bindSearchEvents();
     bindDetailEvents();
     bindBackToTop();
+    await loadLikesData();
+  }
+
+  // 加载当前用户的点赞数据
+  async function loadLikesData() {
+    const client = window._authClient;
+    if (!client) {
+      likesLoaded = true;
+      return;
+    }
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) {
+      likesLoaded = true;
+      return;
+    }
+    const { data: likes } = await client.from('likes').select('*').eq('user_id', session.user.id);
+    cachedLikes = likes || [];
+    likesLoaded = true;
   }
 
   /**
@@ -180,17 +202,26 @@
   /**
    * 提交评论
    */
-  function submitCommissionComment(e) {
+  async function submitCommissionComment(e) {
     e.preventDefault();
     if (!window.currentCommissionId) return;
     const form = document.getElementById('commentsForm');
     if (!form) return;
-    const nicknameInput = form.querySelector('.comment-nickname');
     const contentInput = form.querySelector('.comment-content');
-    if (!nicknameInput || !contentInput) return;
-    const nickname = nicknameInput.value.trim();
+    if (!contentInput) return;
     const content = contentInput.value.trim();
-    if (!nickname || !content) return;
+    if (!content) return;
+
+    // 自动获取用户名
+    const client = window._authClient;
+    let nickname = '游客';
+    if (client) {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        const { data: profile } = await client.from('profiles').select('username').eq('user_id', session.user.id).single();
+        nickname = profile?.username || '游客';
+      }
+    }
 
     const comments = getCommissionComments(window.currentCommissionId);
     comments.push({ id: 'c-' + Date.now(), nickname: nickname, content: content, time: formatTime(new Date()) });
@@ -389,6 +420,8 @@
       const hasMultipleImages = images.length > 1;
       // 检查是否是当前用户的作品
       const isOwner = currentUserId && item.user_id === currentUserId;
+      // 检查是否已点赞
+      const isLiked = cachedLikes.some(l => l.content_type === 'commission' && l.content_id === item.id);
 
       return `
         <article class="commission-card ${isText ? 'commission-card-text' : ''}" data-index="${index}" data-id="${item.id}">
@@ -406,7 +439,12 @@
               <button class="card-action-btn btn-edit" onclick="editCommission('${item.id}')">✏️ 编辑</button>
               <button class="card-action-btn btn-delete" onclick="deleteCommission('${item.id}')">🗑️ 删除</button>
             </div>
-            ` : ''}
+            ` : `
+            <button class="card-action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('commission', '${item.id}')">
+              <span>${isLiked ? '❤' : '♡'}</span>
+              <span>${isLiked ? '已点赞' : '点赞'}</span>
+            </button>
+            `}
           </div>
         </article>
       `;
@@ -835,9 +873,9 @@
 
   // DOM 加载完成后初始化
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initWithLikes);
   } else {
-    init();
+    initWithLikes();
   }
 
   // 删除约稿（暴露到全局供 onclick 调用）
@@ -898,4 +936,33 @@ window.editCommission = function(commissionId) {
     return;
   }
   window.location.href = 'publish.html?edit=' + commissionId + '&type=commission';
+};
+
+// 点赞功能（暴露到全局供 onclick 调用）
+window.toggleLike = async function(contentType, contentId) {
+  const client = window._authClient;
+  if (!client) return;
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) { window.location.href = 'auth.html'; return; }
+
+  const userId = session.user.id;
+  const { data: existing } = await client
+    .from('likes')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('content_type', contentType)
+    .eq('content_id', contentId)
+    .single();
+
+  if (existing) {
+    await client.from('likes').delete().eq('id', existing.id);
+  } else {
+    await client.from('likes').insert({
+      user_id: userId,
+      content_type: contentType,
+      content_id: contentId
+    });
+  }
+  // 刷新页面以更新点赞状态
+  loadCommissionsFromSupabase();
 };

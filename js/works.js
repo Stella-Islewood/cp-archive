@@ -21,6 +21,48 @@
   // 当前打开的详情作品 ID
   window.window.currentWorkId = null;
 
+  // 点赞功能（暴露到全局供 onclick 调用）
+  window.toggleLike = async function(contentType, contentId) {
+    const client = window._authClient || window.dbClient;
+    if (!client) return;
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) { window.location.href = 'auth.html'; return; }
+
+    const userId = session.user.id;
+    const { data: existing } = await client
+      .from('likes')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('content_type', contentType)
+      .eq('content_id', contentId)
+      .single();
+
+    if (existing) {
+      await client.from('likes').delete().eq('id', existing.id);
+    } else {
+      await client.from('likes').insert({
+        user_id: userId,
+        content_type: contentType,
+        content_id: contentId
+      });
+    }
+
+    // 更新 UI
+    const card = document.querySelector(`.work-card[data-work-id="${contentId}"]`);
+    if (card) {
+      const btn = card.querySelector('.btn-favorite');
+      const icon = btn.querySelector('.like-icon');
+      const badge = card.querySelector('.favorite-badge');
+      const isLiked = !existing;
+      btn.classList.toggle('liked', isLiked);
+      if (icon) icon.textContent = isLiked ? '❤' : '♡';
+      if (badge) {
+        badge.style.display = isLiked ? '' : 'none';
+        badge.classList.toggle('show', isLiked);
+      }
+    }
+  };
+
   /**
    * 初始化作品页面
    */
@@ -402,8 +444,8 @@
                 <span>删除</span>
               </button>
               ` : ''}
-              <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
-                <span>${isFav ? '❤' : '♡'}</span>
+              <button class="btn-card-action btn-favorite" data-work-id="${item.id}" onclick="toggleLike('work', '${item.id}')">
+                <span class="like-icon">${isFav ? '❤' : '♡'}</span>
                 <span>收藏</span>
               </button>
               <button class="btn-card-action btn-comment" data-work-id="${item.id}">
@@ -438,8 +480,8 @@
               <span>删除</span>
             </button>
             ` : ''}
-            <button class="btn-card-action btn-favorite" data-work-id="${item.id}">
-              <span>${isFav ? '❤' : '♡'}</span>
+            <button class="btn-card-action btn-favorite" data-work-id="${item.id}" onclick="toggleLike('work', '${item.id}')">
+              <span class="like-icon">${isFav ? '❤' : '♡'}</span>
               <span>收藏</span>
             </button>
             <button class="btn-card-action btn-comment" data-work-id="${item.id}">
@@ -608,7 +650,7 @@
       const btn = e.target.closest('.btn-favorite');
       if (!btn) return;
       e.stopPropagation();
-      toggleFavorite(btn.dataset.workId);
+      toggleLike('work', btn.dataset.workId);
     });
 
     // 评论按钮
@@ -669,7 +711,7 @@
     if (detailFavBtn) {
       detailFavBtn.addEventListener('click', function() {
         if (window.currentWorkId) {
-          toggleFavorite(window.currentWorkId);
+          toggleLike('work', window.currentWorkId);
           updateDetailFavoriteButton();
         }
       });
@@ -710,8 +752,8 @@
     const newFavBtn = favBtn.cloneNode(true);
     favBtn.parentNode.replaceChild(newFavBtn, favBtn);
     newFavBtn.addEventListener('click', function() {
-      toggleFavorite(workId);
-      const nowFav = getFavorites().includes(workId);
+      toggleLike('work', workId);
+      const nowFav = !getFavorites().includes(workId);
       newFavBtn.classList.toggle('liked', nowFav);
       const icon = newFavBtn.querySelector('.reader-fav-icon');
       if (icon) icon.textContent = nowFav ? '❤' : '♡';
@@ -790,7 +832,7 @@
     const card = document.querySelector(`.work-card[data-work-id="${workId}"]`);
     if (!card) return;
     const btn = card.querySelector('.btn-favorite');
-    const icon = btn.querySelector('.favorite-icon');
+    const icon = btn.querySelector('.like-icon');
     const count = btn.querySelector('.favorite-count');
     const badge = card.querySelector('.favorite-badge');
 
@@ -1112,6 +1154,10 @@
     if (el('detailContent')) el('detailContent').innerHTML   = buildDetailContent(work);
 
     updateDetailFavoriteButton();
+    // 从数据库同步点赞状态
+    if (window.updateDetailFavoriteButtonFromDB) {
+      window.updateDetailFavoriteButtonFromDB();
+    }
     renderCommentsList();
     updateCommentsCount();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1349,6 +1395,36 @@
   }
 
   /**
+   * 更新详情页收藏按钮（从数据库获取状态）
+   */
+  window.updateDetailFavoriteButtonFromDB = async function() {
+    if (!window.currentWorkId) return;
+    const btn = document.getElementById('btnDetailFavorite');
+    if (!btn) return;
+    
+    const client = window._authClient || window.dbClient;
+    if (!client) return;
+    
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) return;
+    
+    const { data: existing } = await client
+      .from('likes')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('content_type', 'work')
+      .eq('content_id', window.currentWorkId)
+      .single();
+    
+    const isLiked = !!existing;
+    btn.classList.toggle('liked', isLiked);
+    const icon = btn.querySelector('.favorite-icon-large');
+    const text = btn.querySelector('.favorite-text');
+    if (icon) icon.textContent = isLiked ? '❤' : '♡';
+    if (text) text.textContent = isLiked ? '已收藏' : '收藏';
+  };
+
+  /**
    * 切换收藏状态
    */
   function toggleFavorite(workId) {
@@ -1366,7 +1442,7 @@
 
     const badge = card.querySelector('.favorite-badge');
     const btn = card.querySelector('.btn-favorite');
-    const icon = btn.querySelector('.favorite-icon');
+    const icon = btn.querySelector('.like-icon');
     const count = btn.querySelector('.favorite-count');
 
     if (!isNowFav) {
@@ -1471,14 +1547,24 @@
   /**
    * 提交留言
    */
-  function submitComment(e) {
+  async function submitComment(e) {
     e.preventDefault();
     if (!window.currentWorkId) return;
     const form = document.getElementById('commentsForm');
     if (!form) return;
-    const nickname = form.querySelector('.comment-nickname').value.trim();
     const content = form.querySelector('.comment-content').value.trim();
-    if (!nickname || !content) return;
+    if (!content) return;
+
+    // 自动获取用户名
+    const client = window._authClient || window.dbClient;
+    let nickname = '游客';
+    if (client) {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        const { data: profile } = await client.from('profiles').select('username').eq('user_id', session.user.id).single();
+        nickname = profile?.username || '游客';
+      }
+    }
 
     const comments = getComments(window.currentWorkId);
     comments.push({ id: 'c-' + Date.now(), nickname, content, time: formatTime(new Date()) });
@@ -1562,4 +1648,27 @@ window.deleteWorkComment = function(commentId) {
   // 调用页面内的渲染函数
   if (typeof renderCommentsList === 'function') renderCommentsList();
   if (typeof updateCommentsCount === 'function') updateCommentsCount();
+};
+
+// 同步点赞状态到 UI（供页面调用）
+window.syncLikeStatus = async function(contentType, contentId, elementId) {
+  const client = window._authClient || window.dbClient;
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) return;
+
+  const { data: existing } = await client
+    .from('likes')
+    .select('id')
+    .eq('user_id', session.user.id)
+    .eq('content_type', contentType)
+    .eq('content_id', contentId)
+    .single();
+
+  const isLiked = !!existing;
+  const btn = document.getElementById(elementId);
+  if (btn) {
+    btn.classList.toggle('liked', isLiked);
+    const icon = btn.querySelector('.like-icon');
+    if (icon) icon.textContent = isLiked ? '❤' : '♡';
+  }
 };
