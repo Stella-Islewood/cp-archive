@@ -233,10 +233,7 @@
   <script src="js/petals.js"></script>
   <script src="js/user-auth.js"></script>
   <script>
-    const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-    const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    // 不再创建本地 Supabase 实例，直接使用 user-auth.js 的全局实例
     let currentUserId = null;
     let uploadFiles = [];
     let uploadUrls = [];
@@ -246,12 +243,26 @@
     let editWorkType = null; // 'works' or 'commission'
 
     async function init() {
-      currentUserId = window.UserAuth.getCurrentUserId();
-
-      if (!currentUserId) {
-        document.getElementById('redirectHint').style.display = '';
+      // 等待 user-auth.js 初始化完成
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // 使用全局 Supabase 实例（由 user-auth.js 创建）
+      const client = window.authClient || window._sb;
+      if (!client) {
+        console.error('Supabase 未初始化');
+        showMessage('系统初始化失败，请刷新重试', 'error');
         return;
       }
+      // 保存到全局变量供后续使用
+      window._publishSb = client;
+      
+      // 获取登录状态
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      currentUserId = session.user.id;
 
       document.getElementById('publishFormContainer').style.display = '';
       setupEventListeners();
@@ -268,7 +279,7 @@
     async function loadWorkForEdit(workId) {
       try {
         // 尝试从 works 表获取
-        let { data, error } = await _sb.from('works').select('*').eq('id', workId).single();
+        let { data, error } = await window._publishSb.from('works').select('*').eq('id', workId).single();
         if (data) {
           // 检查是否是当前用户的作品
           if (data.user_id !== currentUserId) {
@@ -281,7 +292,7 @@
         }
 
         // 尝试从 commissions 表获取
-        ({ data, error } = await _sb.from('commissions').select('*').eq('id', workId).single());
+        ({ data, error } = await window._publishSb.from('commissions').select('*').eq('id', workId).single());
         if (data) {
           // 检查是否是当前用户的作品
           if (data.user_id !== currentUserId) {
@@ -439,9 +450,9 @@
           if (!uploadUrls[i]) {
             const file = uploadFiles[i];
             const fileName = 'publish/' + Date.now() + '-' + file.name;
-            const { error } = await _sb.storage.from('media').upload(fileName, file, { upsert: true });
+            const { error } = await window._publishSb.storage.from('media').upload(fileName, file, { upsert: true });
             if (error) throw error;
-            const { data } = _sb.storage.from('media').getPublicUrl(fileName);
+            const { data } = window._publishSb.storage.from('media').getPublicUrl(fileName);
             uploadUrls[i] = data.publicUrl;
             renderPreviews();
           }
@@ -507,11 +518,11 @@
           }
 
           if (isEditMode && editWorkType === 'commission') {
-            await _sb.from('commissions').update(data).eq('id', editWorkId);
+            await window._publishSb.from('commissions').update(data).eq('id', editWorkId);
           } else {
             data.created_at = new Date().toISOString();
             data.user_id = currentUserId;
-            await _sb.from('commissions').insert([data]);
+            await window._publishSb.from('commissions').insert([data]);
           }
         } else {
           data.author = author || '匿名';
@@ -527,11 +538,11 @@
           }
 
           if (isEditMode && editWorkType === 'works') {
-            await _sb.from('works').update(data).eq('id', editWorkId);
+            await window._publishSb.from('works').update(data).eq('id', editWorkId);
           } else {
             data.created_at = new Date().toISOString();
             data.user_id = currentUserId;
-            await _sb.from('works').insert([data]);
+            await window._publishSb.from('works').insert([data]);
           }
         }
 
