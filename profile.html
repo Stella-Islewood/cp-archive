@@ -466,20 +466,25 @@
 
     // 页面加载时初始化
     async function init() {
+      console.log('init开始');
       try {
         // 获取当前 session
         const { data: { session } } = await supabase.auth.getSession();
         const sessionUser = session?.user || null;
+        console.log('session:', sessionUser);
         
         // 获取 URL 参数中的用户 ID
         const params = new URLSearchParams(window.location.search);
         const targetUserId = params.get('user');
+        console.log('targetUserId from URL:', targetUserId);
         
         // 确定要查看的用户 ID
         const userId = targetUserId || sessionUser?.id;
+        console.log('userId to load:', userId);
         
         // 如果没有用户 ID 且没有登录，重定向到登录页
         if (!userId) {
+          console.log('没有userId，重定向到登录页');
           window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
           return;
         }
@@ -487,6 +492,7 @@
         profileUserId = userId;
         currentUserId = sessionUser?.id;
         isOwnProfile = (userId === currentUserId);
+        console.log('isOwnProfile:', isOwnProfile);
         
         // 加载用户资料
         await loadProfile(userId);
@@ -507,6 +513,7 @@
           await loadUserWorks();
           await loadLikedWorks();
         }
+        console.log('init完成');
       } catch (err) {
         console.error('初始化失败:', err);
         document.getElementById('profileUsername').textContent = '加载失败，请刷新重试';
@@ -526,6 +533,7 @@
     
     // 加载用户资料（使用 user_id 查询）
     async function loadProfile(userId) {
+      console.log('loadProfile开始', userId);
       const usernameEl = document.getElementById('profileUsername');
       usernameEl.textContent = '加载中...';
       
@@ -536,6 +544,8 @@
           .eq('user_id', userId)
           .single();
         
+        console.log('loadProfile查询结果:', { profile, error });
+        
         if (error) {
           console.error('查询profiles失败:', error);
           
@@ -543,6 +553,7 @@
           if (isOwnProfile && currentUserId && currentUserId === userId) {
             const username = currentUserId.email?.split('@')[0] || '用户';
             try {
+              console.log('创建新资料:', username);
               await supabase.from('profiles').insert({
                 user_id: userId,
                 username: username
@@ -568,6 +579,7 @@
         
         currentProfileData = profile;
         renderProfile(profile);
+        console.log('loadProfile完成');
         
       } catch (err) {
         console.error('loadProfile错误:', err);
@@ -1223,6 +1235,326 @@
     });
 
     document.addEventListener('DOMContentLoaded', init);
+
+    // ==================== 全局函数声明（供 onclick 使用） ====================
+    // 将所有在 onclick 属性中调用的函数挂载到 window 对象上
+    window.goBack = function() {
+      console.log('goBack called');
+      if (document.referrer && document.referrer !== window.location.href) {
+        history.back();
+      } else {
+        window.location.href = 'index.html';
+      }
+    };
+    
+    window.switchToTab = function(tabName) {
+      console.log('switchToTab:', tabName);
+      document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.profile-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector('.profile-tab[data-tab="' + tabName + '"]').classList.add('active');
+      document.getElementById('content' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+
+      if (tabName === 'messages' && isOwnProfile) loadConversations();
+    };
+    
+    window.toggleFollow = async function() {
+      console.log('toggleFollow called');
+      if (!currentUserId) {
+        window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
+        return;
+      }
+      if (profileUserId === currentUserId) return;
+
+      try {
+        if (isFollowing) {
+          await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', profileUserId);
+        } else {
+          await supabase.from('follows').insert({ follower_id: currentUserId, following_id: profileUserId });
+        }
+        isFollowing = !isFollowing;
+        updateFollowButton();
+        await loadProfileStats();
+      } catch (err) {
+        console.error('toggleFollow错误:', err);
+      }
+    };
+    
+    window.startChat = async function(partnerId, partnerName) {
+      console.log('startChat:', partnerId, partnerName);
+      if (!currentUserId) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      
+      chatPartnerId = partnerId;
+      chatPartnerName = partnerName;
+
+      try {
+        const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('user_id', partnerId).single();
+        const avatarUrl = profile?.avatar_url || '';
+
+        document.getElementById('chatUserName').textContent = partnerName;
+        document.getElementById('chatAvatarInitial').textContent = partnerName.charAt(0).toUpperCase();
+        document.getElementById('chatAvatar').innerHTML = avatarUrl ? '<img src="' + escapeHtml(avatarUrl) + '" alt="">' : '<span>' + partnerName.charAt(0).toUpperCase() + '</span>';
+
+        await loadChatMessages();
+
+        document.getElementById('profileOverlay').classList.add('visible');
+        document.getElementById('chatContainer').classList.add('open');
+      } catch (err) {
+        console.error('startChat错误:', err);
+      }
+    };
+    
+    window.sendMessage = async function() {
+      console.log('sendMessage called');
+      if (!currentUserId) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      const input = document.getElementById('chatInput');
+      const content = input.value.trim();
+      if (!content) return;
+
+      try {
+        await supabase.from('messages').insert({ sender_id: currentUserId, receiver_id: chatPartnerId, content });
+        input.value = '';
+        await loadChatMessages();
+      } catch (err) {
+        alert('发送失败');
+        console.error(err);
+      }
+    };
+    
+    window.saveProfile = async function(e) {
+      console.log('saveProfile called');
+      e.preventDefault();
+      if (!isOwnProfile) return;
+      
+      const btn = document.getElementById('saveProfileBtn');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+      
+      const username = document.getElementById('editUsername').value.trim();
+      const bio = document.getElementById('editBioModal').value.trim();
+      const avatarUrl = document.getElementById('editAvatarUrl').value;
+      
+      try {
+        const updateData = {
+          username: username,
+          bio: bio,
+          banner_color: editBannerColor
+        };
+        
+        if (avatarUrl) {
+          updateData.avatar_url = avatarUrl;
+        }
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('user_id', currentUserId);
+        
+        if (error) throw error;
+        
+        // 更新页面显示
+        document.getElementById('profileUsername').textContent = username;
+        document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
+        document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
+        document.getElementById('profileBanner').style.background = editBannerColor;
+        
+        if (avatarUrl) {
+          document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(username) + '">';
+        }
+        
+        // 更新关于我表单
+        document.getElementById('editBio').value = bio;
+        
+        // 刷新用户认证信息
+        window.UserAuth.refreshProfile();
+        
+        closeEditModal();
+        alert('保存成功');
+      } catch (err) {
+        console.error('保存失败:', err);
+        alert('保存失败: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '保存';
+      }
+    };
+    
+    window.doLogout = async function() {
+      console.log('doLogout called');
+      if (confirm('确定要退出登录吗？')) {
+        await window.UserAuth.signOut();
+      }
+    };
+    
+    window.toggleUserMenu = function() {
+      console.log('toggleUserMenu called');
+      const menu = document.getElementById('userAuthMenu');
+      const trigger = document.getElementById('userAuthTrigger');
+      if (menu && trigger) {
+        const isOpen = menu.classList.contains('open');
+        menu.classList.toggle('open');
+        trigger.setAttribute('aria-expanded', !isOpen);
+      }
+    };
+    
+    window.openEditModal = function() {
+      console.log('openEditModal called');
+      if (!isOwnProfile) return;
+      
+      const modal = document.getElementById('editModal');
+      const profile = currentProfileData || {};
+      
+      // 设置当前值
+      document.getElementById('editUsername').value = profile.username || '';
+      document.getElementById('editBioModal').value = profile.bio || '';
+      
+      // 设置头像预览
+      const avatarUrl = profile.avatar_url || '';
+      const username = profile.username || '用户';
+      if (avatarUrl) {
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="">';
+        document.getElementById('editAvatarUrl').value = avatarUrl;
+      } else {
+        document.getElementById('editAvatarPreview').innerHTML = '<span>' + username.charAt(0).toUpperCase() + '</span>';
+        document.getElementById('editAvatarUrl').value = '';
+      }
+      
+      // 设置横幅颜色
+      editBannerColor = profile.banner_color || 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
+      updateBannerColorPreview();
+      selectBannerColorByValue(editBannerColor);
+      
+      // 重置上传状态
+      document.getElementById('editAvatarStatus').textContent = '';
+      document.getElementById('editAvatarStatus').className = 'profile-upload-status';
+      editAvatarFile = null;
+      
+      modal.classList.add('visible');
+    };
+    
+    window.closeEditModal = function() {
+      console.log('closeEditModal called');
+      const modal = document.getElementById('editModal');
+      modal.classList.remove('visible');
+      editAvatarFile = null;
+    };
+    
+    window.closeChat = function() {
+      console.log('closeChat called');
+      document.getElementById('profileOverlay').classList.remove('visible');
+      document.getElementById('chatContainer').classList.remove('open');
+    };
+    
+    window.selectBannerColor = function(el) {
+      console.log('selectBannerColor called');
+      document.querySelectorAll('.profile-edit-color-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      editBannerColor = el.dataset.color;
+      updateBannerColorPreview();
+    };
+    
+    window.handleAvatarUpload = async function(e) {
+      console.log('handleAvatarUpload called');
+      if (!isOwnProfile) return;
+      
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
+        const { data, error } = await supabase.storage
+          .from('media')
+          .upload(fileName, file, { upsert: true });
+        
+        if (error) throw error;
+        
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+        
+        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
+        
+        const username = document.getElementById('profileUsername').textContent;
+        document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="' + escapeHtml(username) + '">';
+        
+        // 更新编辑 Modal 中的头像
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="">';
+        document.getElementById('editAvatarUrl').value = urlData.publicUrl;
+        
+        window.UserAuth.refreshProfile();
+      } catch (err) {
+        alert('上传失败');
+        console.error(err);
+      }
+    };
+    
+    window.handleEditAvatarSelect = async function(e) {
+      console.log('handleEditAvatarSelect called');
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      editAvatarFile = file;
+      const statusEl = document.getElementById('editAvatarStatus');
+      
+      // 显示本地预览
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + event.target.result + '" alt="">';
+      };
+      reader.readAsDataURL(file);
+      
+      // 上传到 Supabase Storage
+      statusEl.textContent = '上传中...';
+      statusEl.className = 'profile-upload-status uploading';
+      
+      try {
+        const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
+        const { data, error } = await supabase.storage
+          .from('media')
+          .upload(fileName, file, { upsert: true });
+        
+        if (error) throw error;
+        
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+        
+        document.getElementById('editAvatarUrl').value = urlData.publicUrl;
+        statusEl.textContent = '上传成功';
+        statusEl.className = 'profile-upload-status success';
+      } catch (err) {
+        console.error('上传失败:', err);
+        statusEl.textContent = '上传失败: ' + err.message;
+        statusEl.className = 'profile-upload-status error';
+        editAvatarFile = null;
+      }
+    };
+    
+    window.saveAbout = async function(e) {
+      console.log('saveAbout called');
+      e.preventDefault();
+      if (!isOwnProfile) return;
+      
+      const bio = document.getElementById('editBio').value.trim();
+      try {
+        if (currentProfileData) {
+          await supabase.from('profiles').update({ bio }).eq('user_id', currentUserId);
+        } else {
+          await supabase.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
+        }
+        document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
+        window.UserAuth.refreshProfile();
+        alert('保存成功');
+      } catch (err) {
+        alert('保存失败');
+        console.error(err);
+      }
+    };
   </script>
 </body>
 </html>
