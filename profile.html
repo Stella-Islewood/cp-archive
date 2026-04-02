@@ -19,8 +19,58 @@
   <link rel="stylesheet" href="styles/main.css">
   <style>
     .profile-page { min-height: 100vh; padding-bottom: 4rem; }
+    
+    /* 返回按钮 */
+    .profile-back-btn {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      z-index: 100;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .profile-back-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.8);
+    }
+    
+    /* 顶部横幅 */
     .profile-banner { height: 200px; background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%); position: relative; }
     .profile-banner::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 60px; background: linear-gradient(to top, rgba(0,0,0,0.1), transparent); }
+    
+    /* 编辑资料按钮 */
+    .profile-edit-banner-btn {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 100;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.5);
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(10px);
+      color: #fff;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .profile-edit-banner-btn:hover {
+      background: rgba(255,255,255,0.25);
+      border-color: rgba(255,255,255,0.8);
+    }
+    
+    /* 头像区域 */
     .profile-avatar-section { position: relative; max-width: 1200px; margin: -50px auto 0; padding: 0 2rem; z-index: 10; }
     .profile-avatar-wrapper { display: inline-block; position: relative; }
     .profile-avatar { width: 120px; height: 120px; border-radius: 50%; background: var(--accent); border: 4px solid var(--bg-primary); box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: flex; align-items: center; justify-content: center; font-family: "Noto Serif SC", serif; font-size: 2.5rem; font-weight: 700; color: var(--btn-text); overflow: hidden; }
@@ -28,6 +78,8 @@
     .profile-avatar-edit { position: absolute; bottom: 0; right: 0; width: 36px; height: 36px; border-radius: 50%; background: var(--accent); border: 3px solid var(--bg-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity 0.3s; }
     .profile-avatar-wrapper:hover .profile-avatar-edit { opacity: 1; }
     .profile-avatar-edit svg { width: 16px; height: 16px; stroke: white; }
+    
+    /* 用户信息区域 */
     .profile-info-section { max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem; }
     .profile-info-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
     .profile-username { font-size: 1.8rem; font-weight: 600; color: var(--text-title); margin-bottom: 0.3rem; }
@@ -47,6 +99,8 @@
     .profile-btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
     .profile-btn-follow { background: var(--accent); color: var(--btn-text); }
     .profile-btn-follow.followed { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+    
+    /* 内容区域 */
     .profile-content { max-width: 1200px; margin: 0 auto; padding: 2rem; }
     .profile-tabs { display: flex; gap: 0.5rem; border-bottom: 1px solid var(--border-color); margin-bottom: 2rem; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .profile-tab { padding: 1rem 1.5rem; font-size: 0.95rem; color: var(--text-secondary); background: transparent; border: none; cursor: pointer; position: relative; white-space: nowrap; transition: color 0.3s; }
@@ -67,6 +121,7 @@
     .profile-empty { text-align: center; padding: 3rem; color: var(--text-muted); }
     .profile-empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
     .profile-loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+    
     /* 浏览记录/发言记录列表 */
     .profile-record-list { display: flex; flex-direction: column; gap: 1rem; }
     .profile-record-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; gap: 1rem; align-items: flex-start; }
@@ -75,6 +130,7 @@
     .profile-record-info { flex: 1; min-width: 0; }
     .profile-record-title { font-size: 1rem; font-weight: 500; color: var(--text-title); margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .profile-record-time { font-size: 0.85rem; color: var(--text-muted); }
+    
     /* 私信相关 */
     .profile-conversation-list { display: flex; flex-direction: column; gap: 0.75rem; }
     .profile-conversation-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; gap: 1rem; align-items: center; cursor: pointer; transition: all 0.3s; }
@@ -86,6 +142,7 @@
     .profile-conversation-preview { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .profile-conversation-time { font-size: 0.75rem; color: var(--text-muted); flex-shrink: 0; }
     .profile-conversation-unread { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    
     /* 编辑资料表单 */
     .profile-edit-form { max-width: 500px; }
     .profile-edit-group { margin-bottom: 1.5rem; }
@@ -94,6 +151,7 @@
     .profile-edit-input:focus { outline: none; border-color: var(--accent); }
     .profile-edit-textarea { min-height: 120px; resize: vertical; }
     .profile-edit-actions { display: flex; gap: 1rem; }
+    
     /* 聊天界面 */
     .profile-chat-container { position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: var(--card-bg); border-left: 1px solid var(--border-color); box-shadow: -4px 0 20px rgba(0,0,0,0.1); z-index: 1000; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; }
     .profile-chat-container.open { transform: translateX(0); }
@@ -116,9 +174,42 @@
     .profile-chat-send { padding: 0.75rem 1.25rem; background: var(--accent); color: var(--btn-text); border: none; border-radius: 20px; cursor: pointer; font-weight: 500; transition: background 0.3s; }
     .profile-chat-send:hover { background: var(--accent-hover); }
     .profile-chat-empty { text-align: center; padding: 2rem; color: var(--text-muted); }
+    
     /* 遮罩层 */
     .profile-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 999; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
     .profile-overlay.visible { opacity: 1; visibility: visible; }
+    
+    /* 编辑资料 Modal */
+    .profile-edit-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1001; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+    .profile-edit-modal.visible { opacity: 1; visibility: visible; }
+    .profile-edit-modal-content { background: var(--card-bg); border-radius: 12px; padding: 2rem; width: 90%; max-width: 480px; max-height: 90vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.3s; }
+    .profile-edit-modal.visible .profile-edit-modal-content { transform: scale(1); }
+    .profile-edit-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+    .profile-edit-modal-title { font-size: 1.3rem; font-weight: 600; color: var(--text-title); }
+    .profile-edit-modal-close { background: none; border: none; cursor: pointer; padding: 0.5rem; color: var(--text-muted); transition: color 0.3s; }
+    .profile-edit-modal-close:hover { color: var(--text-primary); }
+    
+    /* 头像上传 */
+    .profile-edit-avatar-section { display: flex; flex-direction: column; align-items: center; margin-bottom: 1.5rem; }
+    .profile-edit-avatar-preview { width: 100px; height: 100px; border-radius: 50%; background: var(--accent); border: 3px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; color: var(--btn-text); overflow: hidden; margin-bottom: 0.75rem; cursor: pointer; transition: border-color 0.3s; }
+    .profile-edit-avatar-preview:hover { border-color: var(--accent); }
+    .profile-edit-avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .profile-edit-avatar-hint { font-size: 0.8rem; color: var(--text-muted); }
+    .profile-edit-avatar-input { display: none; }
+    
+    /* 横幅颜色选择 */
+    .profile-edit-banner-colors { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .profile-edit-color-option { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s; }
+    .profile-edit-color-option:hover { transform: scale(1.1); }
+    .profile-edit-color-option.selected { border-color: var(--text-primary); box-shadow: 0 0 0 2px var(--bg-primary); }
+    .profile-edit-color-preview { height: 80px; border-radius: 8px; margin-bottom: 1rem; transition: background 0.3s; }
+    
+    /* 上传状态 */
+    .profile-upload-status { font-size: 0.85rem; margin-top: 0.5rem; text-align: center; }
+    .profile-upload-status.uploading { color: var(--accent); }
+    .profile-upload-status.success { color: #28a745; }
+    .profile-upload-status.error { color: #d93025; }
+    
     /* 响应式 */
     @media (max-width: 768px) {
       .profile-chat-container { width: 100%; }
@@ -131,8 +222,25 @@
   <canvas id="petals-canvas"></canvas>
   
   <div class="profile-page" id="profilePage">
+    <!-- 返回按钮 -->
+    <button class="profile-back-btn" onclick="goBack()">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      返回
+    </button>
+
     <!-- 顶部横幅 -->
-    <div class="profile-banner"></div>
+    <div class="profile-banner" id="profileBanner">
+      <!-- 编辑资料按钮（仅本人可见） -->
+      <button class="profile-edit-banner-btn" id="editProfileBtn" style="display:none;" onclick="openEditModal()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+        编辑资料
+      </button>
+    </div>
 
     <!-- 头像区域 -->
     <div class="profile-avatar-section">
@@ -243,7 +351,7 @@
         <form class="profile-edit-form" id="aboutForm" onsubmit="saveAbout(event)">
           <div class="profile-edit-group">
             <label class="profile-edit-label">简介</label>
-            <textarea class="profile-edit-input profile-edit-textarea" id="editBio" placeholder="介绍一下自己吧..."></textarea>
+            <textarea class="profile-edit-input profile-edit-textarea" id="editBio" placeholder="介绍一下自己吧..." maxlength="100"></textarea>
           </div>
           <div class="profile-edit-actions">
             <button type="submit" class="profile-btn profile-btn-primary">保存</button>
@@ -274,6 +382,65 @@
     </div>
   </div>
 
+  <!-- 编辑资料 Modal -->
+  <div class="profile-edit-modal" id="editModal">
+    <div class="profile-edit-modal-content">
+      <div class="profile-edit-modal-header">
+        <h2 class="profile-edit-modal-title">编辑资料</h2>
+        <button class="profile-edit-modal-close" onclick="closeEditModal()">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      
+      <form onsubmit="saveEditProfile(event)">
+        <!-- 头像上传 -->
+        <div class="profile-edit-avatar-section">
+          <div class="profile-edit-avatar-preview" id="editAvatarPreview" onclick="document.getElementById('editAvatarInput').click()">
+            <span id="editAvatarInitial">?</span>
+          </div>
+          <input type="file" id="editAvatarInput" class="profile-edit-avatar-input" accept="image/*" onchange="handleEditAvatarSelect(event)">
+          <p class="profile-edit-avatar-hint">点击头像上传新图片</p>
+          <p class="profile-upload-status" id="editAvatarStatus"></p>
+        </div>
+        
+        <!-- 头像 URL（隐藏字段） -->
+        <input type="hidden" id="editAvatarUrl" value="">
+        
+        <!-- 横幅颜色选择 -->
+        <div class="profile-edit-group">
+          <label class="profile-edit-label">背景颜色</label>
+          <div class="profile-edit-banner-preview" id="editBannerPreview"></div>
+          <div class="profile-edit-banner-colors" id="editBannerColors">
+            <div class="profile-edit-color-option selected" data-color="linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)" style="background: linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%);" onclick="selectBannerColor(this)"></div>
+            <div class="profile-edit-color-option" data-color="linear-gradient(135deg, #E8B4B8 0%, #D4949A 100%)" style="background: linear-gradient(135deg, #E8B4B8 0%, #D4949A 100%);" onclick="selectBannerColor(this)"></div>
+            <div class="profile-edit-color-option" data-color="linear-gradient(135deg, #B8D4E8 0%, #94B8D4 100%)" style="background: linear-gradient(135deg, #B8D4E8 0%, #94B8D4 100%);" onclick="selectBannerColor(this)"></div>
+            <div class="profile-edit-color-option" data-color="linear-gradient(135deg, #C8E8B8 0%, #A8D494 100%)" style="background: linear-gradient(135deg, #C8E8B8 0%, #A8D494 100%);" onclick="selectBannerColor(this)"></div>
+            <div class="profile-edit-color-option" data-color="linear-gradient(135deg, #E8D4B8 0%, #D4B894 100%)" style="background: linear-gradient(135deg, #E8D4B8 0%, #D4B894 100%);" onclick="selectBannerColor(this)"></div>
+            <div class="profile-edit-color-option" data-color="linear-gradient(135deg, #D4B8E8 0%, #B894D4 100%)" style="background: linear-gradient(135deg, #D4B8E8 0%, #B894D4 100%);" onclick="selectBannerColor(this)"></div>
+          </div>
+        </div>
+        
+        <!-- 用户名 -->
+        <div class="profile-edit-group">
+          <label class="profile-edit-label">用户名</label>
+          <input type="text" class="profile-edit-input" id="editUsername" placeholder="输入用户名" maxlength="20" required>
+        </div>
+        
+        <!-- 个人简介 -->
+        <div class="profile-edit-group">
+          <label class="profile-edit-label">个人简介（最多100字）</label>
+          <textarea class="profile-edit-input profile-edit-textarea" id="editBioModal" placeholder="介绍一下自己吧..." maxlength="100"></textarea>
+        </div>
+        
+        <!-- 保存按钮 -->
+        <div class="profile-edit-actions">
+          <button type="button" class="profile-btn profile-btn-secondary" onclick="closeEditModal()">取消</button>
+          <button type="submit" class="profile-btn profile-btn-primary" id="saveProfileBtn">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- 脚本 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/theme-switcher.js"></script>
@@ -292,21 +459,41 @@
     let chatPartnerId = null;
     let chatPartnerName = '';
     let realtimeChannel = null;
+    
+    // 编辑资料相关变量
+    let editBannerColor = 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
+    let editAvatarFile = null;
 
+    // 页面加载时初始化
     async function init() {
+      // 等待 UserAuth 初始化
+      await new Promise(resolve => {
+        const check = () => {
+          if (window.UserAuth) {
+            resolve();
+          } else {
+            setTimeout(check, 50);
+          }
+        };
+        check();
+      });
+      
       currentUserId = window.UserAuth.getCurrentUserId();
       const urlParams = new URLSearchParams(window.location.search);
-      profileUserId = urlParams.get('user') || currentUserId;
-      isOwnProfile = profileUserId === currentUserId;
-
-      if (!profileUserId) {
-        if (currentUserId) {
-          profileUserId = currentUserId;
-          isOwnProfile = true;
-        } else {
+      const urlUserId = urlParams.get('user');
+      
+      // 判断是否访问他人主页
+      if (urlUserId) {
+        profileUserId = urlUserId;
+        isOwnProfile = (profileUserId === currentUserId);
+      } else {
+        // 没有 URL 参数，重定向到登录或自己的主页
+        if (!currentUserId) {
           window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
           return;
         }
+        profileUserId = currentUserId;
+        isOwnProfile = true;
       }
 
       await loadProfileData();
@@ -314,33 +501,57 @@
       setupOwnProfileTabs();
       await loadUserWorks();
       await loadLikedWorks();
-      loadHistory();
-      loadComments();
+      
+      // 仅本人显示浏览记录和发言记录
+      if (isOwnProfile) {
+        loadHistory();
+        loadComments();
+      }
+      
       setupRealtime();
     }
 
     async function loadProfileData() {
+      const usernameEl = document.getElementById('profileUsername');
+      usernameEl.textContent = '加载中...';
+      
       try {
-        const { data, error } = await supabase.from('profiles').select('*').eq('user_id', profileUserId).single();
-        if (error && error.code !== 'PGRST116') throw error;
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', profileUserId)
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          throw error;
+        }
+        
         currentProfileData = data;
-
+        
         const username = data?.username || '未知用户';
         const bio = data?.bio || '';
         const avatarUrl = data?.avatar_url || '';
+        const bannerColor = data?.banner_color || 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
         const createdAt = data?.created_at;
 
+        // 更新页面显示
         document.getElementById('profileUsername').textContent = username;
         document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
         document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
         document.getElementById('profileJoined').textContent = createdAt ? '加入于 ' + formatDate(createdAt) : '';
-
+        
+        // 更新横幅颜色
+        document.getElementById('profileBanner').style.background = bannerColor;
+        
+        // 更新头像
         if (avatarUrl) {
           document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(username) + '">';
         }
 
+        // 更新关于我表单
         document.getElementById('editBio').value = bio || '';
 
+        // 更新操作按钮
         let actionsHtml = '';
         if (isOwnProfile) {
           actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="switchToTab(\'about\')">编辑资料</button>';
@@ -348,15 +559,18 @@
         } else {
           const userName = currentProfileData?.username || '';
           actionsHtml += '<button class="profile-btn profile-btn-follow" id="followBtn" onclick="toggleFollow()">关注</button>';
-          actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="openChat(\'' + profileUserId + '\', \'' + userName + '\')">发私信</button>';
+          actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="openChat(\'' + profileUserId + '\', \'' + escapeHtml(userName) + '\')">发私信</button>';
         }
         document.getElementById('profileActions').innerHTML = actionsHtml;
 
+        // 检查关注状态
         if (!isOwnProfile) {
           await checkFollowStatus();
         }
       } catch (err) {
         console.error('加载资料失败:', err);
+        document.getElementById('profileUsername').textContent = '加载失败';
+        document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">无法加载用户资料</span>';
       }
     }
 
@@ -385,6 +599,7 @@
         document.getElementById('tabMessages').style.display = '';
         document.getElementById('tabAbout').style.display = '';
         document.getElementById('avatarEditBtn').style.display = '';
+        document.getElementById('editProfileBtn').style.display = '';
       }
     }
 
@@ -431,7 +646,7 @@
       const gridEl = document.getElementById('likedGrid');
       const emptyEl = document.getElementById('likedEmpty');
 
-      if (!currentUserId || isOwnProfile === false) {
+      if (!currentUserId || !isOwnProfile) {
         loadingEl.style.display = 'none';
         emptyEl.style.display = '';
         emptyEl.querySelector('p').textContent = '登录后可查看点赞记录';
@@ -557,7 +772,7 @@
           const { data: profile } = await supabase.from('profiles').select('username, avatar_url').eq('user_id', conv.partnerId).single();
           const name = profile?.username || '用户';
           const avatarUrl = profile?.avatar_url || '';
-          html += '<div class="profile-conversation-item" onclick="openChat(\'' + conv.partnerId + '\', \'' + name + '\')">' +
+          html += '<div class="profile-conversation-item" onclick="openChat(\'' + conv.partnerId + '\', \'' + escapeHtml(name) + '\')">' +
             '<div class="profile-conversation-avatar">' + (avatarUrl ? '<img src="' + escapeHtml(avatarUrl) + '" alt="">' : name.charAt(0).toUpperCase()) + '</div>' +
             '<div class="profile-conversation-info"><div class="profile-conversation-name">' + escapeHtml(name) + '</div><div class="profile-conversation-preview">' + escapeHtml(conv.lastMessage) + '</div></div>' +
             '<span class="profile-conversation-time">' + formatTime(conv.time) + '</span>' + (conv.unread ? '<span class="profile-conversation-unread"></span>' : '') + '</div>';
@@ -603,6 +818,8 @@
 
     async function saveAbout(e) {
       e.preventDefault();
+      if (!isOwnProfile) return;
+      
       const bio = document.getElementById('editBio').value.trim();
       try {
         if (currentProfileData) {
@@ -611,6 +828,7 @@
           await supabase.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
         }
         document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
+        window.UserAuth.refreshProfile();
         alert('保存成功');
       } catch (err) {
         alert('保存失败');
@@ -618,24 +836,207 @@
       }
     }
 
-    async function handleAvatarUpload(e) {
+    // ==================== 编辑资料功能 ====================
+
+    function openEditModal() {
+      if (!isOwnProfile) return;
+      
+      const modal = document.getElementById('editModal');
+      const profile = currentProfileData || {};
+      
+      // 设置当前值
+      document.getElementById('editUsername').value = profile.username || '';
+      document.getElementById('editBioModal').value = profile.bio || '';
+      
+      // 设置头像预览
+      const avatarUrl = profile.avatar_url || '';
+      const username = profile.username || '用户';
+      if (avatarUrl) {
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="">';
+        document.getElementById('editAvatarUrl').value = avatarUrl;
+      } else {
+        document.getElementById('editAvatarPreview').innerHTML = '<span>' + username.charAt(0).toUpperCase() + '</span>';
+        document.getElementById('editAvatarUrl').value = '';
+      }
+      
+      // 设置横幅颜色
+      editBannerColor = profile.banner_color || 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
+      updateBannerColorPreview();
+      selectBannerColorByValue(editBannerColor);
+      
+      // 重置上传状态
+      document.getElementById('editAvatarStatus').textContent = '';
+      document.getElementById('editAvatarStatus').className = 'profile-upload-status';
+      editAvatarFile = null;
+      
+      modal.classList.add('visible');
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('editModal');
+      modal.classList.remove('visible');
+      editAvatarFile = null;
+    }
+
+    function updateBannerColorPreview() {
+      document.getElementById('editBannerPreview').style.background = editBannerColor;
+    }
+
+    function selectBannerColor(el) {
+      document.querySelectorAll('.profile-edit-color-option').forEach(opt => opt.classList.remove('selected'));
+      el.classList.add('selected');
+      editBannerColor = el.dataset.color;
+      updateBannerColorPreview();
+    }
+
+    function selectBannerColorByValue(colorValue) {
+      const options = document.querySelectorAll('.profile-edit-color-option');
+      options.forEach(opt => {
+        if (opt.dataset.color === colorValue) {
+          opt.classList.add('selected');
+        } else {
+          opt.classList.remove('selected');
+        }
+      });
+    }
+
+    async function handleEditAvatarSelect(e) {
       const file = e.target.files[0];
       if (!file) return;
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'ml_default');
+      
+      editAvatarFile = file;
+      const statusEl = document.getElementById('editAvatarStatus');
+      
+      // 显示本地预览
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + event.target.result + '" alt="">';
+      };
+      reader.readAsDataURL(file);
+      
+      // 上传到 Supabase Storage
+      statusEl.textContent = '上传中...';
+      statusEl.className = 'profile-upload-status uploading';
+      
       try {
-        const res = await fetch('https://api.cloudinary.com/v1_1/demo/image/upload', { method: 'POST', body: formData });
-        const data = await res.json();
-        const url = data.secure_url;
-        await supabase.from('profiles').update({ avatar_url: url }).eq('user_id', currentUserId);
-        document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(url) + '" alt="">';
+        const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
+        const { data, error } = await supabase.storage
+          .from('media')
+          .upload(fileName, file, { upsert: true });
+        
+        if (error) throw error;
+        
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+        
+        document.getElementById('editAvatarUrl').value = urlData.publicUrl;
+        statusEl.textContent = '上传成功';
+        statusEl.className = 'profile-upload-status success';
+      } catch (err) {
+        console.error('上传失败:', err);
+        statusEl.textContent = '上传失败: ' + err.message;
+        statusEl.className = 'profile-upload-status error';
+        editAvatarFile = null;
+      }
+    }
+
+    async function saveEditProfile(e) {
+      e.preventDefault();
+      if (!isOwnProfile) return;
+      
+      const btn = document.getElementById('saveProfileBtn');
+      btn.disabled = true;
+      btn.textContent = '保存中...';
+      
+      const username = document.getElementById('editUsername').value.trim();
+      const bio = document.getElementById('editBioModal').value.trim();
+      const avatarUrl = document.getElementById('editAvatarUrl').value;
+      
+      try {
+        const updateData = {
+          username: username,
+          bio: bio,
+          banner_color: editBannerColor
+        };
+        
+        if (avatarUrl) {
+          updateData.avatar_url = avatarUrl;
+        }
+        
+        const { error } = await supabase
+          .from('profiles')
+          .update(updateData)
+          .eq('user_id', currentUserId);
+        
+        if (error) throw error;
+        
+        // 更新页面显示
+        document.getElementById('profileUsername').textContent = username;
+        document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
+        document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
+        document.getElementById('profileBanner').style.background = editBannerColor;
+        
+        if (avatarUrl) {
+          document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(username) + '">';
+        }
+        
+        // 更新关于我表单
+        document.getElementById('editBio').value = bio;
+        
+        // 刷新用户认证信息
+        window.UserAuth.refreshProfile();
+        
+        closeEditModal();
+        alert('保存成功');
+      } catch (err) {
+        console.error('保存失败:', err);
+        alert('保存失败: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '保存';
+      }
+    }
+
+    // ==================== 原有头像上传功能 ====================
+
+    async function handleAvatarUpload(e) {
+      if (!isOwnProfile) return;
+      
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const statusEl = document.getElementById('avatarInput');
+      
+      try {
+        const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
+        const { data, error } = await supabase.storage
+          .from('media')
+          .upload(fileName, file, { upsert: true });
+        
+        if (error) throw error;
+        
+        const { data: urlData } = supabase.storage
+          .from('media')
+          .getPublicUrl(fileName);
+        
+        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
+        
+        const username = document.getElementById('profileUsername').textContent;
+        document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="' + escapeHtml(username) + '">';
+        
+        // 更新编辑 Modal 中的头像
+        document.getElementById('editAvatarPreview').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="">';
+        document.getElementById('editAvatarUrl').value = urlData.publicUrl;
+        
         window.UserAuth.refreshProfile();
       } catch (err) {
         alert('上传失败');
         console.error(err);
       }
     }
+
+    // ==================== 其他功能 ====================
 
     function viewWork(id, type) {
       if (type === 'commission') window.location.href = 'commission.html?work=' + id;
@@ -652,6 +1053,11 @@
     }
 
     async function openChat(partnerId, partnerName) {
+      if (!currentUserId) {
+        window.location.href = 'auth.html';
+        return;
+      }
+      
       chatPartnerId = partnerId;
       chatPartnerName = partnerName;
 
@@ -733,6 +1139,10 @@
       }).subscribe();
     }
 
+    function goBack() {
+      history.back();
+    }
+
     function escapeHtml(str) {
       if (!str) return '';
       const d = document.createElement('div');
@@ -751,6 +1161,14 @@
       const d = new Date(str);
       return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     }
+
+    // 点击遮罩层关闭编辑 Modal
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('editModal');
+      if (e.target === modal) {
+        closeEditModal();
+      }
+    });
 
     document.addEventListener('DOMContentLoaded', init);
   </script>
