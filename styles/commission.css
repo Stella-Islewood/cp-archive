@@ -1731,3 +1731,41 @@ html, body {
   background: #d93025;
   color: white;
 }
+
+/* 点赞按钮样式 */
+.btn-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid rgba(200,220,255,0.4);
+  border-radius: 20px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #888;
+  transition: all 0.2s;
+}
+
+.btn-like:hover,
+.btn-like.liked {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200,220,255,0.1);
+}
+
+.btn-like.liked .like-icon {
+  color: #e74c3c;
+}
+
+[data-theme="lucasmia"] .btn-like {
+  border-color: rgba(200,120,150,0.4);
+  color: #F0E0E0;
+}
+
+[data-theme="lucasmia"] .btn-like:hover,
+[data-theme="lucasmia"] .btn-like.liked {
+  border-color: #d48;
+  color: #d48;
+  background: rgba(200,120,150,0.1);
+}

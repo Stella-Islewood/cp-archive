@@ -1108,6 +1108,9 @@
     // 记录当前滚动位置
     sessionStorage.setItem('listScrollPos', window.scrollY);
 
+    // 记录浏览历史
+    recordBrowseHistory(work.title, 'works', work.id);
+
     const url = new URL(window.location);
     url.searchParams.set('work', workId);
     url.searchParams.set('view', 'detail');
@@ -1601,6 +1604,23 @@
     if (!dateStr) return '';
     const d = new Date(dateStr);
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  /**
+   * 记录浏览历史
+   */
+  function recordBrowseHistory(title, type, id) {
+    const history = JSON.parse(localStorage.getItem('browse-history') || '[]');
+    // 避免重复记录
+    const filtered = history.filter(h => h.id !== id);
+    filtered.unshift({
+      id: id,
+      title: title,
+      type: type,
+      time: new Date().toLocaleString('zh-CN')
+    });
+    // 只保留最近50条
+    localStorage.setItem('browse-history', JSON.stringify(filtered.slice(0, 50)));
   }
 
   /**

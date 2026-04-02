@@ -440,10 +440,12 @@
               <button class="card-action-btn btn-delete" onclick="deleteCommission('${item.id}')">🗑️ 删除</button>
             </div>
             ` : `
-            <button class="card-action-btn btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('commission', '${item.id}')">
-              <span>${isLiked ? '❤' : '♡'}</span>
-              <span>${isLiked ? '已点赞' : '点赞'}</span>
-            </button>
+            <div class="card-actions" style="justify-content: flex-end;">
+              <button class="btn-like ${isLiked ? 'liked' : ''}" onclick="toggleLike('commission', '${item.id}')">
+                <span class="like-icon">${isLiked ? '❤' : '♡'}</span>
+                <span>${isLiked ? '已点赞' : '点赞'}</span>
+              </button>
+            </div>
             `}
           </div>
         </article>
@@ -493,6 +495,9 @@
 
     // 记录当前滚动位置
     sessionStorage.setItem('listScrollPos', window.scrollY);
+
+    // 记录浏览历史
+    recordBrowseHistory(item.title, 'commission', item.id);
 
     var coverPlaceholder = document.getElementById('detailCoverPlaceholder');
     var detailContent = document.getElementById('detailContent');
@@ -852,6 +857,23 @@
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}.${month}.${day}`;
+  }
+
+  /**
+   * 记录浏览历史
+   */
+  function recordBrowseHistory(title, type, id) {
+    const history = JSON.parse(localStorage.getItem('browse-history') || '[]');
+    // 避免重复记录
+    const filtered = history.filter(h => h.id !== id);
+    filtered.unshift({
+      id: id,
+      title: title,
+      type: type,
+      time: new Date().toLocaleString('zh-CN')
+    });
+    // 只保留最近50条
+    localStorage.setItem('browse-history', JSON.stringify(filtered.slice(0, 50)));
   }
 
   // 监听主题切换

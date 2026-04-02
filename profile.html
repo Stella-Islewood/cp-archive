@@ -762,60 +762,48 @@
 
       try {
         // 获取当前用户的点赞记录
-        const { data: likesData, error: likesError } = await client
+        const { data: likes, error } = await client
           .from('likes')
           .select('*')
           .eq('user_id', currentUserId)
           .order('created_at', { ascending: false });
 
-        console.log('点赞记录查询结果:', likesData, likesError);
+        console.log('点赞记录查询结果:', likes, error);
 
-        if (!likesData || likesData.length === 0) {
+        if (error || !likes || likes.length === 0) {
           loadingEl.style.display = 'none';
           emptyEl.style.display = '';
-          emptyEl.querySelector('p').textContent = '还没有点赞过任何作品';
+          emptyEl.querySelector('p').textContent = '还没有收藏过任何内容';
           return;
         }
 
         // 根据 content_type 和 content_id 获取对应的作品信息
-        const works = [];
+        const items = [];
 
-        for (const like of likesData) {
+        for (const like of likes) {
           const table = like.content_type === 'work' ? 'works' : 'commissions';
-          const { data: item } = await client.from(table).select('id, title, type, image_url, images, created_at, author, artist').eq('id', like.content_id).single();
+          const { data: item } = await client.from(table).select('id, title, type, created_at').eq('id', like.content_id).single();
           if (item) {
-            works.push({
-              ...item,
-              work_type: like.content_type === 'work' ? 'works' : 'commission',
-              liked_at: like.created_at
-            });
+            items.push({ ...item, _table: table, _liked_at: like.created_at });
           }
         }
 
         loadingEl.style.display = 'none';
 
-        if (works.length === 0) {
+        if (items.length === 0) {
           emptyEl.style.display = '';
-          emptyEl.querySelector('p').textContent = '点赞的作品已下架或无法显示';
+          emptyEl.querySelector('p').textContent = '收藏的内容已下架或无法显示';
           return;
         }
         emptyEl.style.display = 'none';
 
-        gridEl.innerHTML = works.map(work => {
-          let imgUrl = '';
-          let images = [];
-          try { images = work.images ? (typeof work.images === 'string' ? JSON.parse(work.images) : work.images) : []; } catch(e) {}
-          if (images.length > 0 && images[0]) imgUrl = images[0];
-          else if (work.image_url) imgUrl = work.image_url;
-
-          const typeLabel = work.work_type === 'commission' ? '约稿' : work.type;
-          const meta = work.work_type === 'commission' ? (work.artist ? '画师：' + escapeHtml(work.artist) : '') : formatDate(work.created_at);
-
-          return '<div class="profile-work-card" onclick="viewWork(\'' + work.id + '\', \'' + work.work_type + '\')">' +
-            (imgUrl ? '<img src="' + escapeHtml(imgUrl) + '" class="profile-work-card-img" alt="' + escapeHtml(work.title) + '">' : '<div class="profile-work-card-placeholder">📄</div>') +
-            '<div class="profile-work-card-body"><h3 class="profile-work-card-title">' + escapeHtml(work.title) + '</h3><p class="profile-work-card-meta">' + typeLabel + (meta ? ' · ' + meta : '') + '</p></div></div>';
-        }).join('');
-        console.log('点赞作品渲染完成，数量:', works.length);
+        gridEl.innerHTML = items.map(item => `
+          <div class="work-list-item" onclick="window.location.href='${item._table === 'works' ? 'works' : 'commission'}.html?work=${item.id}'">
+            <div class="work-list-title">${escapeHtml(item.title) || '无标题'}</div>
+            <div class="work-list-meta">${item._table === 'works' ? '创作' : '约稿'} · ${item.type || ''} · ${item.created_at ? item.created_at.slice(0, 10) : ''}</div>
+          </div>
+        `).join('');
+        console.log('点赞收藏渲染完成，数量:', items.length);
       } catch (err) {
         loadingEl.textContent = '加载失败';
         console.error('加载点赞记录失败:', err);
@@ -828,16 +816,18 @@
       const history = JSON.parse(localStorage.getItem('browse-history') || '[]');
 
       if (history.length === 0) {
+        listEl.innerHTML = '';
         emptyEl.style.display = '';
         return;
       }
       emptyEl.style.display = 'none';
 
-      listEl.innerHTML = history.map(item => {
-        return '<div class="profile-record-item" onclick="viewWork(\'' + item.id + '\', \'' + item.type + '\')">' +
-          '<div class="profile-record-thumb">' + (item.type === 'commission' ? '🎨' : '✍️') + '</div>' +
-          '<div class="profile-record-info"><h4 class="profile-record-title">' + escapeHtml(item.title) + '</h4><p class="profile-record-time">' + item.time + '</p></div></div>';
-      }).join('');
+      listEl.innerHTML = history.map(item => `
+        <div class="work-list-item" onclick="window.location.href='${item.type === 'works' ? 'works' : 'commission'}.html?work=${item.id}'">
+          <div class="work-list-title">${escapeHtml(item.title) || '未知内容'}</div>
+          <div class="work-list-meta">${item.type === 'works' ? '创作' : '约稿'} · ${item.time || ''}</div>
+        </div>
+      `).join('');
     }
 
     function loadComments() {
