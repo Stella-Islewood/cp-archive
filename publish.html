@@ -143,20 +143,10 @@
                 <label class="publish-label" for="inputTitle">标题 <span class="required">*</span></label>
                 <input type="text" class="publish-input" id="inputTitle" placeholder="输入作品标题" required maxlength="100">
               </div>
-              <div class="publish-form-group" id="groupArtist">
-                <label class="publish-label" for="inputArtist">画师名 <span class="required">*</span></label>
-                <input type="text" class="publish-input" id="inputArtist" placeholder="输入画师昵称" required maxlength="50">
-              </div>
             </div>
 
-            <!-- 约稿特有字段 -->
-            <div class="publish-form-group" id="groupArtist">
-              <label class="publish-label" for="inputArtist">画师名 <span class="required">*</span></label>
-              <input type="text" class="publish-input" id="inputArtist" placeholder="输入画师昵称" required maxlength="50">
-            </div>
-
-            <!-- 创作特有字段 - 自动使用用户名 -->
-            <div class="publish-form-group" id="groupAuthor" style="display:none;">
+            <!-- 约稿/创作：自动使用用户名作为作者/画师 -->
+            <div class="publish-form-group" id="groupAuthor">
               <label class="publish-label">作者名</label>
               <input type="text" class="publish-input" id="inputAuthor" placeholder="自动使用您的用户名" maxlength="50" readonly>
             </div>
@@ -349,9 +339,8 @@
 
       // 设置基本信息
       document.getElementById('inputTitle').value = data.title || '';
-      document.getElementById('inputArtist').value = data.artist || '';
-      // 创作模式时，作者名可能已被用户修改，保持原值
-      document.getElementById('inputAuthor').value = data.author || '';
+      // 作者名：编辑时保持原值（可能是之前用户输入的）
+      document.getElementById('inputAuthor').value = data.author || data.artist || '';
       document.getElementById('inputNotes').value = data.founder_notes || '';
 
       // 设置内容类型
@@ -400,13 +389,9 @@
 
     function updateFormFields() {
       const isCommission = document.getElementById('typeCommission').checked;
-      document.getElementById('groupArtist').style.display = isCommission ? '' : 'none';
-      document.getElementById('groupAuthor').style.display = isCommission ? 'none' : '';
-      document.getElementById('inputArtist').required = isCommission;
-      document.getElementById('inputAuthor').required = false;
-      
-      // 创作模式时自动填入用户名
-      if (!isCommission && !isEditMode) {
+      // 不再区分约稿和创作，都使用作者名字段
+      // 自动填入用户名
+      if (!isEditMode) {
         const savedAuthor = localStorage.getItem('publish-author');
         document.getElementById('inputAuthor').value = savedAuthor || '';
       }
@@ -499,8 +484,6 @@
       const publishType = document.querySelector('input[name="publishType"]:checked').value;
       const site = document.querySelector('input[name="site"]:checked').value;
       const title = document.getElementById('inputTitle').value.trim();
-      const artist = document.getElementById('inputArtist').value.trim();
-      const author = document.getElementById('inputAuthor').value.trim();
       const contentType = document.querySelector('input[name="contentType"]:checked').value;
       const textContent = document.getElementById('inputTextContent').value.trim();
       const musicLink = document.getElementById('inputMusicLink').value.trim();
@@ -508,8 +491,15 @@
       const notes = document.getElementById('inputNotes').value.trim();
 
       if (!title) { showMessage('请输入标题', 'error'); return; }
-      if (publishType === 'commission' && !artist) { showMessage('请输入画师名', 'error'); return; }
       if (contentType === '图片' && uploadUrls.length === 0) { showMessage('请上传至少一张图片', 'error'); return; }
+
+      // 自动获取用户名作为作者/画师名
+      let authorName = localStorage.getItem('publish-author') || '匿名';
+      if (!localStorage.getItem('publish-author')) {
+        const { data: profile } = await window._authClient.from('profiles').select('username').eq('user_id', currentUser.id).single();
+        authorName = profile?.username || '匿名';
+        localStorage.setItem('publish-author', authorName);
+      }
 
       const btn = document.getElementById('submitBtn');
       const btnText = document.getElementById('submitBtnText');
@@ -524,7 +514,7 @@
         };
 
         if (publishType === 'commission') {
-          data.artist = artist;
+          data.artist = authorName;
           data.founder_notes = notes;
           if (contentType === '图片') {
             data.images = JSON.stringify(uploadUrls);
@@ -542,6 +532,29 @@
           } else {
             data.created_at = new Date().toISOString();
             data.user_id = currentUserId;
+            await window._authClient.from('commissions').insert([data]);
+          }
+        } else {
+          data.author = authorName;
+          if (contentType === '图片') {
+            data.images = JSON.stringify(uploadUrls);
+            data.image_url = uploadUrls[0];
+          } else if (contentType === '文字') {
+            data.content = textContent;
+          } else if (contentType === '音乐') {
+            data.content = musicLink;
+          } else if (contentType === '视频') {
+            data.content = videoLink;
+          }
+
+          if (isEditMode && editWorkType === 'works') {
+            await window._authClient.from('works').update(data).eq('id', editWorkId);
+          } else {
+            data.created_at = new Date().toISOString();
+            data.user_id = currentUserId;
+            await window._authClient.from('works').insert([data]);
+          }
+        }
             await window._authClient.from('commissions').insert([data]);
           }
         } else {

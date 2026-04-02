@@ -542,34 +542,45 @@
     
     // 加载用户资料（使用 user_id 查询）
     async function loadProfile(userId) {
-      console.log('loadProfile开始', userId);
+      console.log('loadProfile开始, userId:', userId);
       const usernameEl = document.getElementById('profileUsername');
       usernameEl.textContent = '加载中...';
       
+      const client = window._authClient;
+      if (!client) {
+        console.error('_authClient 未初始化');
+        usernameEl.textContent = '初始化失败';
+        document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">初始化失败，请刷新重试</span>';
+        return;
+      }
+
       try {
-        const { data: profile, error } = await _sb
+        const { data: profile, error } = await client
           .from('profiles')
           .select('*')
           .eq('user_id', userId)
           .single();
-        
-        console.log('loadProfile查询结果:', { profile, error });
-        
-        if (error) {
-          console.error('查询profiles失败:', error);
+
+        console.log('profiles查询结果:', profile, error);
+
+        if (error || !profile) {
+          console.log('profiles无数据，尝试自动创建...');
           
           // 如果是自己但没有资料，自动创建
-          if (isOwnProfile && currentUserId && currentUserId === userId) {
-            const username = currentUserId.email?.split('@')[0] || '用户';
+          const { data: { session } } = await client.auth.getSession();
+          if (session && session.user.id === userId) {
+            const username = session.user.email.split('@')[0] || '用户';
             try {
-              console.log('创建新资料:', username);
-              await window._authClient.from('profiles').insert({
+              console.log('自动创建资料, username:', username);
+              const { error: insertError } = await client.from('profiles').insert({
                 user_id: userId,
                 username: username
               });
-              // 重新加载
-              await loadProfile(userId);
-              return;
+              console.log('自动创建资料结果:', insertError ? insertError : '成功');
+              if (!insertError) {
+                await loadProfile(userId);
+                return;
+              }
             } catch (insertErr) {
               console.error('创建资料失败:', insertErr);
             }
@@ -577,12 +588,6 @@
           
           usernameEl.textContent = '用户不存在';
           document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">无法加载用户资料</span>';
-          return;
-        }
-        
-        if (!profile) {
-          usernameEl.textContent = '用户不存在';
-          document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">该用户资料不存在</span>';
           return;
         }
         
@@ -673,17 +678,43 @@
     }
 
     async function loadUserWorks() {
+      console.log('loadUserWorks开始, profileUserId:', profileUserId);
       const loadingEl = document.getElementById('worksLoading');
       const gridEl = document.getElementById('worksGrid');
       const emptyEl = document.getElementById('worksEmpty');
 
-      try {
-        const { data: works1 } = await window._authClient.from('works').select('id, title, type, image_url, images, created_at').eq('user_id', profileUserId).order('created_at', { ascending: false });
-        const { data: works2 } = await window._authClient.from('commissions').select('id, title, type, image_url, images, created_at, artist').eq('user_id', profileUserId).order('created_at', { ascending: false });
+      const client = window._authClient;
+      if (!client) {
+        console.error('_authClient 未初始化');
+        loadingEl.textContent = '初始化失败';
+        return;
+      }
 
-        const allWorks = [...(works1 || []), ...(works2 || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      if (!profileUserId) {
+        console.warn('profileUserId 为空，无法加载作品');
+        loadingEl.style.display = 'none';
+        emptyEl.style.display = '';
+        emptyEl.querySelector('p').textContent = '无法加载作品';
+        return;
+      }
+
+      try {
+        // 并行查询 works 和 commissions 表
+        const [worksRes, commissionsRes] = await Promise.all([
+          client.from('works').select('id, title, type, image_url, images, created_at').eq('user_id', profileUserId).order('created_at', { ascending: false }),
+          client.from('commissions').select('id, title, type, image_url, images, created_at, artist').eq('user_id', profileUserId).order('created_at', { ascending: false })
+        ]);
+        
+        console.log('works查询结果:', worksRes.data, worksRes.error);
+        console.log('commissions查询结果:', commissionsRes.data, commissionsRes.error);
+
+        const works1 = worksRes.data || [];
+        const works2 = commissionsRes.data || [];
+        const allWorks = [...works1, ...works2].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
         loadingEl.style.display = 'none';
+        console.log('作品总数:', allWorks.length);
+        
         if (allWorks.length === 0) {
           emptyEl.style.display = '';
           return;
@@ -704,6 +735,7 @@
             (imgUrl ? '<img src="' + escapeHtml(imgUrl) + '" class="profile-work-card-img" alt="' + escapeHtml(work.title) + '">' : '<div class="profile-work-card-placeholder">📄</div>') +
             '<div class="profile-work-card-body"><h3 class="profile-work-card-title">' + escapeHtml(work.title) + '</h3><p class="profile-work-card-meta">' + typeLabel + ' · ' + meta + '</p></div></div>';
         }).join('');
+        console.log('作品渲染完成');
       } catch (err) {
         loadingEl.textContent = '加载失败';
         console.error('加载作品失败:', err);
