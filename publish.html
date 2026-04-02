@@ -555,29 +555,6 @@
             await window._authClient.from('works').insert([data]);
           }
         }
-            await window._authClient.from('commissions').insert([data]);
-          }
-        } else {
-          data.author = author || '匿名';
-          if (contentType === '图片') {
-            data.images = JSON.stringify(uploadUrls);
-            data.image_url = uploadUrls[0];
-          } else if (contentType === '文字') {
-            data.content = textContent;
-          } else if (contentType === '音乐') {
-            data.content = musicLink;
-          } else if (contentType === '视频') {
-            data.content = videoLink;
-          }
-
-          if (isEditMode && editWorkType === 'works') {
-            await window._authClient.from('works').update(data).eq('id', editWorkId);
-          } else {
-            data.created_at = new Date().toISOString();
-            data.user_id = currentUserId;
-            await window._authClient.from('works').insert([data]);
-          }
-        }
 
         showMessage(isEditMode ? '保存成功！' : '发布成功！', 'success');
         setTimeout(() => {
