@@ -1685,3 +1685,49 @@ html, body {
     padding: 0.8rem;
   }
 }
+
+/* ========================================
+   编辑和删除按钮样式
+   ======================================== */
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.card-action-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.card-action-btn:hover {
+  transform: translateY(-1px);
+}
+
+.card-action-btn.btn-edit {
+  background: rgba(123, 167, 196, 0.15);
+  color: var(--accent);
+}
+
+.card-action-btn.btn-edit:hover {
+  background: var(--accent);
+  color: var(--btn-text);
+}
+
+.card-action-btn.btn-delete {
+  background: rgba(217, 48, 37, 0.1);
+  color: #d93025;
+}
+
+.card-action-btn.btn-delete:hover {
+  background: #d93025;
+  color: white;
+}

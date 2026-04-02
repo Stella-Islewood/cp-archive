@@ -28,6 +28,8 @@
     
     if (session && session.user) {
       currentUser = session.user;
+      // 确保用户资料存在（可能因 RLS 在注册时创建失败）
+      await ensureProfile(currentUser, currentUser.user_metadata?.username);
       await loadUserProfile();
     } else {
       currentUser = null;
@@ -41,10 +43,13 @@
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session && session.user) {
         currentUser = session.user;
-        loadUserProfile().then(() => {
-          updateHeaderAuth();
-          // 触发自定义事件通知其他脚本
-          window.dispatchEvent(new CustomEvent('userAuthChange', { detail: { isLoggedIn: true, user: currentUser, profile: currentProfile } }));
+        // 确保用户资料存在
+        ensureProfile(currentUser, currentUser.user_metadata?.username).then(() => {
+          loadUserProfile().then(() => {
+            updateHeaderAuth();
+            // 触发自定义事件通知其他脚本
+            window.dispatchEvent(new CustomEvent('userAuthChange', { detail: { isLoggedIn: true, user: currentUser, profile: currentProfile } }));
+          });
         });
       } else if (event === 'SIGNED_OUT') {
         currentUser = null;
@@ -71,11 +76,34 @@
         .eq('user_id', currentUser.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('加载用户资料失败:', error);
-      }
+      if (error && error.code === 'PGRST116') {
+        // 记录不存在，创建一条（user_id 是主键）
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: currentUser.id,
+            username: currentUser.user_metadata?.username || currentUser.email?.split('@')[0] || '用户',
+            created_at: new Date().toISOString()
+          });
 
-      currentProfile = data || null;
+        if (!insertError) {
+          // 重新获取
+          const { data: newData } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+          currentProfile = newData;
+        } else {
+          console.warn('创建用户资料失败:', insertError);
+          currentProfile = null;
+        }
+      } else if (error) {
+        console.error('加载用户资料失败:', error);
+        currentProfile = null;
+      } else {
+        currentProfile = data;
+      }
     } catch (err) {
       console.error('加载用户资料异常:', err);
       currentProfile = null;
@@ -199,47 +227,98 @@
   }
 
   /**
+   * 生成 UUID（兼容所有浏览器）
+   */
+  function generateUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  /**
+   * 检查并确保用户资料存在
+   * 如果不存在则创建（用于登录后或注册后）
+   */
+  async function ensureProfile(user, username) {
+    if (!user) return;
+
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!data) {
+        // 资料不存在，创建一条
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            username: username || user.user_metadata?.username || user.email?.split('@')[0] || '用户'
+          });
+
+        if (insertError) {
+          console.warn('创建用户资料失败，将在下次登录时重试:', insertError.message);
+        }
+      }
+    } catch (err) {
+      console.warn('检查用户资料时出错:', err);
+    }
+  }
+
+  /**
    * 注册新用户
    */
   async function signUp(email, password, username) {
     try {
       // 检查用户名是否已被使用
-      const { data: existingUser } = await supabase
+      const { data: existingUsers } = await supabase
         .from('profiles')
         .select('user_id')
         .eq('username', username)
-        .single();
+        .limit(1);
 
-      if (existingUser) {
+      if (existingUsers && existingUsers.length > 0) {
         return { error: { message: '用户名已被使用' } };
       }
 
       // 创建用户
       const { data, error } = await supabase.auth.signUp({
         email: email,
-        password: password
+        password: password,
+        options: {
+          data: {
+            username: username
+          }
+        }
       });
 
       if (error) {
         return { error };
       }
 
+      // 尝试创建用户资料（可能因 RLS 失败，忽略错误）
       if (data.user) {
-        // 创建用户资料
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: data.user.id,
-            username: username,
-            created_at: new Date().toISOString()
-          });
+        try {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: data.user.id,
+              username: username
+            });
 
-        if (profileError) {
-          console.error('创建用户资料失败:', profileError);
-          return { error: profileError };
+          if (profileError) {
+            console.warn('注册时创建资料失败，将在登录后重试:', profileError.message);
+          }
+        } catch (e) {
+          console.warn('注册时创建资料出错:', e);
         }
-
-        return { data };
       }
 
       return { data };
@@ -259,7 +338,16 @@
         password: password
       });
 
-      return { data, error };
+      if (error) {
+        return { error };
+      }
+
+      // 登录成功后确保用户资料存在
+      if (data.user) {
+        await ensureProfile(data.user, data.user.user_metadata?.username);
+      }
+
+      return { data };
     } catch (err) {
       console.error('登录异常:', err);
       return { error: { message: '登录失败，请稍后重试' } };

@@ -216,7 +216,8 @@
 
             <!-- 提交按钮 -->
             <div class="publish-submit-row">
-              <button type="button" class="publish-btn publish-btn-secondary" onclick="resetForm()">重置</button>
+              <button type="button" class="publish-btn publish-btn-secondary" id="cancelBtn" onclick="cancelEdit()">取消</button>
+              <button type="button" class="publish-btn publish-btn-secondary" id="resetBtn" onclick="resetForm()">重置</button>
               <button type="submit" class="publish-btn publish-btn-primary" id="submitBtn">
                 <span id="submitBtnText">发布作品</span>
               </button>
@@ -269,6 +270,11 @@
         // 尝试从 works 表获取
         let { data, error } = await supabase.from('works').select('*').eq('id', workId).single();
         if (data) {
+          // 检查是否是当前用户的作品
+          if (data.user_id !== currentUserId) {
+            showMessage('您没有权限编辑这个作品', 'error');
+            return;
+          }
           editWorkType = 'works';
           populateForm(data, 'works');
           return;
@@ -277,6 +283,11 @@
         // 尝试从 commissions 表获取
         ({ data, error } = await supabase.from('commissions').select('*').eq('id', workId).single());
         if (data) {
+          // 检查是否是当前用户的作品
+          if (data.user_id !== currentUserId) {
+            showMessage('您没有权限编辑这个作品', 'error');
+            return;
+          }
           editWorkType = 'commission';
           populateForm(data, 'commission');
           return;
@@ -296,6 +307,9 @@
       document.querySelector('.publish-title').textContent = '编辑作品';
       document.querySelector('.publish-subtitle').textContent = '修改你的创作';
       document.getElementById('submitBtnText').textContent = '保存修改';
+
+      // 隐藏重置按钮（编辑模式下）
+      document.getElementById('resetBtn').style.display = 'none';
 
       // 设置发布类型
       if (type === 'commission') {
@@ -541,6 +555,16 @@
       document.getElementById('uploadStatus').textContent = '';
       updateFormFields();
       updateContentFields();
+    }
+
+    function cancelEdit() {
+      if (isEditMode) {
+        if (confirm('确定要取消编辑吗？未保存的更改将丢失。')) {
+          window.location.href = editWorkType === 'commission' ? 'commission.html' : 'works.html';
+        }
+      } else {
+        window.history.back();
+      }
     }
 
     function showMessage(text, type) {

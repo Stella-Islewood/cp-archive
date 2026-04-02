@@ -358,6 +358,30 @@
   color: var(--accent);
 }
 
+/* 编辑按钮样式 */
+.btn-card-action.btn-edit {
+  background: rgba(123, 167, 196, 0.15);
+  border-color: transparent;
+  color: var(--accent);
+}
+
+.btn-card-action.btn-edit:hover {
+  background: var(--accent);
+  color: var(--btn-text);
+}
+
+/* 删除按钮样式 */
+.btn-card-action.btn-delete {
+  background: rgba(217, 48, 37, 0.1);
+  border-color: transparent;
+  color: #d93025;
+}
+
+.btn-card-action.btn-delete:hover {
+  background: #d93025;
+  color: white;
+}
+
 /* ========================================
    详情视图 - 简洁阅读模式
    ======================================== */

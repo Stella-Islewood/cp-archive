@@ -11,6 +11,7 @@
   // Supabase 配置
   const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const COMMENTS_KEY = 'commission-comments';
 
   // 缓存的约稿数据
@@ -38,8 +39,7 @@
     try {
       const theme = localStorage.getItem('cp-archive-theme') || 'lionmio';
 
-      const { data, error } = await supabase
-        .createClient(SUPABASE_URL, SUPABASE_KEY)
+      const { data, error } = await dbClient
         .from('commissions')
         .select('*')
         .eq('archive_id', theme)
@@ -368,6 +368,9 @@
     const grid = document.getElementById('commissionGrid');
     if (!grid) return;
 
+    // 获取当前登录用户ID
+    const currentUserId = window.UserAuth?.getCurrentUserId() || null;
+
     if (displayedCommissions.length === 0) {
       const query = document.getElementById('commissionSearch').value.trim();
       if (query) {
@@ -384,6 +387,8 @@
       const isText = type === '文字';
       const images = getCommissionImages(item);
       const hasMultipleImages = images.length > 1;
+      // 检查是否是当前用户的作品
+      const isOwner = currentUserId && item.user_id === currentUserId;
 
       return `
         <article class="commission-card ${isText ? 'commission-card-text' : ''}" data-index="${index}" data-id="${item.id}">
@@ -396,6 +401,12 @@
               <span class="card-type-tag">${escapeHtml(type)}</span>
               <span class="card-date">${formatDate(item.created_at)}</span>
             </div>
+            ${isOwner ? `
+            <div class="card-actions">
+              <button class="card-action-btn btn-edit" onclick="editCommission('${item.id}')">✏️ 编辑</button>
+              <button class="card-action-btn btn-delete" onclick="deleteCommission('${item.id}')">🗑️ 删除</button>
+            </div>
+            ` : ''}
           </div>
         </article>
       `;
@@ -844,4 +855,47 @@ window.deleteCommissionComment = function(commentId) {
   // 调用页面内的渲染函数
   if (typeof renderCommissionCommentsList === 'function') renderCommissionCommentsList();
   if (typeof updateCommissionCommentsCount === 'function') updateCommissionCommentsCount();
+};
+
+// 编辑约稿（暴露到全局供 onclick 调用）
+window.editCommission = function(commissionId) {
+  const currentUserId = window.UserAuth?.getCurrentUserId();
+  if (!currentUserId) {
+    window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
+    return;
+  }
+  window.location.href = 'publish.html?edit=' + commissionId + '&type=commission';
+};
+
+// 删除约稿（暴露到全局供 onclick 调用）
+window.deleteCommission = async function(commissionId) {
+  const currentUserId = window.UserAuth?.getCurrentUserId();
+  if (!currentUserId) {
+    alert('请先登录');
+    window.location.href = 'auth.html';
+    return;
+  }
+
+  // 验证是否是作品所有者
+  const work = cachedCommissions.find(w => w.id === commissionId);
+  if (!work) {
+    alert('约稿不存在');
+    return;
+  }
+  if (work.user_id !== currentUserId) {
+    alert('您没有权限删除这个约稿');
+    return;
+  }
+
+  if (!confirm('确定要删除这个约稿吗？此操作不可恢复。')) return;
+
+  try {
+    const { error } = await dbClient.from('commissions').delete().eq('id', commissionId);
+    if (error) throw error;
+    alert('删除成功');
+    loadCommissionsFromSupabase();
+  } catch (err) {
+    console.error('删除失败:', err);
+    alert('删除失败: ' + err.message);
+  }
 };

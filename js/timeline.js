@@ -11,7 +11,7 @@
   // Supabase 配置
   const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-  const dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const dbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // localStorage 键名
   const STORAGE_KEY = 'timeline-likes';

@@ -452,15 +452,38 @@
     }).join('');
   }
 
-  // 编辑作品
-  function editWork(workId) {
+  // 编辑作品（暴露到全局供 onclick 调用）
+  window.editWork = function(workId) {
+    const currentUserId = window.UserAuth?.getCurrentUserId();
+    if (!currentUserId) {
+      window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
+      return;
+    }
     window.location.href = 'publish.html?edit=' + workId;
-  }
+  };
 
-  // 删除作品
-  async function deleteWork(workId) {
+  // 删除作品（暴露到全局供 onclick 调用）
+  window.deleteWork = async function(workId) {
+    const currentUserId = window.UserAuth?.getCurrentUserId();
+    if (!currentUserId) {
+      alert('请先登录');
+      window.location.href = 'auth.html';
+      return;
+    }
+
+    // 验证是否是作品所有者
+    const work = cachedWorks.find(w => w.id === workId);
+    if (!work) {
+      alert('作品不存在');
+      return;
+    }
+    if (work.user_id !== currentUserId) {
+      alert('您没有权限删除这个作品');
+      return;
+    }
+
     if (!confirm('确定要删除这个作品吗？此操作不可恢复。')) return;
-    
+
     try {
       const { error } = await window.dbClient.from('works').delete().eq('id', workId);
       if (error) throw error;
@@ -470,7 +493,7 @@
       console.error('删除失败:', err);
       alert('删除失败: ' + err.message);
     }
-  }
+  };
 
   /**
    * 获取类型对应的 CSS 类
