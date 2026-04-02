@@ -149,9 +149,16 @@
               </div>
             </div>
 
+            <!-- 约稿特有字段 -->
+            <div class="publish-form-group" id="groupArtist">
+              <label class="publish-label" for="inputArtist">画师名 <span class="required">*</span></label>
+              <input type="text" class="publish-input" id="inputArtist" placeholder="输入画师昵称" required maxlength="50">
+            </div>
+
+            <!-- 创作特有字段 - 自动使用用户名 -->
             <div class="publish-form-group" id="groupAuthor" style="display:none;">
-              <label class="publish-label" for="inputAuthor">作者名</label>
-              <input type="text" class="publish-input" id="inputAuthor" placeholder="输入作者昵称（选填）" maxlength="50">
+              <label class="publish-label">作者名</label>
+              <input type="text" class="publish-input" id="inputAuthor" placeholder="自动使用您的用户名" maxlength="50" readonly>
             </div>
 
             <!-- 内容类型 -->
@@ -255,14 +262,19 @@
         return;
       }
       currentUser = session.user;
+      currentUserId = session.user.id;
 
-      const savedAuthor = localStorage.getItem('publish-author');
-      if (savedAuthor && document.getElementById('pubAuthor')) {
-        document.getElementById('pubAuthor').value = savedAuthor;
+      // 保存作者名到 localStorage
+      const { data: profile } = await client.from('profiles').select('username').eq('user_id', currentUserId).single();
+      if (profile?.username) {
+        localStorage.setItem('publish-author', profile.username);
       }
+
       const currentArchive = localStorage.getItem('currentArchive') || 'lionmio';
-      if (document.getElementById('publishArchive')) {
-        document.getElementById('publishArchive').value = currentArchive;
+      if (document.getElementById('siteLionmio') && currentArchive === 'lionmio') {
+        document.getElementById('siteLionmio').checked = true;
+      } else if (document.getElementById('siteLucasmia') && currentArchive === 'lucasmia') {
+        document.getElementById('siteLucasmia').checked = true;
       }
 
       document.getElementById('publishFormContainer').style.display = '';
@@ -338,6 +350,7 @@
       // 设置基本信息
       document.getElementById('inputTitle').value = data.title || '';
       document.getElementById('inputArtist').value = data.artist || '';
+      // 创作模式时，作者名可能已被用户修改，保持原值
       document.getElementById('inputAuthor').value = data.author || '';
       document.getElementById('inputNotes').value = data.founder_notes || '';
 
@@ -391,6 +404,12 @@
       document.getElementById('groupAuthor').style.display = isCommission ? 'none' : '';
       document.getElementById('inputArtist').required = isCommission;
       document.getElementById('inputAuthor').required = false;
+      
+      // 创作模式时自动填入用户名
+      if (!isCommission && !isEditMode) {
+        const savedAuthor = localStorage.getItem('publish-author');
+        document.getElementById('inputAuthor').value = savedAuthor || '';
+      }
     }
 
     function updateContentFields() {
