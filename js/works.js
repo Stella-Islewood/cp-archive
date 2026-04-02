@@ -1300,6 +1300,7 @@
 
   /**
    * 构建详情页内容 HTML
+   * 注意：图片类作品的多图已在封面区相册显示，这里只返回正文内容（如果有的话）
    */
   function buildDetailContent(work) {
     const images = getWorkImages(work);
@@ -1312,11 +1313,14 @@
       return `<div class="article-body">${(work.content || '').replace(/\n/g, '<br>')}</div>`;
     }
 
-    // 图片类作品：只显示图片
+    // 图片类作品：图片已在封面区显示，detailContent 只显示正文文字（如果有）
     if (type === '图片') {
-      const allImages = images.length ? images : (img && isImageUrl(img) ? [img] : []);
-      if (!allImages.length) return '';
-      return allImages.map(url => `<img src="${escapeHtml(url)}" style="width:100%;border-radius:8px;margin-bottom:12px;">`).join('');
+      // 多图在封面区相册显示，单图在封面区显示
+      // 这里只返回正文文字内容（如果有的话）
+      if (content && !isImageUrl(content) && !isExternalLink(content)) {
+        return `<div class="article-body">${escapeHtml(content)}</div>`;
+      }
+      return '';
     }
 
     // 音乐类作品
@@ -1329,20 +1333,27 @@
       </div>`;
     }
 
-    // 视频类作品
+    // 视频类作品：视频已在封面区显示
     if (type === '视频') {
+      // 视频嵌入在封面区或 detailContent 中显示
       const mediaUrl = img || content;
       const videoEmbed = getVideoEmbedHtml(mediaUrl, work.title);
       if (videoEmbed) {
         return videoEmbed;
       }
+      // 如果封面区没有显示视频，这里尝试显示
+      if (isDirectVideoUrl(mediaUrl)) {
+        return `<video controls width="100%" style="border-radius:8px;max-height:500px;">
+          <source src="${escapeHtml(mediaUrl)}" type="video/${mediaUrl.endsWith('.webm') ? 'webm' : 'mp4'}">
+          您的浏览器不支持视频播放
+        </video>`;
+      }
       return '';
     }
 
-    // 其他类型（玩偶/游戏等）：有图显示图
-    const allImages = images.length ? images : (img && isImageUrl(img) ? [img] : []);
-    if (allImages.length) {
-      return allImages.map(url => `<img src="${escapeHtml(url)}" style="width:100%;border-radius:8px;margin-bottom:12px;">`).join('');
+    // 其他类型（玩偶/游戏等）：图片已在封面区显示，这里只显示正文
+    if (content && !isImageUrl(content) && !isExternalLink(content)) {
+      return `<div class="article-body">${escapeHtml(content)}</div>`;
     }
 
     // 没有任何内容时返回空

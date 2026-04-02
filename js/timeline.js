@@ -21,6 +21,18 @@
   let cachedTimeline = [];
 
   /**
+   * 获取评论者名字
+   */
+  async function getCommenterName() {
+    const client = window._authClient || dbClient;
+    if (!client) return '游客';
+    const { data: { session } } = await client.auth.getSession();
+    if (!session) return '游客';
+    const { data: profile } = await client.from('profiles').select('username').eq('user_id', session.user.id).single();
+    return profile?.username || '游客';
+  }
+
+  /**
    * 初始化时间线功能
    */
   function init() {
@@ -182,9 +194,6 @@
             <!-- 评论将由JS动态加载 -->
           </div>
           <form class="comment-form" data-index="${index}">
-            <div class="comment-input-row">
-              <input type="text" class="comment-nickname input-field" placeholder="昵称" maxlength="20" required>
-            </div>
             <textarea class="comment-content input-field" placeholder="说点什么..." maxlength="200" required></textarea>
             <button type="submit" class="btn btn-comment">发布</button>
           </form>
@@ -253,14 +262,15 @@
 
     // 评论表单
     const commentForm = item.querySelector('.comment-form');
-    commentForm.addEventListener('submit', function(e) {
+    commentForm.addEventListener('submit', async function(e) {
       e.preventDefault();
-      
-      const nickname = this.querySelector('.comment-nickname').value.trim();
+
       const content = this.querySelector('.comment-content').value.trim();
-      
-      if (!nickname || !content) return;
-      
+      if (!content) return;
+
+      // 自动获取用户名
+      const nickname = await getCommenterName();
+
       const comment = {
         id: 'comment-' + Date.now(),
         nickname: nickname,
@@ -269,7 +279,7 @@
         empathize: 0,
         empathizeLiked: false
       };
-      
+
       addCommentToDOM(index, comment);
       saveComments();
       this.reset();

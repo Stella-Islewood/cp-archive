@@ -242,6 +242,18 @@
   }
 
   /**
+   * 获取评论者名字
+   */
+  async function getCommenterName() {
+    var client = window._authClient || guestbookClient;
+    if (!client) return '游客';
+    var session = await client.auth.getSession();
+    if (!session.data.session) return '游客';
+    var result = await client.from('profiles').select('username').eq('user_id', session.data.session.user.id).single();
+    return result.data?.username || '游客';
+  }
+
+  /**
    * 发布新留言
    */
   async function submitNote(nickname, content) {
@@ -343,10 +355,11 @@
       form.addEventListener('submit', async function(e) {
         e.preventDefault();
 
-        var nickname = document.getElementById('nickname') ? document.getElementById('nickname').value.trim() : '';
         var content = messageInput ? messageInput.value.trim() : '';
+        if (!content) return;
 
-        if (!nickname || !content) return;
+        // 自动获取用户名
+        var nickname = await getCommenterName();
 
         // 禁用按钮，显示加载状态
         if (submitBtn) {
