@@ -409,7 +409,7 @@
       if (query) {
         grid.innerHTML = '<p class="works-grid-empty">没有找到相关作品</p>';
       } else {
-        grid.innerHTML = '<p class="works-grid-empty">暂无作品数据</p>';
+        grid.innerHTML = '<p class="works-grid-empty">暂无作品，快来发布第一篇吧</p>';
       }
       return;
     }
@@ -463,7 +463,7 @@
           <div class="favorite-badge ${isFav ? 'show' : ''}" style="${isFav ? '' : 'display:none'}">❤</div>
           ${body}
           <div class="work-card-content">
-            <span class="work-card-tag">${escapeHtml(item.type)}</span>
+            <span class="work-type-tag">${escapeHtml(item.type)}</span>
             <h3 class="work-card-title">${escapeHtml(item.title)}</h3>
             <p class="work-card-author">${escapeHtml(item.author || '未知作者')}</p>
             ${item.created_at ? `<p class="work-card-date">${formatDate(item.created_at)}</p>` : ''}
@@ -1302,60 +1302,51 @@
    * 构建详情页内容 HTML
    */
   function buildDetailContent(work) {
-    const parts = [];
     const images = getWorkImages(work);
     const img = work.image_url || '';
     const content = (work.content || '').trim();
     const type = work.type;
 
-    // 图片创作：多图不显示在detailContent中（已在相册中显示）
-    if (type === '图片') {
-      // 如果没有多图，则显示单张图片
-      if (images.length === 0 && img && isImageUrl(img)) {
-        parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
-      }
-      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    // 文字类作品：只显示文字内容
+    if (type === '文字') {
+      return `<div class="article-body">${(work.content || '').replace(/\n/g, '<br>')}</div>`;
     }
 
-    // 视频创作：显示嵌入播放器
+    // 图片类作品：只显示图片
+    if (type === '图片') {
+      const allImages = images.length ? images : (img && isImageUrl(img) ? [img] : []);
+      if (!allImages.length) return '';
+      return allImages.map(url => `<img src="${escapeHtml(url)}" style="width:100%;border-radius:8px;margin-bottom:12px;">`).join('');
+    }
+
+    // 音乐类作品
+    if (type === '音乐') {
+      return `<div style="text-align:center;padding:40px;">
+        <div style="font-size:3rem">🎵</div>
+        <p style="margin:16px 0;font-size:1.2rem;font-weight:600;">${escapeHtml(work.title)}</p>
+        ${img && isExternalLink(img) ? `<a href="${escapeHtml(img)}" target="_blank" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;">🎵 点击收听</a>` : ''}
+        ${content && isExternalLink(content) ? `<a href="${escapeHtml(content)}" target="_blank" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;">🎵 点击收听</a>` : ''}
+      </div>`;
+    }
+
+    // 视频类作品
     if (type === '视频') {
       const mediaUrl = img || content;
       const videoEmbed = getVideoEmbedHtml(mediaUrl, work.title);
       if (videoEmbed) {
-        parts.push(videoEmbed);
-        return parts.join('');
+        return videoEmbed;
       }
+      return '';
     }
 
-    // 音乐创作
-    if (type === '音乐') {
-      const mediaUrl = img || content;
-      if (mediaUrl && isExternalLink(mediaUrl)) {
-        parts.push(`<a href="${escapeHtml(mediaUrl)}" target="_blank" rel="noopener noreferrer" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;margin-bottom:20px;">🎵 点击收听</a>`);
-      }
-      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    // 其他类型（玩偶/游戏等）：有图显示图
+    const allImages = images.length ? images : (img && isImageUrl(img) ? [img] : []);
+    if (allImages.length) {
+      return allImages.map(url => `<img src="${escapeHtml(url)}" style="width:100%;border-radius:8px;margin-bottom:12px;">`).join('');
     }
 
-    // 玩偶/游戏：有图片显示图片
-    if (type === '玩偶' || type === '游戏') {
-      if (images.length === 0 && img && isImageUrl(img)) {
-        parts.push(`<img src="${escapeHtml(img)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
-      }
-      return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
-    }
-
-    // 文字创作
-    if (content !== '') {
-      if (isImageUrl(content)) {
-        parts.push(`<img src="${escapeHtml(content)}" alt="${escapeHtml(work.title)}" style="max-width:100%;border-radius:8px;display:block;margin:0 auto 20px;">`);
-      } else if (isExternalLink(content)) {
-        parts.push(`<a href="${escapeHtml(content)}" target="_blank" rel="noopener noreferrer" class="detail-content-link" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.2rem;background:var(--accent);color:white;border-radius:20px;text-decoration:none;font-size:0.9rem;margin-bottom:20px;">🔗 前往链接</a>`);
-      } else {
-        parts.push(`<div style="white-space:pre-wrap;line-height:1.8;">${escapeHtml(content)}</div>`);
-      }
-    }
-
-    return parts.length ? parts.join('') : '<p style="color:#888;text-align:center;padding:20px;">暂无内容</p>';
+    // 没有任何内容时返回空
+    return '';
   }
 
   /**
