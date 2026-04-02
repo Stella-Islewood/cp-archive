@@ -235,7 +235,7 @@
   <script>
     const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUserId = null;
     let uploadFiles = [];
@@ -268,7 +268,7 @@
     async function loadWorkForEdit(workId) {
       try {
         // 尝试从 works 表获取
-        let { data, error } = await supabase.from('works').select('*').eq('id', workId).single();
+        let { data, error } = await _sb.from('works').select('*').eq('id', workId).single();
         if (data) {
           // 检查是否是当前用户的作品
           if (data.user_id !== currentUserId) {
@@ -281,7 +281,7 @@
         }
 
         // 尝试从 commissions 表获取
-        ({ data, error } = await supabase.from('commissions').select('*').eq('id', workId).single());
+        ({ data, error } = await _sb.from('commissions').select('*').eq('id', workId).single());
         if (data) {
           // 检查是否是当前用户的作品
           if (data.user_id !== currentUserId) {
@@ -439,9 +439,9 @@
           if (!uploadUrls[i]) {
             const file = uploadFiles[i];
             const fileName = 'publish/' + Date.now() + '-' + file.name;
-            const { error } = await supabase.storage.from('media').upload(fileName, file, { upsert: true });
+            const { error } = await _sb.storage.from('media').upload(fileName, file, { upsert: true });
             if (error) throw error;
-            const { data } = supabase.storage.from('media').getPublicUrl(fileName);
+            const { data } = _sb.storage.from('media').getPublicUrl(fileName);
             uploadUrls[i] = data.publicUrl;
             renderPreviews();
           }
@@ -507,11 +507,11 @@
           }
 
           if (isEditMode && editWorkType === 'commission') {
-            await supabase.from('commissions').update(data).eq('id', editWorkId);
+            await _sb.from('commissions').update(data).eq('id', editWorkId);
           } else {
             data.created_at = new Date().toISOString();
             data.user_id = currentUserId;
-            await supabase.from('commissions').insert([data]);
+            await _sb.from('commissions').insert([data]);
           }
         } else {
           data.author = author || '匿名';
@@ -527,11 +527,11 @@
           }
 
           if (isEditMode && editWorkType === 'works') {
-            await supabase.from('works').update(data).eq('id', editWorkId);
+            await _sb.from('works').update(data).eq('id', editWorkId);
           } else {
             data.created_at = new Date().toISOString();
             data.user_id = currentUserId;
-            await supabase.from('works').insert([data]);
+            await _sb.from('works').insert([data]);
           }
         }
 
