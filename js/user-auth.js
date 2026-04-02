@@ -12,8 +12,9 @@
   const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
 
-  // 创建 Supabase 客户端
+  // 创建 Supabase 客户端并挂载到全局
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  window._authClient = supabase;
 
   // 当前用户信息
   let currentUser = null;
