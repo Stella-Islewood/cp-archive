@@ -449,7 +449,7 @@
   <script>
     const SUPABASE_URL = 'https://vbvfrmqwlyitarmnhmyw.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let profileUserId = null;
     let isOwnProfile = false;
@@ -469,7 +469,7 @@
       console.log('init开始');
       try {
         // 获取当前 session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await _sb.auth.getSession();
         const sessionUser = session?.user || null;
         console.log('session:', sessionUser);
         
@@ -538,7 +538,7 @@
       usernameEl.textContent = '加载中...';
       
       try {
-        const { data: profile, error } = await supabase
+        const { data: profile, error } = await _sb
           .from('profiles')
           .select('*')
           .eq('user_id', userId)
@@ -554,7 +554,7 @@
             const username = currentUserId.email?.split('@')[0] || '用户';
             try {
               console.log('创建新资料:', username);
-              await supabase.from('profiles').insert({
+              await _sb.from('profiles').insert({
                 user_id: userId,
                 username: username
               });
@@ -633,12 +633,12 @@
 
     async function loadProfileStats() {
       try {
-        const { count: followingCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profileUserId);
-        const { count: followersCount } = await supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profileUserId);
+        const { count: followingCount } = await _sb.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', profileUserId);
+        const { count: followersCount } = await _sb.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', profileUserId);
 
         let worksCount = 0;
-        const { count: worksCnt1 } = await supabase.from('works').select('*', { count: 'exact', head: true }).eq('user_id', profileUserId);
-        const { count: worksCnt2 } = await supabase.from('commissions').select('*', { count: 'exact', head: true }).eq('user_id', profileUserId);
+        const { count: worksCnt1 } = await _sb.from('works').select('*', { count: 'exact', head: true }).eq('user_id', profileUserId);
+        const { count: worksCnt2 } = await _sb.from('commissions').select('*', { count: 'exact', head: true }).eq('user_id', profileUserId);
         worksCount = (worksCnt1 || 0) + (worksCnt2 || 0);
 
         document.getElementById('followingCount').textContent = followingCount || 0;
@@ -669,8 +669,8 @@
       const emptyEl = document.getElementById('worksEmpty');
 
       try {
-        const { data: works1 } = await supabase.from('works').select('id, title, type, image_url, images, created_at').eq('user_id', profileUserId).order('created_at', { ascending: false });
-        const { data: works2 } = await supabase.from('commissions').select('id, title, type, image_url, images, created_at, artist').eq('user_id', profileUserId).order('created_at', { ascending: false });
+        const { data: works1 } = await _sb.from('works').select('id, title, type, image_url, images, created_at').eq('user_id', profileUserId).order('created_at', { ascending: false });
+        const { data: works2 } = await _sb.from('commissions').select('id, title, type, image_url, images, created_at, artist').eq('user_id', profileUserId).order('created_at', { ascending: false });
 
         const allWorks = [...(works1 || []), ...(works2 || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -714,7 +714,7 @@
       }
 
       try {
-        const { data: likes } = await supabase.from('likes').select('work_id, work_type').eq('user_id', currentUserId);
+        const { data: likes } = await _sb.from('likes').select('work_id, work_type').eq('user_id', currentUserId);
         if (!likes || likes.length === 0) {
           loadingEl.style.display = 'none';
           emptyEl.style.display = '';
@@ -726,11 +726,11 @@
         const commissionIds = likes.filter(l => l.work_type === 'commission').map(l => l.work_id);
 
         if (workIds.length > 0) {
-          const { data } = await supabase.from('works').select('id, title, type, image_url, images, created_at').in('id', workIds);
+          const { data } = await _sb.from('works').select('id, title, type, image_url, images, created_at').in('id', workIds);
           if (data) works = works.concat(data.map(w => ({ ...w, work_type: 'works' })));
         }
         if (commissionIds.length > 0) {
-          const { data } = await supabase.from('commissions').select('id, title, type, image_url, images, created_at, artist').in('id', commissionIds);
+          const { data } = await _sb.from('commissions').select('id, title, type, image_url, images, created_at, artist').in('id', commissionIds);
           if (data) works = works.concat(data.map(w => ({ ...w, work_type: 'commission' })));
         }
 
@@ -806,7 +806,7 @@
       }
 
       try {
-        const { data: messages } = await supabase.from('messages').select('*').or('sender_id.eq.' + currentUserId + ',receiver_id.eq.' + currentUserId).order('created_at', { ascending: false });
+        const { data: messages } = await _sb.from('messages').select('*').or('sender_id.eq.' + currentUserId + ',receiver_id.eq.' + currentUserId).order('created_at', { ascending: false });
 
         const conversationsMap = {};
         (messages || []).forEach(msg => {
@@ -829,7 +829,7 @@
 
         let html = '';
         for (const conv of conversations) {
-          const { data: profile } = await supabase.from('profiles').select('username, avatar_url').eq('user_id', conv.partnerId).single();
+          const { data: profile } = await _sb.from('profiles').select('username, avatar_url').eq('user_id', conv.partnerId).single();
           const name = profile?.username || '用户';
           const avatarUrl = profile?.avatar_url || '';
           html += '<div class="profile-conversation-item" onclick="openChat(\'' + conv.partnerId + '\', \'' + escapeHtml(name) + '\')">' +
@@ -846,7 +846,7 @@
 
     async function checkFollowStatus() {
       if (!currentUserId) return;
-      const { data } = await supabase.from('follows').select('*').eq('follower_id', currentUserId).eq('following_id', profileUserId).single();
+      const { data } = await _sb.from('follows').select('*').eq('follower_id', currentUserId).eq('following_id', profileUserId).single();
       isFollowing = !!data;
       updateFollowButton();
     }
@@ -859,9 +859,9 @@
       if (profileUserId === currentUserId) return;
 
       if (isFollowing) {
-        await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', profileUserId);
+        await _sb.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', profileUserId);
       } else {
-        await supabase.from('follows').insert({ follower_id: currentUserId, following_id: profileUserId });
+        await _sb.from('follows').insert({ follower_id: currentUserId, following_id: profileUserId });
       }
       isFollowing = !isFollowing;
       updateFollowButton();
@@ -883,9 +883,9 @@
       const bio = document.getElementById('editBio').value.trim();
       try {
         if (currentProfileData) {
-          await supabase.from('profiles').update({ bio }).eq('user_id', currentUserId);
+          await _sb.from('profiles').update({ bio }).eq('user_id', currentUserId);
         } else {
-          await supabase.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
+          await _sb.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
         }
         document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
         window.UserAuth.refreshProfile();
@@ -980,13 +980,13 @@
       
       try {
         const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
-        const { data, error } = await supabase.storage
+        const { data, error } = await _sb.storage
           .from('media')
           .upload(fileName, file, { upsert: true });
         
         if (error) throw error;
         
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = _sb.storage
           .from('media')
           .getPublicUrl(fileName);
         
@@ -1024,7 +1024,7 @@
           updateData.avatar_url = avatarUrl;
         }
         
-        const { error } = await supabase
+        const { error } = await _sb
           .from('profiles')
           .update(updateData)
           .eq('user_id', currentUserId);
@@ -1070,17 +1070,17 @@
       
       try {
         const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
-        const { data, error } = await supabase.storage
+        const { data, error } = await _sb.storage
           .from('media')
           .upload(fileName, file, { upsert: true });
         
         if (error) throw error;
         
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = _sb.storage
           .from('media')
           .getPublicUrl(fileName);
         
-        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
+        await _sb.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
         
         const username = document.getElementById('profileUsername').textContent;
         document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="' + escapeHtml(username) + '">';
@@ -1121,7 +1121,7 @@
       chatPartnerId = partnerId;
       chatPartnerName = partnerName;
 
-      const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('user_id', partnerId).single();
+      const { data: profile } = await _sb.from('profiles').select('avatar_url').eq('user_id', partnerId).single();
       const avatarUrl = profile?.avatar_url || '';
 
       document.getElementById('chatUserName').textContent = partnerName;
@@ -1144,7 +1144,7 @@
       const messagesEl = document.getElementById('chatMessages');
 
       try {
-        const { data: messages } = await supabase.from('messages').select('*').or('and(sender_id.eq.' + currentUserId + ',receiver_id.eq.' + chatPartnerId + '),and(sender_id.eq.' + chatPartnerId + ',receiver_id.eq.' + currentUserId + ')').order('created_at', { ascending: true });
+        const { data: messages } = await _sb.from('messages').select('*').or('and(sender_id.eq.' + currentUserId + ',receiver_id.eq.' + chatPartnerId + '),and(sender_id.eq.' + chatPartnerId + ',receiver_id.eq.' + currentUserId + ')').order('created_at', { ascending: true });
 
         if (!messages || messages.length === 0) {
           messagesEl.innerHTML = '<div class="profile-chat-empty">还没有消息，开始聊天吧~</div>';
@@ -1159,7 +1159,7 @@
 
         messagesEl.scrollTop = messagesEl.scrollHeight;
 
-        await supabase.from('messages').update({ read: true }).eq('receiver_id', currentUserId).eq('sender_id', chatPartnerId);
+        await _sb.from('messages').update({ read: true }).eq('receiver_id', currentUserId).eq('sender_id', chatPartnerId);
       } catch (err) {
         messagesEl.innerHTML = '<div class="profile-chat-empty">加载失败</div>';
         console.error(err);
@@ -1176,7 +1176,7 @@
       if (!content) return;
 
       try {
-        await supabase.from('messages').insert({ sender_id: currentUserId, receiver_id: chatPartnerId, content });
+        await _sb.from('messages').insert({ sender_id: currentUserId, receiver_id: chatPartnerId, content });
         input.value = '';
         await loadChatMessages();
       } catch (err) {
@@ -1187,9 +1187,9 @@
 
     function setupRealtime() {
       if (!currentUserId) return;
-      if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+      if (realtimeChannel) _sb.removeChannel(realtimeChannel);
 
-      realtimeChannel = supabase.channel('messages-realtime').on('postgres_changes', {
+      realtimeChannel = _sb.channel('messages-realtime').on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'messages',
         filter: 'receiver_id=eq.' + currentUserId
       }, async payload => {
@@ -1267,9 +1267,9 @@
 
       try {
         if (isFollowing) {
-          await supabase.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', profileUserId);
+          await _sb.from('follows').delete().eq('follower_id', currentUserId).eq('following_id', profileUserId);
         } else {
-          await supabase.from('follows').insert({ follower_id: currentUserId, following_id: profileUserId });
+          await _sb.from('follows').insert({ follower_id: currentUserId, following_id: profileUserId });
         }
         isFollowing = !isFollowing;
         updateFollowButton();
@@ -1290,7 +1290,7 @@
       chatPartnerName = partnerName;
 
       try {
-        const { data: profile } = await supabase.from('profiles').select('avatar_url').eq('user_id', partnerId).single();
+        const { data: profile } = await _sb.from('profiles').select('avatar_url').eq('user_id', partnerId).single();
         const avatarUrl = profile?.avatar_url || '';
 
         document.getElementById('chatUserName').textContent = partnerName;
@@ -1317,7 +1317,7 @@
       if (!content) return;
 
       try {
-        await supabase.from('messages').insert({ sender_id: currentUserId, receiver_id: chatPartnerId, content });
+        await _sb.from('messages').insert({ sender_id: currentUserId, receiver_id: chatPartnerId, content });
         input.value = '';
         await loadChatMessages();
       } catch (err) {
@@ -1350,7 +1350,7 @@
           updateData.avatar_url = avatarUrl;
         }
         
-        const { error } = await supabase
+        const { error } = await _sb
           .from('profiles')
           .update(updateData)
           .eq('user_id', currentUserId);
@@ -1467,17 +1467,17 @@
       
       try {
         const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
-        const { data, error } = await supabase.storage
+        const { data, error } = await _sb.storage
           .from('media')
           .upload(fileName, file, { upsert: true });
         
         if (error) throw error;
         
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = _sb.storage
           .from('media')
           .getPublicUrl(fileName);
         
-        await supabase.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
+        await _sb.from('profiles').update({ avatar_url: urlData.publicUrl }).eq('user_id', currentUserId);
         
         const username = document.getElementById('profileUsername').textContent;
         document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(urlData.publicUrl) + '" alt="' + escapeHtml(username) + '">';
@@ -1514,13 +1514,13 @@
       
       try {
         const fileName = 'avatars/' + currentUserId + '/' + Date.now() + '-' + file.name;
-        const { data, error } = await supabase.storage
+        const { data, error } = await _sb.storage
           .from('media')
           .upload(fileName, file, { upsert: true });
         
         if (error) throw error;
         
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = _sb.storage
           .from('media')
           .getPublicUrl(fileName);
         
@@ -1543,9 +1543,9 @@
       const bio = document.getElementById('editBio').value.trim();
       try {
         if (currentProfileData) {
-          await supabase.from('profiles').update({ bio }).eq('user_id', currentUserId);
+          await _sb.from('profiles').update({ bio }).eq('user_id', currentUserId);
         } else {
-          await supabase.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
+          await _sb.from('profiles').insert({ user_id: currentUserId, username: window.UserAuth.getCurrentProfile()?.username || '用户', bio });
         }
         document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
         window.UserAuth.refreshProfile();
