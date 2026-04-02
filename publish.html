@@ -234,8 +234,7 @@
     if (!window._publishClient) {
       window._publishClient = supabase.createClient(
         'https://vbvfrmqwlyitarmnhmyw.supabase.co',
-        'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH',
-        { auth: { storageKey: 'sb-publish-auth' } }
+        'sb_publishable_SB0uqo25MSjOPA4fb8n-eg_bCBiXMzH'
       );
     }
   </script>
@@ -255,15 +254,34 @@
 
     async function init() {
       const client = window._publishClient;
-      const { data: { session } } = await client.auth.getSession();
+      
+      // 先尝试获取 session
+      let { data: { session } } = await client.auth.getSession();
+      
+      // 如果没有 session，再等一下重试一次
+      if (!session) {
+        await new Promise(r => setTimeout(r, 800));
+        const retry = await client.auth.getSession();
+        session = retry.data.session;
+      }
+      
       if (!session) {
         window.location.href = 'auth.html';
         return;
       }
+      
       currentUser = session.user;
       currentUserId = session.user.id;
       updateHeaderUser();
-
+      
+      // 预填作者名
+      const savedAuthor = localStorage.getItem('publish-author');
+      if (savedAuthor) document.getElementById('pubAuthor').value = savedAuthor;
+      
+      // 读取当前站点
+      const currentArchive = localStorage.getItem('currentArchive') || 'lionmio';
+      document.getElementById('publishArchive').value = currentArchive;
+      
       document.getElementById('publishFormContainer').style.display = '';
       setupEventListeners();
       setupDragUpload();
