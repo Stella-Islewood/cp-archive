@@ -840,6 +840,39 @@
     init();
   }
 
+  // 删除约稿（暴露到全局供 onclick 调用）
+  window.deleteCommission = async function(commissionId) {
+    const currentUserId = window.UserAuth?.getCurrentUserId();
+    if (!currentUserId) {
+      alert('请先登录');
+      window.location.href = 'auth.html';
+      return;
+    }
+
+    // 验证是否是作品所有者
+    const work = cachedCommissions.find(w => w.id === commissionId);
+    if (!work) {
+      alert('约稿不存在');
+      return;
+    }
+    if (work.user_id !== currentUserId) {
+      alert('您没有权限删除这个约稿');
+      return;
+    }
+
+    if (!confirm('确定要删除这个约稿吗？此操作不可恢复。')) return;
+
+    try {
+      const { error } = await dbClient.from('commissions').delete().eq('id', commissionId);
+      if (error) throw error;
+      alert('删除成功');
+      loadCommissionsFromSupabase();
+    } catch (err) {
+      console.error('删除失败:', err);
+      alert('删除失败: ' + err.message);
+    }
+  };
+
 })();
 
 // 全局删除约稿评论函数（供 onclick 调用）
@@ -865,37 +898,4 @@ window.editCommission = function(commissionId) {
     return;
   }
   window.location.href = 'publish.html?edit=' + commissionId + '&type=commission';
-};
-
-// 删除约稿（暴露到全局供 onclick 调用）
-window.deleteCommission = async function(commissionId) {
-  const currentUserId = window.UserAuth?.getCurrentUserId();
-  if (!currentUserId) {
-    alert('请先登录');
-    window.location.href = 'auth.html';
-    return;
-  }
-
-  // 验证是否是作品所有者
-  const work = cachedCommissions.find(w => w.id === commissionId);
-  if (!work) {
-    alert('约稿不存在');
-    return;
-  }
-  if (work.user_id !== currentUserId) {
-    alert('您没有权限删除这个约稿');
-    return;
-  }
-
-  if (!confirm('确定要删除这个约稿吗？此操作不可恢复。')) return;
-
-  try {
-    const { error } = await dbClient.from('commissions').delete().eq('id', commissionId);
-    if (error) throw error;
-    alert('删除成功');
-    loadCommissionsFromSupabase();
-  } catch (err) {
-    console.error('删除失败:', err);
-    alert('删除失败: ' + err.message);
-  }
 };
