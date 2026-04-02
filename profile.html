@@ -466,111 +466,156 @@
 
     // 页面加载时初始化
     async function init() {
-      // 等待 UserAuth 初始化
-      await new Promise(resolve => {
-        const check = () => {
-          if (window.UserAuth) {
-            resolve();
-          } else {
-            setTimeout(check, 50);
-          }
-        };
-        check();
-      });
-      
-      currentUserId = window.UserAuth.getCurrentUserId();
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlUserId = urlParams.get('user');
-      
-      // 判断是否访问他人主页
-      if (urlUserId) {
-        profileUserId = urlUserId;
-        isOwnProfile = (profileUserId === currentUserId);
-      } else {
-        // 没有 URL 参数，重定向到登录或自己的主页
-        if (!currentUserId) {
+      try {
+        // 获取当前 session
+        const { data: { session } } = await supabase.auth.getSession();
+        const sessionUser = session?.user || null;
+        
+        // 获取 URL 参数中的用户 ID
+        const params = new URLSearchParams(window.location.search);
+        const targetUserId = params.get('user');
+        
+        // 确定要查看的用户 ID
+        const userId = targetUserId || sessionUser?.id;
+        
+        // 如果没有用户 ID 且没有登录，重定向到登录页
+        if (!userId) {
           window.location.href = 'auth.html?redirect=' + encodeURIComponent(window.location.href);
           return;
         }
-        profileUserId = currentUserId;
-        isOwnProfile = true;
+        
+        profileUserId = userId;
+        currentUserId = sessionUser?.id;
+        isOwnProfile = (userId === currentUserId);
+        
+        // 加载用户资料
+        await loadProfile(userId);
+        
+        // 如果是本人，继续加载其他数据
+        if (isOwnProfile && sessionUser) {
+          await loadProfileStats();
+          setupOwnProfileTabs();
+          await loadUserWorks();
+          await loadLikedWorks();
+          loadHistory();
+          loadComments();
+          setupRealtime();
+        } else {
+          // 访问他人主页
+          await loadProfileStats();
+          setupOtherProfileTabs();
+          await loadUserWorks();
+          await loadLikedWorks();
+        }
+      } catch (err) {
+        console.error('初始化失败:', err);
+        document.getElementById('profileUsername').textContent = '加载失败，请刷新重试';
       }
-
-      await loadProfileData();
-      await loadProfileStats();
-      setupOwnProfileTabs();
-      await loadUserWorks();
-      await loadLikedWorks();
-      
-      // 仅本人显示浏览记录和发言记录
-      if (isOwnProfile) {
-        loadHistory();
-        loadComments();
-      }
-      
-      setupRealtime();
     }
-
-    async function loadProfileData() {
+    
+    // 访问他人主页时的 Tab 设置
+    function setupOtherProfileTabs() {
+      // 不显示本人专属的 Tab
+      document.getElementById('tabHistory').style.display = 'none';
+      document.getElementById('tabComments').style.display = 'none';
+      document.getElementById('tabMessages').style.display = 'none';
+      document.getElementById('tabAbout').style.display = 'none';
+      document.getElementById('avatarEditBtn').style.display = 'none';
+      document.getElementById('editProfileBtn').style.display = 'none';
+    }
+    
+    // 加载用户资料（使用 user_id 查询）
+    async function loadProfile(userId) {
       const usernameEl = document.getElementById('profileUsername');
       usernameEl.textContent = '加载中...';
       
       try {
-        const { data, error } = await supabase
+        const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', profileUserId)
+          .eq('user_id', userId)
           .single();
         
-        if (error && error.code !== 'PGRST116') {
-          throw error;
+        if (error) {
+          console.error('查询profiles失败:', error);
+          
+          // 如果是自己但没有资料，自动创建
+          if (isOwnProfile && currentUserId && currentUserId === userId) {
+            const username = currentUserId.email?.split('@')[0] || '用户';
+            try {
+              await supabase.from('profiles').insert({
+                user_id: userId,
+                username: username
+              });
+              // 重新加载
+              await loadProfile(userId);
+              return;
+            } catch (insertErr) {
+              console.error('创建资料失败:', insertErr);
+            }
+          }
+          
+          usernameEl.textContent = '用户不存在';
+          document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">无法加载用户资料</span>';
+          return;
         }
         
-        currentProfileData = data;
-        
-        const username = data?.username || '未知用户';
-        const bio = data?.bio || '';
-        const avatarUrl = data?.avatar_url || '';
-        const bannerColor = data?.banner_color || 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
-        const createdAt = data?.created_at;
-
-        // 更新页面显示
-        document.getElementById('profileUsername').textContent = username;
-        document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
-        document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
-        document.getElementById('profileJoined').textContent = createdAt ? '加入于 ' + formatDate(createdAt) : '';
-        
-        // 更新横幅颜色
-        document.getElementById('profileBanner').style.background = bannerColor;
-        
-        // 更新头像
-        if (avatarUrl) {
-          document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(username) + '">';
+        if (!profile) {
+          usernameEl.textContent = '用户不存在';
+          document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">该用户资料不存在</span>';
+          return;
         }
-
-        // 更新关于我表单
-        document.getElementById('editBio').value = bio || '';
-
-        // 更新操作按钮
-        let actionsHtml = '';
-        if (isOwnProfile) {
-          actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="switchToTab(\'about\')">编辑资料</button>';
-          actionsHtml += '<a href="publish.html" class="profile-btn profile-btn-primary">发布作品</a>';
-        } else {
-          const userName = currentProfileData?.username || '';
-          actionsHtml += '<button class="profile-btn profile-btn-follow" id="followBtn" onclick="toggleFollow()">关注</button>';
-          actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="openChat(\'' + profileUserId + '\', \'' + escapeHtml(userName) + '\')">发私信</button>';
-        }
-        document.getElementById('profileActions').innerHTML = actionsHtml;
-
-        // 检查关注状态
-        if (!isOwnProfile) {
-          await checkFollowStatus();
-        }
+        
+        currentProfileData = profile;
+        renderProfile(profile);
+        
       } catch (err) {
-        console.error('加载资料失败:', err);
-        document.getElementById('profileUsername').textContent = '加载失败';
+        console.error('loadProfile错误:', err);
+        usernameEl.textContent = '加载失败';
         document.getElementById('profileBio').innerHTML = '<span class="profile-bio-empty">无法加载用户资料</span>';
+      }
+    }
+    
+    // 渲染用户资料到页面
+    function renderProfile(profile) {
+      const username = profile.username || '未知用户';
+      const bio = profile.bio || '';
+      const avatarUrl = profile.avatar_url || '';
+      const bannerColor = profile.banner_color || 'linear-gradient(135deg, #7BA7C4 0%, #5A8FB0 100%)';
+      const createdAt = profile.created_at;
+
+      // 更新页面显示
+      document.getElementById('profileUsername').textContent = username;
+      document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
+      document.getElementById('profileBio').innerHTML = bio ? escapeHtml(bio) : '<span class="profile-bio-empty">还没有简介</span>';
+      document.getElementById('profileJoined').textContent = createdAt ? '加入于 ' + formatDate(createdAt) : '';
+      
+      // 更新横幅颜色
+      document.getElementById('profileBanner').style.background = bannerColor;
+      
+      // 更新头像
+      if (avatarUrl) {
+        document.getElementById('profileAvatar').innerHTML = '<img src="' + escapeHtml(avatarUrl) + '" alt="' + escapeHtml(username) + '">';
+      }
+
+      // 更新关于我表单
+      document.getElementById('editBio').value = bio || '';
+
+      // 更新操作按钮
+      let actionsHtml = '';
+      if (isOwnProfile) {
+        actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="switchToTab(\'about\')">编辑资料</button>';
+        actionsHtml += '<a href="publish.html" class="profile-btn profile-btn-primary">发布作品</a>';
+      } else {
+        const userName = profile?.username || '';
+        actionsHtml += '<button class="profile-btn profile-btn-follow" id="followBtn" onclick="toggleFollow()">关注</button>';
+        actionsHtml += '<button class="profile-btn profile-btn-secondary" onclick="openChat(\'' + profileUserId + '\', \'' + escapeHtml(userName) + '\')">发私信</button>';
+      }
+      document.getElementById('profileActions').innerHTML = actionsHtml;
+
+      // 检查关注状态
+      if (!isOwnProfile) {
+        checkFollowStatus();
       }
     }
 
@@ -593,14 +638,17 @@
     }
 
     function setupOwnProfileTabs() {
-      if (isOwnProfile) {
-        document.getElementById('tabHistory').style.display = '';
-        document.getElementById('tabComments').style.display = '';
-        document.getElementById('tabMessages').style.display = '';
-        document.getElementById('tabAbout').style.display = '';
-        document.getElementById('avatarEditBtn').style.display = '';
-        document.getElementById('editProfileBtn').style.display = '';
-      }
+      // 显示本人专属的 Tab 和按钮
+      document.getElementById('tabHistory').style.display = '';
+      document.getElementById('tabComments').style.display = '';
+      document.getElementById('tabMessages').style.display = '';
+      document.getElementById('tabAbout').style.display = '';
+      document.getElementById('avatarEditBtn').style.display = '';
+      document.getElementById('editProfileBtn').style.display = '';
+      
+      // 不显示他人主页的操作按钮
+      const followBtn = document.getElementById('followBtn');
+      if (followBtn) followBtn.style.display = 'none';
     }
 
     async function loadUserWorks() {
@@ -1140,7 +1188,11 @@
     }
 
     function goBack() {
-      history.back();
+      if (document.referrer && document.referrer !== window.location.href) {
+        history.back();
+      } else {
+        window.location.href = 'index.html';
+      }
     }
 
     function escapeHtml(str) {
